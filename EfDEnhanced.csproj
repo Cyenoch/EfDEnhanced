@@ -6,8 +6,10 @@
         <Nullable>enable</Nullable>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
         <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
-        <DuckovPath>/Users/cyenoch/Library/Application Support/Steam/steamapps/common/Escape from Duckov/Duckov.app/Contents/</DuckovPath>
-        <DuckovDataPath>$(DuckovPath)Resources/Data</DuckovDataPath>
+        <DuckovPath>C:/Program Files (x86)/Steam/steamapps/common/Escape from Duckov/</DuckovPath>
+        <!-- MACOS: <DuckovPath>/Users/cyenoch/Library/Application Support/Steam/steamapps/common/Escape from Duckov/Duckov.app/Contents/</DuckovPath> -->
+        <DuckovDataPath>$(DuckovPath)/Duckov_Data/</DuckovDataPath>
+        <!-- MACOS: <DuckovDataPath>$(DuckovPath)Resources/Data</DuckovDataPath> -->
         <DefaultItemExcludes>$(DefaultItemExcludes);decompiled/**;tools/**;extracted_assets/**</DefaultItemExcludes>
     </PropertyGroup>
 
@@ -50,10 +52,12 @@
         <ItemGroup>
             <ModFilesToCopy Include="$(ModsFolder)\**\*.*" />
         </ItemGroup>
-        <Copy SourceFiles="@(ModFilesToCopy)" DestinationFolder="$(DuckovPath)Mods/EfDEnhanced/%(RecursiveDir)" />
+        <Copy SourceFiles="@(ModFilesToCopy)" DestinationFolder="$(DuckovDataPath)Mods/EfDEnhanced/%(RecursiveDir)" />
+        <!-- MACOS: <Copy SourceFiles="@(ModFilesToCopy)" DestinationFolder="$(DuckovPath)Mods/EfDEnhanced/%(RecursiveDir)" /> -->
 
         <Message Text="Mod files copied to: $(ModsFolder)" Importance="high" />
-        <Message Text="Mod files deployed to: $(DuckovPath)Mods/EfDEnhanced" Importance="high" />
+        <Message Text="Mod files deployed to: $(DuckovDataPath)Mods/EfDEnhanced" Importance="high" />
+        <!-- MACOS: <Message Text="Mod files deployed to: $(DuckovPath)Mods/EfDEnhanced" Importance="high" /> -->
         <Message Text="Harmony DLL copied from: $(HarmonyPackagePath)" Importance="high" />
     </Target>
 </Project>

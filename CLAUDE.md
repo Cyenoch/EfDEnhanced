@@ -154,19 +154,29 @@ dotnet restore                  # 恢复依赖
 
 ### Unity资源文档
 
-**[docs/assets/asset-index.md](docs/assets/asset-index.md)** - Unity资源提取和分析指南
-- 场景文件(level*.assets)索引
-- 共享资源包(sharedassets*.assets)目录
-- **AssetRipper使用教程** - 提取Prefab、场景到YAML格式
-- **UnityExplorer MOD** - 运行时资源检查
-- 资源搜索和LLM使用方法
+**[docs/assets/assets-guide.md](docs/assets/assets-guide.md)** - Unity资源系统完整指南
+- 资源类型组织和目录结构
+- 场景、网格、纹理、精灵资源索引
+- Prefab和地形系统说明
+- 资源搜索和引用方法
 
-**[extracted_assets/](extracted_assets/)** - 提取的Unity资源（如已提取）
-- **Prefab YAML文件** - GameObject组件结构
-- **场景YAML文件** - 场景层级和对象配置
-- **资源引用** - MonoBehaviour脚本引用、材质、纹理等
+**[docs/scenes/scenes-guide.md](docs/scenes/scenes-guide.md)** - 游戏场景系统指南
+- 完整关卡列表和结构
+- 场景组织和依赖关系
+- 光照和环境设置
+- Mod开发中的场景使用
+
+**[extracted_assets/](extracted_assets/)** - 提取的Unity资源
+- **场景结构** - 游戏关卡组织和光照设置
+- **网格模型** - 2762个GLB格式的3D模型
+- **纹理资源** - 3096个PNG纹理文件
+- **精灵图集** - 1028个UI和2D图形JSON定义
+- **Prefab对象** - 2195个预制件层级定义（GLB格式）
+- **地形数据** - 13个地形网格文件
+- **Resources目录** - Unity运行时加载的资源
 - **⚠️ 重要**: 使用`Grep`搜索，不要读取整个目录
-- 示例: `Grep pattern:"m_Name: Player" path:"extracted_assets"`
+- 示例: `Grep pattern:"LightingSettings" path:"extracted_assets/Assets/Scenes"`
+- 详见 [docs/assets/assets-guide.md](docs/assets/assets-guide.md) 获取完整资源指南
 
 ### 日志系统
 
@@ -177,14 +187,15 @@ dotnet restore                  # 恢复依赖
 **推荐做法**:
 - **优先使用反编译源码查看实现**: `Grep pattern:"class ModBehaviour" path:"decompiled"`
 - **读取特定反编译文件**查看系统工作原理: `Read file_path:"decompiled/TeamSoda.Duckov.Core.cs"`
-- **使用提取的资源理解场景和Prefab**: `Grep pattern:"m_Name: ItemController" path:"extracted_assets"`
+- **搜索提取的资源**: `Grep pattern:"LightingSettings" path:"extracted_assets/Assets/Scenes"`
+- **查找特定资源类型**: `Grep pattern:"TerrainData" path:"extracted_assets"`
 - 使用`Grep`工具搜索特定类型: `Grep pattern:"class MyClassName"`
 - 按命名空间搜索: `Grep pattern:"namespace Duckov.Buffs"`
-- 阅读docs/game/game-analysis.md了解系统概览和MOD框架细节
-- 阅读docs/assets/asset-index.md了解资源提取和使用
+- 阅读 [docs/scenes/scenes-guide.md](docs/scenes/scenes-guide.md) 了解游戏关卡结构
+- 阅读 [docs/assets/assets-guide.md](docs/assets/assets-guide.md) 了解资源系统
+- 阅读 [docs/assets/mod-development-guide.md](docs/assets/mod-development-guide.md) 了解Mod开发最佳实践
 - 检查`Patches/`中的现有补丁了解实现模式
 - 游戏更新后运行`./scripts/decompile.sh`重新生成反编译代码
-- 需要理解场景结构时运行`./scripts/extract-assets.sh`并使用AssetRipper提取资源
 
 **禁止做法**:
 - 永远不要对整个目录（反编译、提取资源或其他）使用`Read`工具
