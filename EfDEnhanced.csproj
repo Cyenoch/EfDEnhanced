@@ -15,6 +15,7 @@
 
     <ItemGroup>
         <Reference Include="$(DuckovDataPath)\Managed\TeamSoda.*" />
+        <Reference Include="$(DuckovDataPath)\Managed\SodaLocalization.dll" />
         <Reference Include="$(DuckovDataPath)\Managed\ItemStatsSystem.dll" />
         <Reference Include="$(DuckovDataPath)\Managed\FMODUnity.dll" />
         <Reference Include="$(DuckovDataPath)\Managed\Unity*" />

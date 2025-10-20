@@ -1,12 +1,13 @@
-# EfDEnhanced Documentation
+# Raid Ready Check Documentation
 
-Complete documentation for "Escape from Duckov" mod development using the EfDEnhanced framework.
+Complete documentation for "Escape from Duckov" mod development and the Raid Ready Check mod.
 
 ## Quick Links
 
 ### Getting Started
 - **[Main Guide (CLAUDE.md)](../CLAUDE.md)** - Complete project overview and AI assistant guide
 - **[Mod Development Guide](assets/mod-development-guide.md)** - Comprehensive mod development tutorial
+- **[Main README](../README.md)** - User-facing mod documentation (English)
 
 ### Game Resources
 - **[Scenes Guide](scenes/scenes-guide.md)** - All game levels and scene structure
@@ -227,7 +228,7 @@ All documentation is based on:
 ---
 
 **Last Updated**: October 2025  
-**Maintained By**: EfDEnhanced Development Team
+**Maintained By**: Raid Ready Check Development Team
 
 For the most up-to-date information, always refer to the latest version of this repository.
 

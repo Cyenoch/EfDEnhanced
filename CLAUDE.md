@@ -1,10 +1,12 @@
 # CLAUDE.md
 
-这是EfDEnhanced项目的AI助手指南，提供项目架构、开发规范和工作流程说明。
+这是Raid Ready Check项目的AI助手指南，提供项目架构、开发规范和工作流程说明。
 
 ## 项目概述
 
-EfDEnhanced是《Escape from Duckov》游戏的增强MOD，基于游戏的官方Modding框架构建。这是一个.NET Standard 2.1类库项目，通过继承`Duckov.Modding.ModBehaviour`来扩展游戏功能。
+Raid Ready Check是《Escape from Duckov》游戏的Raid前检查MOD，基于游戏的官方Modding框架构建。这是一个.NET Standard 2.1类库项目，通过继承`Duckov.Modding.ModBehaviour`来扩展游戏功能。
+
+**项目目标**: 在玩家进入Raid前自动检查装备、物资、任务物品和天气，避免因忘带装备而导致的尴尬死亡。
 
 **重要说明**: "Escape from Duckov"是一款独立游戏，不是"Escape from Tarkov"。
 
@@ -16,8 +18,15 @@ EfDEnhanced是《Escape from Duckov》游戏的增强MOD，基于游戏的官方
 EfDEnhanced/
 ├── ModBehaviour.cs              # MOD入口点（继承游戏ModBehaviour）
 ├── Utils/                       # 工具类
-│   └── ModLogger.cs             # 统一日志系统
+│   ├── ModLogger.cs             # 统一日志系统
+│   ├── RaidCheckUtility.cs      # Raid检查核心逻辑
+│   └── LocalizationHelper.cs    # 多语言本地化支持
+├── Features/                    # 功能模块
+│   ├── RaidCheckDialog.cs       # 警告对话框UI组件
+│   ├── RaidPreparationView.cs   # 准备界面视图
+│   └── README.md                # 功能详细说明（中文）
 ├── Patches/                     # Harmony补丁（按游戏系统分类）
+│   └── RaidEntryPatches.cs      # Raid进入拦截补丁
 ├── docs/                        # 文档
 │   ├── api/                     # API文档和反编译代码
 │   │   ├── decompiled/          # 反编译的游戏源码 ⭐
@@ -27,7 +36,9 @@ EfDEnhanced/
 │   ├── harmony/                 # Harmony补丁教程
 │   │   ├── quickstart.md        # 快速参考
 │   │   └── guide.md             # 完整指南
-│   └── logging-guide.md         # 日志系统使用指南
+│   ├── localization-guide.md    # 本地化系统指南
+│   └── assets/                  # 资源文档
+│       └── assets-guide.md      # 提取资源使用指南
 ├── scripts/                     # 开发脚本
 │   ├── decompile.sh             # 反编译游戏DLL
 │   ├── deploy.sh                # 部署到游戏目录
@@ -39,6 +50,7 @@ EfDEnhanced/
 │   └── preview.png              # 预览图（256x256）
 ├── info.ini                     # MOD配置文件
 ├── preview.png                  # 预览图源文件
+├── README.md                    # 项目说明（英文，面向用户）
 └── EfDEnhanced.csproj           # 项目配置文件
 ```
 
@@ -309,6 +321,21 @@ publishedFileId=3590346461        # Steam创意工坊ID（可选）
    - `info.ini`
    - `preview.png`
 3. 打包并分发
+
+## 已实现功能
+
+### 1. Pre-Raid Check System (Raid前检查系统)
+
+**功能**: 在玩家进入Raid地图前自动检查装备和天气条件
+
+**检查项目**:
+1. 枪支 - 确保携带至少一把武器
+2. 弹药 - 确保背包中有弹药（包括额外弹匣）
+3. 药品 - 确保携带医疗用品
+4. 食物 - 确保携带食物或饮料
+5. 天气 - 警告风暴天气（Stormy_I 和 Stormy_II）
+
+---
 
 ## 获取帮助
 

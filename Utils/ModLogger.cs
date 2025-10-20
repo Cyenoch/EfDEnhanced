@@ -3,7 +3,7 @@ using UnityEngine;
 namespace EfDEnhanced.Utils;
 
 /// <summary>
-/// Centralized logging utility for EfDEnhanced mod.
+/// Centralized logging utility for Raid Ready Check mod.
 /// All logs are prefixed with [EfDEnhanced] for easy filtering in Unity console.
 /// </summary>
 public static class ModLogger
