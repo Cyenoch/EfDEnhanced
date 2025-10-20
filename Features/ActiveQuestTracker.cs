@@ -725,8 +725,10 @@ public class QuestEntryUI
                     
                     bool isFinished = task.IsFinished();
                     
-                    // 格式化任务描述
-                    string statusIcon = isFinished ? "✓" : "○";
+                    // 格式化任务描述（使用本地化图标）
+                    string statusIcon = isFinished 
+                        ? LocalizationHelper.Get("QuestTracker_TaskComplete") 
+                        : LocalizationHelper.Get("QuestTracker_TaskPending");
                     string taskDesc = task.Description;
                     
                     // 显示额外描述（如果有）

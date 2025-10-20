@@ -112,6 +112,9 @@ public static class LocalizationHelper
             { "QuestTracker_Title", "活跃任务" },
             { "QuestTracker_Progress", "进度: {0}/{1}" },
             { "QuestTracker_NoQuests", "无进行中的任务" },
+            { "QuestTracker_TaskComplete", "✓" },  // 已完成标记
+            { "QuestTracker_TaskPending", "○" },   // 未完成标记
+            { "QuestTracker_CheckboxLabel", "局内追踪" },  // 任务详情界面的追踪复选框标签
         };
         
         // 繁体中文
@@ -134,6 +137,9 @@ public static class LocalizationHelper
             { "QuestTracker_Title", "活躍任務" },
             { "QuestTracker_Progress", "進度: {0}/{1}" },
             { "QuestTracker_NoQuests", "無進行中的任務" },
+            { "QuestTracker_TaskComplete", "✓" },
+            { "QuestTracker_TaskPending", "○" },
+            { "QuestTracker_CheckboxLabel", "局內追蹤" },
         };
         
         // 英语
@@ -156,6 +162,9 @@ public static class LocalizationHelper
             { "QuestTracker_Title", "Active Quests" },
             { "QuestTracker_Progress", "Progress: {0}/{1}" },
             { "QuestTracker_NoQuests", "No active quests" },
+            { "QuestTracker_TaskComplete", "✓" },
+            { "QuestTracker_TaskPending", "○" },
+            { "QuestTracker_CheckboxLabel", "Track in Raid" },
         };
         
         // 日语
@@ -178,6 +187,9 @@ public static class LocalizationHelper
             { "QuestTracker_Title", "アクティブクエスト" },
             { "QuestTracker_Progress", "進行状況: {0}/{1}" },
             { "QuestTracker_NoQuests", "進行中のクエストなし" },
+            { "QuestTracker_TaskComplete", "✓" },
+            { "QuestTracker_TaskPending", "○" },
+            { "QuestTracker_CheckboxLabel", "レイド中追跡" },
         };
         
         ModLogger.Log("Localization", $"Loaded translations for {LocalizationData.Count} languages");

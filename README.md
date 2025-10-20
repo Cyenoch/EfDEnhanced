@@ -4,58 +4,72 @@
 
 Never die from forgetting your meds, ammo, or quest items again! Track your active quests in real-time during raids with a clean, non-intrusive HUD overlay.
 
-## Features
+---
 
-### 🎯 In-Raid Quest Tracker (NEW!)
+## 目前功能 | Current Features
 
-Customizable quest tracking system that shows YOUR selected quests in real-time during raids:
+### 🎯 任务追踪 | Quest Tracking
 
-- **Selective Tracking** - Choose which quests to track using checkbox in quest panel
-- **In-Raid Display** - Only tracked quests appear in top-right corner during raids
-- **Native UI Style** - Uses game's native task checkbox icons for seamless integration
-- **Progress Tracking** - View completed/total tasks for each quest (e.g., "2/3")
-- **Task Status** - ✓ for completed, ○ for pending tasks
-- **Persistent Settings** - Your tracking preferences are saved between sessions
-- **Auto Show/Hide** - Only visible during raids, hidden in base
-- **Multi-language** - Full support for Chinese, English, and Japanese
+在任务面板中可以追踪任务，并在游戏中于右上角显示。
 
-**How to use:**
-1. Open quest panel (Tab key)
-2. Click any quest to view details
-3. Check the "局内追踪" (Track in Raid) checkbox below the quest title
-4. Enter raid and see your tracked quests in top-right corner!
+Quests can be tracked in the quest panel, and will be displayed in the upper right corner of the game.
 
-### ✅ Automatic Pre-Raid Checks
+**功能特性 | Features:**
+- **选择性追踪** | Selective Tracking - 使用任务面板中的复选框选择要追踪的任务
+- **局内显示** | In-Raid Display - 仅追踪的任务会显示在右上角
+- **原生UI风格** | Native UI Style - 使用游戏原生任务图标实现无缝集成
+- **进度追踪** | Progress Tracking - 显示每个任务的完成/总数（例如 "2/3"）
+- **任务状态** | Task Status - ✓ 表示已完成，○ 表示待完成
+- **持久化设置** | Persistent Settings - 追踪偏好会在会话间保存
+- **自动显隐** | Auto Show/Hide - 仅在突袭时可见，基地中隐藏
+- **多语言支持** | Multi-language - 完整支持中文、英文和日文
 
-Before you enter a raid through teleport pads, stairs, or sewers, the mod checks:
+**使用方法 | How to use:**
+1. 打开任务面板（Tab 键）| Open quest panel (Tab key)
+2. 点击任意任务查看详情 | Click any quest to view details
+3. 勾选任务标题下方的"局内追踪"复选框 | Check the "Track in Raid" checkbox below the quest title
+4. 进入突袭后在右上角查看追踪的任务！| Enter raid and see your tracked quests in top-right corner!
 
-- ✅ **Weapon** - Do you have at least one gun?
-- ✅ **Ammunition** - Do you have bullets/magazines?
-- ✅ **Medicine** - Do you have healing items?
-- ✅ **Food/Drink** - Do you have sustenance?
-- ✅ **Quest Items** - Do you have items required by active quests?
-- ⚠️ **Weather** - Are you entering during a dangerous storm?
-- ⚠️ **Storm Warning** - Is a storm approaching within 24 hours?
+---
 
-### Smart Warning Dialog
+### ✅ 传送台进图检查 | Pre-Raid Checks
+
+使用传送台进入地图前检查：
+
+Before entering a map using the teleporter, check:
+
+- ✅ **武器检查** | Weapon - 是否携带了武器？| Are you carrying weapons?
+- ✅ **弹药检查** | Ammunition - 是否携带了弹药？| Are you carrying ammunition?
+- ✅ **药品检查** | Medicine - 是否携带了药品？| Are you carrying medicine?
+- ✅ **食物检查** | Food/Drink - 是否携带了食物？| Are you carrying food?
+- ⚠️ **天气检查** | Weather - 是否处于风暴天气？| Are you in a storm?
+- ✅ **任务物品检查** | Quest Items - 是否携带了任务所需的物品？| Are you carrying the necessary items for the quest?
+- ⚠️ **风暴预警** | Storm Warning - 是否有即将到来的风暴？| Is a storm approaching within 24 hours?
+
+**智能警告对话框 | Smart Warning Dialog:**
+
+如果检测到任何问题，会显示清晰的对话框：
 
 If any issues are detected, a clear dialog shows you:
-- What's missing from your loadout (color-coded for visibility)
-- Which quest items you need (with quest names)
-- Current weather conditions and storm warnings
-- Option to continue anyway or go back to prepare
+- 缺少的装备内容（带颜色标记）| What's missing from your loadout (color-coded)
+- 需要的任务物品（带任务名称）| Which quest items you need (with quest names)
+- 当前天气状况和风暴警告 | Current weather conditions and storm warnings
+- 可选择继续或返回准备 | Option to continue anyway or go back to prepare
 
-**Warning Colors:**
-- 🔴 **Red** - Critical issues (active storm, missing essential gear)
-- 🟠 **Orange** - Important warnings (storm approaching)
-- 🟡 **Gold** - Quest item reminders
+---
 
-### Seamless Integration
+### 🔧 无缝集成 | Seamless Integration
 
-- Works with all raid entry points (teleport pads, stairs, sewers)
-- Uses game's native item detection systems for accuracy
-- Fail-safe design: won't block you if something goes wrong
-- Fully localized UI in Chinese Simplified, Traditional, English, and Japanese
+- 适用于所有突袭入口（传送台、楼梯、下水道）| Works with all raid entry points
+- 使用游戏原生物品检测系统以确保准确性 | Uses game's native item detection systems for accuracy
+- 失效保护设计：出错时不会阻止你 | Fail-safe design: won't block you if something goes wrong
+- 完全本地化UI（简体中文、繁体中文、英文、日文）| Fully localized UI in Chinese Simplified, Traditional, English, and Japanese
+
+---
+
+更多功能等我遇到忍不了的问题再说吧... 😄
+
+More features will be added later when I encounter unbearable problems... 😄
 
 ## Installation
 

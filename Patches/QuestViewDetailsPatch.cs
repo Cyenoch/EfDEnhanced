@@ -184,7 +184,7 @@ public class QuestViewDetailsPatch
             labelObj.transform.SetParent(buttonContainer.transform, false);
             
             TextMeshProUGUI labelText = labelObj.AddComponent<TextMeshProUGUI>();
-            labelText.text = "局内追踪";
+            labelText.text = LocalizationHelper.Get("QuestTracker_CheckboxLabel");
             labelText.fontSize = 20;
             labelText.color = new Color(1f, 1f, 1f, 1f);
             labelText.alignment = TextAlignmentOptions.MidlineLeft;

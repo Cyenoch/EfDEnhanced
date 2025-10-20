@@ -34,6 +34,8 @@
   - ✓ 绿色勾选 = 已完成
   - ○ 白色圆圈 = 未完成
 
+**国际化支持**：状态图标会随游戏语言自动切换（支持中文简体/繁体、英语、日语）
+
 ### 追踪数据保存
 
 - **保存位置**：`%LocalLow%\TeamSoda\Duckov\EfDEnhanced\TrackedQuests.json`
