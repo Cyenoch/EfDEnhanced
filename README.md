@@ -1,12 +1,31 @@
-# Raid Ready Check
+# EfDEnhanced - Escape from Duckov Enhancement Mod
 
-**Pre-raid inspection system for Escape from Duckov**
+**Enhanced raid experience with pre-raid checks and in-raid quest tracking**
 
-Never die from forgetting your meds, ammo, or quest items again! This mod automatically checks your loadout before entering any raid and warns you if something is missing.
+Never die from forgetting your meds, ammo, or quest items again! Track your active quests in real-time during raids with a clean, non-intrusive HUD overlay.
 
 ## Features
 
-### Automatic Pre-Raid Checks
+### 🎯 In-Raid Quest Tracker (NEW!)
+
+Customizable quest tracking system that shows YOUR selected quests in real-time during raids:
+
+- **Selective Tracking** - Choose which quests to track using checkbox in quest panel
+- **In-Raid Display** - Only tracked quests appear in top-right corner during raids
+- **Native UI Style** - Uses game's native task checkbox icons for seamless integration
+- **Progress Tracking** - View completed/total tasks for each quest (e.g., "2/3")
+- **Task Status** - ✓ for completed, ○ for pending tasks
+- **Persistent Settings** - Your tracking preferences are saved between sessions
+- **Auto Show/Hide** - Only visible during raids, hidden in base
+- **Multi-language** - Full support for Chinese, English, and Japanese
+
+**How to use:**
+1. Open quest panel (Tab key)
+2. Click any quest to view details
+3. Check the "局内追踪" (Track in Raid) checkbox below the quest title
+4. Enter raid and see your tracked quests in top-right corner!
+
+### ✅ Automatic Pre-Raid Checks
 
 Before you enter a raid through teleport pads, stairs, or sewers, the mod checks:
 
@@ -128,6 +147,7 @@ EfDEnhanced/
 ├── Patches/
 │   └── RaidEntryPatches.cs  # Intercepts raid entry clicks
 ├── Features/
+│   ├── ActiveQuestTracker.cs # In-raid quest tracker HUD (NEW!)
 │   ├── RaidCheckDialog.cs    # Warning dialog UI
 │   └── RaidPreparationView.cs # Preparation screen view
 └── Utils/
@@ -170,6 +190,8 @@ This mod is provided as-is for Escape from Duckov modding community.
 Built with:
 - [HarmonyLib](https://github.com/pardeike/Harmony) - Runtime patching
 - [UniTask](https://github.com/Cysharp/UniTask) - Async operations
+- [TrueShadow](https://github.com/LeaTai/TrueShadow) - High-quality UI shadows
+- TextMeshPro - Advanced text rendering
 - Duckov Modding Framework - Official mod API
 
 ---

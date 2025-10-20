@@ -118,7 +118,8 @@ public static class RaidCheckUtility
     /// <summary>
     /// 检查玩家是否准备好进入Raid
     /// </summary>
-    public static RaidCheckResult CheckPlayerReadiness()
+    /// <param name="targetSceneID">目标场景ID（可选，如果提供则只检查该场景相关的任务）</param>
+    public static RaidCheckResult CheckPlayerReadiness(string targetSceneID = null)
     {
         try
         {
@@ -151,10 +152,10 @@ public static class RaidCheckUtility
                 HasFood = HasFoodItems(allItems),
                 IsWeatherSafe = IsWeatherSafe(),
                 IsStormComing = IsStormComingSoon(),
-                QuestItems = CheckQuestItems()
+                QuestItems = CheckQuestItems(targetSceneID)
             };
             
-            ModLogger.Log("RaidCheck", $"Check result - Weapon: {result.HasWeapon}, Ammo: {result.HasAmmo}, Medicine: {result.HasMedicine}, Food: {result.HasFood}, Weather: {result.IsWeatherSafe}, StormComing: {result.IsStormComing}, QuestItems: {result.QuestItems.Count}");
+            ModLogger.Log("RaidCheck", $"Check result for scene '{targetSceneID ?? "any"}' - Weapon: {result.HasWeapon}, Ammo: {result.HasAmmo}, Medicine: {result.HasMedicine}, Food: {result.HasFood}, Weather: {result.IsWeatherSafe}, StormComing: {result.IsStormComing}, QuestItems: {result.QuestItems.Count}");
             
             return result;
         }
@@ -412,10 +413,11 @@ public static class RaidCheckUtility
     }
     
     /// <summary>
-    /// 检查所有活跃任务所需的物品
+    /// 检查活跃任务所需的物品
     /// 这些是任务要求玩家携带到 Raid 中的物品（Quest.RequiredItemID）
     /// </summary>
-    private static List<QuestItemRequirement> CheckQuestItems()
+    /// <param name="targetSceneID">目标场景ID（可选，如果提供则只检查该场景相关的任务）</param>
+    private static List<QuestItemRequirement> CheckQuestItems(string targetSceneID = null)
     {
         var questItems = new List<QuestItemRequirement>();
         
@@ -435,7 +437,7 @@ public static class RaidCheckUtility
                 return questItems;
             }
             
-            ModLogger.Log("QuestCheck", $"Found {activeQuests.Count} active quests");
+            ModLogger.Log("QuestCheck", $"Found {activeQuests.Count} active quests, filtering for scene: '{targetSceneID ?? "any"}'");
             
             // 遍历所有活跃任务
             foreach (var quest in activeQuests)
@@ -453,6 +455,33 @@ public static class RaidCheckUtility
                 
                 try
                 {
+                    // 如果提供了目标场景ID，检查任务是否属于该场景
+                    if (!string.IsNullOrEmpty(targetSceneID))
+                    {
+                        // 获取任务的场景信息
+                        var questSceneInfo = quest.RequireSceneInfo;
+                        
+                        // 如果任务指定了特定场景要求
+                        if (questSceneInfo != null && !string.IsNullOrEmpty(questSceneInfo.ID))
+                        {
+                            // 只检查与目标场景匹配的任务
+                            if (questSceneInfo.ID != targetSceneID)
+                            {
+                                ModLogger.Log("QuestCheck", $"Skipping quest '{quest.DisplayName}' - requires scene '{questSceneInfo.ID}', target is '{targetSceneID}'");
+                                continue;
+                            }
+                            else
+                            {
+                                ModLogger.Log("QuestCheck", $"Checking quest '{quest.DisplayName}' - matches target scene '{targetSceneID}'");
+                            }
+                        }
+                        // 如果任务没有指定场景要求，说明可以在任意地图完成，需要检查
+                        else
+                        {
+                            ModLogger.Log("QuestCheck", $"Checking quest '{quest.DisplayName}' - no scene requirement (can be done in any map)");
+                        }
+                    }
+                    
                     // 检查任务的 RequiredItemID（任务要求携带的物品）
                     int itemTypeID = quest.RequiredItemID;
                     int requiredCount = quest.RequiredItemCount;
@@ -493,7 +522,7 @@ public static class RaidCheckUtility
                 }
             }
             
-            ModLogger.Log("QuestCheck", $"Total quest items to check: {questItems.Count}");
+            ModLogger.Log("QuestCheck", $"Total quest items to check for scene '{targetSceneID ?? "any"}': {questItems.Count}");
         }
         catch (Exception ex)
         {

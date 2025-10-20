@@ -22,6 +22,7 @@ EfDEnhanced/
 │   ├── RaidCheckUtility.cs      # Raid检查核心逻辑
 │   └── LocalizationHelper.cs    # 多语言本地化支持
 ├── Features/                    # 功能模块
+│   ├── ActiveQuestTracker.cs    # Raid中任务追踪HUD (NEW!)
 │   ├── RaidCheckDialog.cs       # 警告对话框UI组件
 │   ├── RaidPreparationView.cs   # 准备界面视图
 │   └── README.md                # 功能详细说明（中文）

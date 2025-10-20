@@ -58,9 +58,12 @@ public class RaidEntryPatches
                 return true;
             }
             
-            // 执行检查
-            ModLogger.Log("RaidCheck", "Starting raid readiness check...");
-            var result = RaidCheckUtility.CheckPlayerReadiness();
+            // 获取目标场景ID
+            string sceneID = mapSelectionEntry.SceneID;
+            
+            // 执行检查，传入场景ID以便只检查该场景相关的任务
+            ModLogger.Log("RaidCheck", $"Starting raid readiness check for scene: {sceneID}");
+            var result = RaidCheckUtility.CheckPlayerReadiness(sceneID);
             
             // 如果一切正常，直接放行
             if (result.IsReady)
@@ -70,7 +73,6 @@ public class RaidEntryPatches
             }
             
             // 有问题，启动异步确认流程
-            string sceneID = mapSelectionEntry.SceneID;
             ModLogger.Log("RaidCheck", $"Issues detected for scene {sceneID}, showing confirmation dialog");
             
             // 立即设置 loading 标志，防止重复点击
