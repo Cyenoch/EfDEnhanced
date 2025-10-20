@@ -22,6 +22,7 @@
         <Reference Include="$(DuckovDataPath)\Managed\UniTask.dll" />
         <Reference Include="$(DuckovDataPath)\Managed\Eflatun.SceneReference.dll" />
         <Reference Include="$(DuckovDataPath)\Managed\LeTai.TrueShadow.dll" />
+        <Reference Include="$(DuckovDataPath)\Managed\com.rlabrecque.steamworks.net.dll" />
         <PackageReference Include="Lib.Harmony" Version="2.4.1">
             <PrivateAssets>none</PrivateAssets>
             <ExcludeAssets>none</ExcludeAssets>

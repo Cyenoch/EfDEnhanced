@@ -38,13 +38,13 @@ Quests can be tracked in the quest panel, and will be displayed in the upper rig
 
 Before entering a map using the teleporter, check:
 
-- ✅ **武器检查** | Weapon - 是否携带了武器？| Are you carrying weapons?
-- ✅ **弹药检查** | Ammunition - 是否携带了弹药？| Are you carrying ammunition?
-- ✅ **药品检查** | Medicine - 是否携带了药品？| Are you carrying medicine?
-- ✅ **食物检查** | Food/Drink - 是否携带了食物？| Are you carrying food?
-- ⚠️ **天气检查** | Weather - 是否处于风暴天气？| Are you in a storm?
-- ✅ **任务物品检查** | Quest Items - 是否携带了任务所需的物品？| Are you carrying the necessary items for the quest?
-- ⚠️ **风暴预警** | Storm Warning - 是否有即将到来的风暴？| Is a storm approaching within 24 hours?
+- **武器检查** | Weapon - 是否携带了武器？| Are you carrying weapons?
+- **弹药检查** | Ammunition - 是否携带了弹药？| Are you carrying ammunition?
+- **药品检查** | Medicine - 是否携带了药品？| Are you carrying medicine?
+- **食物检查** | Food/Drink - 是否携带了食物？| Are you carrying food?
+- **天气检查** | Weather - 是否处于风暴天气？| Are you in a storm?
+- **任务物品检查** | Quest Items - 是否携带了任务所需的物品？| Are you carrying the necessary items for the quest?
+- **风暴预警** | Storm Warning - 是否有即将到来的风暴？| Is a storm approaching within 24 hours?
 
 **智能警告对话框 | Smart Warning Dialog:**
 
@@ -76,6 +76,49 @@ More features will be added later when I encounter unbearable problems... 😄
 1. Download the latest release
 2. Extract to `Duckov_Data/Mods/EfDEnhanced/` (or `Duckov.app/Contents/Mods/` on macOS)
 3. Launch game - mod loads automatically
+
+---
+
+## 创意工坊注意事项 | Workshop Notes
+
+### 防止介绍被覆盖 | Preventing Description Override
+
+**此 Mod 已包含补丁，仅对自身防止上传时覆盖创意工坊介绍！**
+
+**This mod includes a patch to prevent overwriting its own workshop description only!**
+
+当你在游戏中上传 Mod 到创意工坊时，游戏默认会用 `info.ini` 中的 `description` 覆盖创意工坊页面的介绍。本 Mod 包含了自动补丁来防止 **EfDEnhanced 自身** 的创意工坊介绍被覆盖：
+
+When uploading mods to the workshop in-game, the game normally overwrites your workshop page description with the `description` from `info.ini`. This mod includes automatic patches to prevent **EfDEnhanced's own** workshop description from being overwritten:
+
+**仅对 EfDEnhanced 生效 | Only applies to EfDEnhanced:**
+- ✅ **标题更新正常** | Title updates work normally
+- ✅ **文件内容更新正常** | File content updates work normally  
+- ✅ **预览图更新正常** | Preview image updates work normally
+- ⛔ **介绍不会被覆盖** | Description will NOT be overwritten
+
+**其他 Mod 不受影响 | Other mods are unaffected:**
+- 如果你上传其他 Mod，描述仍会正常更新
+- 补丁会通过 Workshop ID (3590346461) 和 Mod 名称识别 EfDEnhanced
+- 其他 Mod 的上传行为保持游戏默认
+
+- If you upload other mods, their descriptions will update normally
+- The patch identifies EfDEnhanced by Workshop ID (3590346461) and mod name
+- Other mods' upload behavior remains unchanged
+
+这意味着你可以：
+- 在创意工坊页面编写详细的 Markdown 介绍
+- 在 `info.ini` 中保留简短的一句话描述
+- 放心上传更新，不会丢失创意工坊上的详细介绍
+
+This means you can:
+- Write detailed Markdown descriptions on your workshop page
+- Keep a short one-line description in `info.ini`
+- Upload updates without losing your detailed workshop description
+
+**注意**: `info.ini` 中的 `description` 仅用于游戏内 Mod 管理器显示，不会影响创意工坊页面。
+
+**Note**: The `description` in `info.ini` is only used for the in-game mod manager, and will not affect your workshop page.
 
 ## How It Works
 
