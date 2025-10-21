@@ -62,17 +62,17 @@ namespace EfDEnhanced.Utils.UI.Constants
         /// <summary>
         /// 设置条目之间的间距
         /// </summary>
-        public const int SETTINGS_ENTRY_SPACING = 8;
+        public const int SETTINGS_ENTRY_SPACING = 4;
         
         /// <summary>
         /// 设置字段高度
         /// </summary>
-        public const int SETTINGS_FIELD_HEIGHT = 60;
+        public const int SETTINGS_FIELD_HEIGHT = 42;
         
         /// <summary>
         /// 分节标题之间的间距
         /// </summary>
-        public const int SECTION_SPACING = 10;
+        public const int SECTION_SPACING = 6;
         
         #endregion
 
@@ -101,22 +101,22 @@ namespace EfDEnhanced.Utils.UI.Constants
         /// <summary>
         /// 设置面板标题字体大小
         /// </summary>
-        public const int SETTINGS_TITLE_FONT_SIZE = 32;
+        public const int SETTINGS_TITLE_FONT_SIZE = 28;
         
         /// <summary>
         /// 设置分节标题字体大小
         /// </summary>
-        public const int SETTINGS_SECTION_FONT_SIZE = 24;
+        public const int SETTINGS_SECTION_FONT_SIZE = 22;
         
         /// <summary>
         /// 设置标签字体大小
         /// </summary>
-        public const int SETTINGS_LABEL_FONT_SIZE = 20;
+        public const int SETTINGS_LABEL_FONT_SIZE = 18;
         
         /// <summary>
         /// 设置普通文本字体大小
         /// </summary>
-        public const int SETTINGS_FONT_SIZE = 18;
+        public const int SETTINGS_FONT_SIZE = 16;
         
         /// <summary>
         /// 按钮文本字体大小
@@ -239,12 +239,12 @@ namespace EfDEnhanced.Utils.UI.Constants
         /// <summary>
         /// 标准按钮高度
         /// </summary>
-        public const int BUTTON_HEIGHT = 40;
+        public const int BUTTON_HEIGHT = 36;
         
         /// <summary>
         /// 复选框大小
         /// </summary>
-        public const int CHECKBOX_SIZE = 26;
+        public const int CHECKBOX_SIZE = 24;
         
         /// <summary>
         /// Raid检查按钮宽度

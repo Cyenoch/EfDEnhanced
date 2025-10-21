@@ -55,7 +55,7 @@ namespace EfDEnhanced.Utils.UI.Components
 
             // 添加垂直布局
             VerticalLayoutGroup layout = containerObj.AddComponent<VerticalLayoutGroup>();
-            layout.spacing = 8;
+            layout.spacing = 2;
             layout.padding = new RectOffset(8, 8, 4, 4);
             layout.childAlignment = TextAnchor.UpperLeft;
             layout.childControlWidth = true;

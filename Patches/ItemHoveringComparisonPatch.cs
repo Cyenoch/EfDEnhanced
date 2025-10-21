@@ -91,24 +91,59 @@ namespace EfDEnhanced.Patches
           return;
         }
 
-        // Compare stats
-        int entryIndex = 0;
-        foreach (var hoverProp in hoverProps)
+        foreach (var entry in entries)
         {
-          if (entryIndex >= entries.Length) break;
-
-          // Find matching property by key
-          var selectedProp = selectedProps.FirstOrDefault(p => p.Key == hoverProp.Key);
-
-          if (selectedProp != null)
+          // Find label text by searching for child named "Label" or first TextMeshProUGUI
+          TextMeshProUGUI? labelText = null;
+          Transform? labelTransform = entry.transform.Find("Label");
+          if (labelTransform != null)
           {
-            var entry = entries[entryIndex];
-            // Found matching property, add comparison
-            AddComparisonToEntry(entry, selectedProp.Value, hoverProp.Value,
-                hoverProp.Key, selectedProp.Polarity, selectedProp.RawValue, hoverProp.RawValue);
-            
-            entryIndex++;
+            labelText = labelTransform.GetComponent<TextMeshProUGUI>();
           }
+          
+          // Fallback: use reflection if direct search fails
+          if (labelText == null)
+          {
+            var labelTextField = typeof(LabelAndValue).GetField("labelText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            labelText = labelTextField?.GetValue(entry) as TextMeshProUGUI;
+            if (labelText == null)
+            {
+              ModLogger.Log("WeaponComparison", $"Could not find labelText for entry {entry.name} with neither child 'Label' nor field reflection.");
+            }
+            else
+            {
+              ModLogger.Log("WeaponComparison", $"labelText resolved by reflection for entry {entry.name}");
+            }
+          }
+          
+          if (labelText == null)
+          {
+            ModLogger.Log("WeaponComparison", $"Skipping entry {entry.name}: labelText is still null.");
+            continue;
+          }
+          
+          string? key = labelText.text;
+          if (string.IsNullOrEmpty(key))
+          {
+            ModLogger.Log("WeaponComparison", $"Skipping entry {entry.name}: labelText.text is null or empty.");
+            continue;
+          }
+
+          var selectedProp = selectedProps.FirstOrDefault(p => p.DisplayName == key);
+          if (selectedProp == null)
+          {
+            ModLogger.Log("WeaponComparison", $"Property [{key}] not found in selected weapon.");
+            continue;
+          }
+
+          var hoverProp = hoverProps.FirstOrDefault(p => p.DisplayName == key);
+          if (hoverProp == null)
+          {
+            ModLogger.Log("WeaponComparison", $"Property [{key}] not found in hover weapon.");
+            continue;
+          }
+
+          AddComparisonToEntry(entry, selectedProp.Value, hoverProp.Value, key, selectedProp.Polarity, selectedProp.RawValue, hoverProp.RawValue);
         }
       }
       catch (Exception ex)
@@ -194,7 +229,7 @@ namespace EfDEnhanced.Patches
 
         // Entry structure: [Label] [Value]
         Transform? valueTransform = null;
-        
+
         // Try to find Value child by name
         for (int i = 0; i < entry.transform.childCount; i++)
         {
@@ -228,7 +263,7 @@ namespace EfDEnhanced.Patches
 
         // Build comparison text with colors using TextMeshPro rich text tags
         string comparisonText = BuildComparisonText(selectedValue, hoverValue, propertyName, polarity, selectedRaw, hoverRaw);
-        
+
         // Update the text
         valueText.text = comparisonText;
       }
@@ -259,7 +294,7 @@ namespace EfDEnhanced.Patches
           return $"<color={neutralColor}>{selectedValue}</color> <color={arrowColor}>→</color> <color={neutralColor}>{hoverValue}</color>";
         }
 
-        // Try to convert raw values to numeric
+        // Try to convert display values to numeric for comparison
         if (TryGetNumericValue(selectedRaw, out float selectedNum) &&
             TryGetNumericValue(hoverRaw, out float hoverNum))
         {
@@ -303,7 +338,7 @@ namespace EfDEnhanced.Patches
           string colorInfo = hoverIsBetter ? "Green" : "Red";
 
           ModLogger.Log("WeaponComparison",
-              $"  {propertyName}: [{selectedNum}] → [{hoverNum}] | " +
+              $"  {propertyName}: {selectedValue} → {hoverValue} | " +
               $"Polarity: {polarity} | Result: {comparisonResult} ({colorInfo})");
 
           // Build rich text string with colors
@@ -355,6 +390,12 @@ namespace EfDEnhanced.Patches
         {
           result = b ? 1f : 0f;
           return true;
+        }
+        else if (value is string str)
+        {
+          // Try to parse string to float
+          // Handle potential formatting like "10.5" or "10"
+          return float.TryParse(str, out result);
         }
 
         return false;

@@ -158,8 +158,8 @@ namespace EfDEnhanced.Features
             var headerRect = header.AddComponent<RectTransform>();
             headerRect.anchorMin = new Vector2(0, 1);
             headerRect.anchorMax = new Vector2(1, 1);
-            headerRect.sizeDelta = new Vector2(0, 80);
-            headerRect.anchoredPosition = new Vector2(0, -40);
+            headerRect.sizeDelta = new Vector2(0, 60);
+            headerRect.anchoredPosition = new Vector2(0, -30);
 
             var title = new GameObject("Title");
             title.transform.SetParent(header.transform, false);
@@ -188,8 +188,8 @@ namespace EfDEnhanced.Features
             var scrollRect = scrollViewObj.AddComponent<RectTransform>();
             scrollRect.anchorMin = new Vector2(0, 0);
             scrollRect.anchorMax = new Vector2(1, 1);
-            scrollRect.offsetMin = new Vector2(20, 100); // Leave space for footer
-            scrollRect.offsetMax = new Vector2(-20, -100); // Leave space for header
+            scrollRect.offsetMin = new Vector2(15, 70); // Leave space for footer
+            scrollRect.offsetMax = new Vector2(-15, -70); // Leave space for header
 
             var scrollView = scrollViewObj.AddComponent<ScrollRect>();
 
@@ -223,7 +223,7 @@ namespace EfDEnhanced.Features
             layoutGroup.childForceExpandWidth = true;
             layoutGroup.childForceExpandHeight = false;
             layoutGroup.spacing = UIConstants.SETTINGS_ENTRY_SPACING;
-            layoutGroup.padding = new RectOffset(0, 0, 0, 20); // 只在底部添加padding
+            layoutGroup.padding = new RectOffset(0, 0, 0, 10); // 只在底部添加padding
 
             // Add ContentSizeFitter to automatically adjust content height
             var sizeFitter = content.AddComponent<ContentSizeFitter>();
@@ -304,14 +304,14 @@ namespace EfDEnhanced.Features
             var footerRect = footer.AddComponent<RectTransform>();
             footerRect.anchorMin = new Vector2(0, 0);
             footerRect.anchorMax = new Vector2(1, 0);
-            footerRect.sizeDelta = new Vector2(0, 80);
-            footerRect.anchoredPosition = new Vector2(0, 40);
+            footerRect.sizeDelta = new Vector2(0, 60);
+            footerRect.anchoredPosition = new Vector2(0, 30);
 
             var layout = footer.AddComponent<HorizontalLayoutGroup>();
             layout.childAlignment = TextAnchor.MiddleCenter;
             layout.childControlWidth = false;
             layout.childForceExpandWidth = false;
-            layout.spacing = 24;
+            layout.spacing = 20;
 
             // Spacer
             var spacer1 = new GameObject("Spacer1");
