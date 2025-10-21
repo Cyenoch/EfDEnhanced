@@ -123,11 +123,25 @@ public static class RaidCheckUtility
     {
         try
         {
+            // 如果Raid检查功能被禁用，直接返回全部通过
+            if (!ModSettings.EnableRaidCheck.Value)
+            {
+                ModLogger.Log("RaidCheck", "Raid check is disabled in settings");
+                return new RaidCheckResult
+                {
+                    HasWeapon = true,
+                    HasAmmo = true,
+                    HasMedicine = true,
+                    HasFood = true,
+                    IsWeatherSafe = true
+                };
+            }
+
             // 获取玩家角色背包和装备
             var mainCharacter = LevelManager.Instance?.MainCharacter;
             var characterItem = mainCharacter?.CharacterItem;
             var inventory = characterItem?.Inventory;
-            
+
             if (inventory == null || characterItem == null)
             {
                 ModLogger.LogWarning("RaidCheck", "Player character inventory or item is null, skipping check");
@@ -140,23 +154,24 @@ public static class RaidCheckUtility
                     IsWeatherSafe = true
                 };
             }
-            
+
             // 收集所有物品：背包 + 装备栏
             var allItems = GetAllPlayerItems(inventory, characterItem);
-            
+
+            // 根据设置执行检查项
             var result = new RaidCheckResult
             {
-                HasWeapon = HasWeapon(allItems),
-                HasAmmo = HasAmmo(allItems),
-                HasMedicine = HasMedicalItems(allItems),
-                HasFood = HasFoodItems(allItems),
-                IsWeatherSafe = IsWeatherSafe(),
-                IsStormComing = IsStormComingSoon(),
+                HasWeapon = !ModSettings.CheckWeapon.Value || HasWeapon(allItems),
+                HasAmmo = !ModSettings.CheckAmmo.Value || HasAmmo(allItems),
+                HasMedicine = !ModSettings.CheckMeds.Value || HasMedicalItems(allItems),
+                HasFood = !ModSettings.CheckFood.Value || HasFoodItems(allItems),
+                IsWeatherSafe = !ModSettings.CheckWeather.Value || IsWeatherSafe(),
+                IsStormComing = ModSettings.CheckWeather.Value && IsStormComingSoon(),
                 QuestItems = CheckQuestItems(targetSceneID)
             };
-            
+
             ModLogger.Log("RaidCheck", $"Check result for scene '{targetSceneID ?? "any"}' - Weapon: {result.HasWeapon}, Ammo: {result.HasAmmo}, Medicine: {result.HasMedicine}, Food: {result.HasFood}, Weather: {result.IsWeatherSafe}, StormComing: {result.IsStormComing}, QuestItems: {result.QuestItems.Count}");
-            
+
             return result;
         }
         catch (Exception ex)

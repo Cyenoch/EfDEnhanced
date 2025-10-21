@@ -17,6 +17,7 @@ Raid Ready Check是《Escape from Duckov》游戏的Raid前检查MOD，基于游
 ```
 EfDEnhanced/
 ├── ModBehaviour.cs              # MOD入口点（继承游戏ModBehaviour）
+├── extracted_assets             # 提取的游戏Unity资源，包含反编译的源代码
 ├── Utils/                       # 工具类
 │   ├── ModLogger.cs             # 统一日志系统
 │   ├── RaidCheckUtility.cs      # Raid检查核心逻辑
@@ -187,7 +188,6 @@ dotnet restore                  # 恢复依赖
 - **Prefab对象** - 2195个预制件层级定义（GLB格式）
 - **地形数据** - 13个地形网格文件
 - **Resources目录** - Unity运行时加载的资源
-- **⚠️ 重要**: 使用`Grep`搜索，不要读取整个目录
 - 示例: `Grep pattern:"LightingSettings" path:"extracted_assets/Assets/Scenes"`
 - 详见 [docs/assets/assets-guide.md](docs/assets/assets-guide.md) 获取完整资源指南
 

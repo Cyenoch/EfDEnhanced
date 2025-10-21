@@ -1,0 +1,288 @@
+using System;
+using Duckov.Options;
+
+namespace EfDEnhanced.Utils.Settings
+{
+    /// <summary>
+    /// Event arguments for settings value changes
+    /// </summary>
+    public class SettingsValueChangedEventArgs<T> : EventArgs
+    {
+        public T OldValue { get; }
+        public T NewValue { get; }
+
+        public SettingsValueChangedEventArgs(T oldValue, T newValue)
+        {
+            OldValue = oldValue;
+            NewValue = newValue;
+        }
+    }
+
+    /// <summary>
+    /// Base class for all settings entries
+    /// Provides persistence, events, default value management, and version control
+    /// </summary>
+    public abstract class SettingsEntry<T>
+    {
+        /// <summary>
+        /// Event fired when the setting value changes
+        /// </summary>
+        public event EventHandler<SettingsValueChangedEventArgs<T>>? ValueChanged;
+
+        /// <summary>
+        /// Unique key for this setting (used for persistence)
+        /// </summary>
+        public string Key { get; }
+
+        /// <summary>
+        /// Localization key for the setting name
+        /// </summary>
+        public string NameKey { get; }
+
+        /// <summary>
+        /// Localization key for the setting description
+        /// </summary>
+        public string? DescriptionKey { get; }
+
+        /// <summary>
+        /// Localization key for the category
+        /// </summary>
+        public string CategoryKey { get; }
+
+        /// <summary>
+        /// Get localized name for this setting
+        /// </summary>
+        public string Name => LocalizationHelper.Get(NameKey);
+
+        /// <summary>
+        /// Get localized description for this setting
+        /// </summary>
+        public string? Description => string.IsNullOrEmpty(DescriptionKey) ? null : LocalizationHelper.Get(DescriptionKey);
+
+        /// <summary>
+        /// Get localized category name
+        /// </summary>
+        public string Category => LocalizationHelper.Get(CategoryKey);
+
+        /// <summary>
+        /// Default value for this setting
+        /// </summary>
+        public T DefaultValue { get; }
+
+        /// <summary>
+        /// Version of this setting's default value
+        /// Increment this when changing default values to trigger migration
+        /// </summary>
+        public int Version { get; }
+
+        private T _cachedValue;
+        private bool _isInitialized;
+        private bool _wasModifiedByUser;
+
+        protected SettingsEntry(string prefix, string key, string nameKey, T defaultValue, string categoryKey, string? descriptionKey = null, int version = 1)
+        {
+            Key = $"{prefix}_{key}";
+            NameKey = nameKey;
+            CategoryKey = categoryKey;
+            DescriptionKey = descriptionKey;
+            DefaultValue = defaultValue;
+            Version = version;
+            _cachedValue = defaultValue;
+            _isInitialized = false;
+            _wasModifiedByUser = false;
+        }
+
+        /// <summary>
+        /// Current value of this setting
+        /// </summary>
+        public T Value
+        {
+            get
+            {
+                if (!_isInitialized)
+                {
+                    _cachedValue = LoadValueWithMigration();
+                    _isInitialized = true;
+                }
+                return _cachedValue;
+            }
+            set
+            {
+                T oldValue = _cachedValue;
+                if (!Equals(oldValue, value) && Validate(value))
+                {
+                    _cachedValue = value;
+                    _wasModifiedByUser = true;
+                    SaveValue(value);
+                    SaveVersion();
+                    SaveModifiedFlag();
+                    OnValueChanged(oldValue, value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Check if this setting was modified by user
+        /// </summary>
+        public bool WasModifiedByUser => _wasModifiedByUser;
+
+        /// <summary>
+        /// Reset this setting to its default value (user-initiated reset)
+        /// </summary>
+        public void Reset()
+        {
+            T oldValue = _cachedValue;
+            _cachedValue = DefaultValue;
+            _wasModifiedByUser = false;
+            SaveValue(DefaultValue);
+            SaveVersion();
+            SaveModifiedFlag();
+            OnValueChanged(oldValue, DefaultValue);
+        }
+
+        /// <summary>
+        /// Validate a value before setting it
+        /// Override to implement custom validation logic
+        /// </summary>
+        protected virtual bool Validate(T value)
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Load value with version migration support
+        /// </summary>
+        private T LoadValueWithMigration()
+        {
+            try
+            {
+                // Load saved version
+                int savedVersion = OptionsManager.Load(GetVersionKey(), 0);
+                bool wasModified = OptionsManager.Load(GetModifiedFlagKey(), false);
+
+                _wasModifiedByUser = wasModified;
+
+                // If version changed and user hasn't modified the setting, use new default
+                if (savedVersion < Version && !wasModified)
+                {
+                    Utils.ModLogger.Log("SettingsEntry", $"{Key}: Upgrading from v{savedVersion} to v{Version}, applying new default: {DefaultValue}");
+                    SaveValue(DefaultValue);
+                    SaveVersion();
+                    return DefaultValue;
+                }
+
+                // Load value with fallback to default on parse failure
+                return LoadValue();
+            }
+            catch (Exception ex)
+            {
+                Utils.ModLogger.LogError($"Failed to load setting {Key}, resetting to default: {ex.Message}");
+                ResetToDefault();
+                return DefaultValue;
+            }
+        }
+
+        /// <summary>
+        /// Load value from persistent storage
+        /// </summary>
+        protected virtual T LoadValue()
+        {
+            try
+            {
+                return OptionsManager.Load(Key, DefaultValue);
+            }
+            catch (Exception ex)
+            {
+                Utils.ModLogger.LogError($"Parse error for setting {Key}: {ex.Message}");
+                throw; // Re-throw to trigger reset in LoadValueWithMigration
+            }
+        }
+
+        /// <summary>
+        /// Save value to persistent storage
+        /// </summary>
+        protected virtual void SaveValue(T value)
+        {
+            try
+            {
+                OptionsManager.Save(Key, value);
+            }
+            catch (Exception ex)
+            {
+                Utils.ModLogger.LogError($"Failed to save setting {Key}: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Save current version
+        /// </summary>
+        private void SaveVersion()
+        {
+            try
+            {
+                OptionsManager.Save(GetVersionKey(), Version);
+            }
+            catch (Exception ex)
+            {
+                Utils.ModLogger.LogError($"Failed to save version for {Key}: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Save modified flag
+        /// </summary>
+        private void SaveModifiedFlag()
+        {
+            try
+            {
+                OptionsManager.Save(GetModifiedFlagKey(), _wasModifiedByUser);
+            }
+            catch (Exception ex)
+            {
+                Utils.ModLogger.LogError($"Failed to save modified flag for {Key}: {ex.Message}");
+            }
+        }
+
+        private string GetVersionKey() => $"{Key}_Version";
+        private string GetModifiedFlagKey() => $"{Key}_Modified";
+
+        /// <summary>
+        /// Reset to default value (used internally for error recovery)
+        /// </summary>
+        private void ResetToDefault()
+        {
+            _cachedValue = DefaultValue;
+            _wasModifiedByUser = false;
+            SaveValue(DefaultValue);
+            SaveVersion();
+            SaveModifiedFlag();
+        }
+
+        /// <summary>
+        /// Trigger ValueChanged event
+        /// </summary>
+        protected virtual void OnValueChanged(T oldValue, T newValue)
+        {
+            ValueChanged?.Invoke(this, new SettingsValueChangedEventArgs<T>(oldValue, newValue));
+        }
+
+        /// <summary>
+        /// Force reload value from storage (useful for external changes)
+        /// </summary>
+        public void Reload()
+        {
+            T newValue = LoadValue();
+            if (!Equals(_cachedValue, newValue))
+            {
+                T oldValue = _cachedValue;
+                _cachedValue = newValue;
+                OnValueChanged(oldValue, newValue);
+            }
+        }
+
+        public override string ToString()
+        {
+            return $"{Name}: {Value}";
+        }
+    }
+}

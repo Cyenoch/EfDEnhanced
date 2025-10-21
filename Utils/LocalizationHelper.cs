@@ -115,6 +115,42 @@ public static class LocalizationHelper
             { "QuestTracker_TaskComplete", "✓" },  // 已完成标记
             { "QuestTracker_TaskPending", "○" },   // 未完成标记
             { "QuestTracker_CheckboxLabel", "局内追踪" },  // 任务详情界面的追踪复选框标签
+
+            // 设置界面
+            { "Settings_Title", "EfD Enhanced 设置" },
+            { "Settings_ResetButton", "恢复默认" },
+            { "Settings_CloseButton", "关闭" },
+            { "Settings_ModSettings_Button", "EfD Enhanced 设置" },
+
+            // 设置类别
+            { "Settings_Category_PreRaidCheck", "Raid前检查" },
+            { "Settings_Category_QuestTracker", "任务追踪器" },
+
+            // Pre-Raid Check 设置
+            { "Settings_EnableRaidCheck_Name", "启用Raid前检查" },
+            { "Settings_EnableRaidCheck_Desc", "启用整个Raid前检查系统" },
+            { "Settings_CheckWeapon_Name", "检查武器" },
+            { "Settings_CheckWeapon_Desc", "未携带武器时警告" },
+            { "Settings_CheckAmmo_Name", "检查弹药" },
+            { "Settings_CheckAmmo_Desc", "未携带弹药时警告" },
+            { "Settings_CheckMeds_Name", "检查医疗用品" },
+            { "Settings_CheckMeds_Desc", "未携带医疗用品时警告" },
+            { "Settings_CheckFood_Name", "检查食物/水" },
+            { "Settings_CheckFood_Desc", "未携带食物或水时警告" },
+            { "Settings_CheckWeather_Name", "警告风暴天气" },
+            { "Settings_CheckWeather_Desc", "检测到风暴天气时警告" },
+
+            // Quest Tracker 设置
+            { "Settings_EnableQuestTracker_Name", "启用任务追踪HUD" },
+            { "Settings_EnableQuestTracker_Desc", "在Raid中显示活跃任务追踪器" },
+            { "Settings_TrackerPositionX_Name", "追踪器水平位置" },
+            { "Settings_TrackerPositionX_Desc", "水平位置 (0=左, 1=右)" },
+            { "Settings_TrackerPositionY_Name", "追踪器垂直位置" },
+            { "Settings_TrackerPositionY_Desc", "垂直位置 (0=底, 1=顶)" },
+            { "Settings_TrackerScale_Name", "追踪器缩放" },
+            { "Settings_TrackerScale_Desc", "UI缩放倍数" },
+            { "Settings_TrackerShowDescription_Name", "显示任务描述" },
+            { "Settings_TrackerShowDescription_Desc", "在追踪器中显示任务描述" },
         };
         
         // 繁体中文
@@ -140,6 +176,42 @@ public static class LocalizationHelper
             { "QuestTracker_TaskComplete", "✓" },
             { "QuestTracker_TaskPending", "○" },
             { "QuestTracker_CheckboxLabel", "局內追蹤" },
+
+            // 設置界面
+            { "Settings_Title", "EfD Enhanced 設置" },
+            { "Settings_ResetButton", "恢復默認" },
+            { "Settings_CloseButton", "關閉" },
+            { "Settings_ModSettings_Button", "EfD Enhanced 設置" },
+
+            // 設置類別
+            { "Settings_Category_PreRaidCheck", "Raid前檢查" },
+            { "Settings_Category_QuestTracker", "任務追蹤器" },
+
+            // Pre-Raid Check 設置
+            { "Settings_EnableRaidCheck_Name", "啟用Raid前檢查" },
+            { "Settings_EnableRaidCheck_Desc", "啟用整個Raid前檢查系統" },
+            { "Settings_CheckWeapon_Name", "檢查武器" },
+            { "Settings_CheckWeapon_Desc", "未攜帶武器時警告" },
+            { "Settings_CheckAmmo_Name", "檢查彈藥" },
+            { "Settings_CheckAmmo_Desc", "未攜帶彈藥時警告" },
+            { "Settings_CheckMeds_Name", "檢查醫療用品" },
+            { "Settings_CheckMeds_Desc", "未攜帶醫療用品時警告" },
+            { "Settings_CheckFood_Name", "檢查食物/水" },
+            { "Settings_CheckFood_Desc", "未攜帶食物或水時警告" },
+            { "Settings_CheckWeather_Name", "警告風暴天氣" },
+            { "Settings_CheckWeather_Desc", "檢測到風暴天氣時警告" },
+
+            // Quest Tracker 設置
+            { "Settings_EnableQuestTracker_Name", "啟用任務追蹤HUD" },
+            { "Settings_EnableQuestTracker_Desc", "在Raid中顯示活躍任務追蹤器" },
+            { "Settings_TrackerPositionX_Name", "追蹤器水平位置" },
+            { "Settings_TrackerPositionX_Desc", "水平位置 (0=左, 1=右)" },
+            { "Settings_TrackerPositionY_Name", "追蹤器垂直位置" },
+            { "Settings_TrackerPositionY_Desc", "垂直位置 (0=底, 1=頂)" },
+            { "Settings_TrackerScale_Name", "追蹤器縮放" },
+            { "Settings_TrackerScale_Desc", "UI縮放倍數" },
+            { "Settings_TrackerShowDescription_Name", "顯示任務描述" },
+            { "Settings_TrackerShowDescription_Desc", "在追蹤器中顯示任務描述" },
         };
         
         // 英语
@@ -165,6 +237,42 @@ public static class LocalizationHelper
             { "QuestTracker_TaskComplete", "✓" },
             { "QuestTracker_TaskPending", "○" },
             { "QuestTracker_CheckboxLabel", "Track in Raid" },
+
+            // Settings UI
+            { "Settings_Title", "EfD Enhanced Settings" },
+            { "Settings_ResetButton", "Reset to Defaults" },
+            { "Settings_CloseButton", "Close" },
+            { "Settings_ModSettings_Button", "EfD Enhanced Settings" },
+
+            // Settings Categories
+            { "Settings_Category_PreRaidCheck", "Pre-Raid Check" },
+            { "Settings_Category_QuestTracker", "Quest Tracker" },
+
+            // Pre-Raid Check Settings
+            { "Settings_EnableRaidCheck_Name", "Enable Pre-Raid Check" },
+            { "Settings_EnableRaidCheck_Desc", "Enable the entire pre-raid check system" },
+            { "Settings_CheckWeapon_Name", "Check Weapon" },
+            { "Settings_CheckWeapon_Desc", "Warn if no weapon is equipped" },
+            { "Settings_CheckAmmo_Name", "Check Ammunition" },
+            { "Settings_CheckAmmo_Desc", "Warn if no ammunition is available" },
+            { "Settings_CheckMeds_Name", "Check Medical Supplies" },
+            { "Settings_CheckMeds_Desc", "Warn if no medical supplies are available" },
+            { "Settings_CheckFood_Name", "Check Food/Water" },
+            { "Settings_CheckFood_Desc", "Warn if no food or water is available" },
+            { "Settings_CheckWeather_Name", "Warn Stormy Weather" },
+            { "Settings_CheckWeather_Desc", "Warn about stormy weather conditions" },
+
+            // Quest Tracker Settings
+            { "Settings_EnableQuestTracker_Name", "Enable Quest Tracker HUD" },
+            { "Settings_EnableQuestTracker_Desc", "Show active quest tracker during raids" },
+            { "Settings_TrackerPositionX_Name", "Tracker Horizontal Position" },
+            { "Settings_TrackerPositionX_Desc", "Horizontal position (0=left, 1=right)" },
+            { "Settings_TrackerPositionY_Name", "Tracker Vertical Position" },
+            { "Settings_TrackerPositionY_Desc", "Vertical position (0=bottom, 1=top)" },
+            { "Settings_TrackerScale_Name", "Tracker Scale" },
+            { "Settings_TrackerScale_Desc", "UI scale multiplier" },
+            { "Settings_TrackerShowDescription_Name", "Show Quest Descriptions" },
+            { "Settings_TrackerShowDescription_Desc", "Display quest descriptions in tracker" },
         };
         
         // 日语
@@ -190,6 +298,42 @@ public static class LocalizationHelper
             { "QuestTracker_TaskComplete", "✓" },
             { "QuestTracker_TaskPending", "○" },
             { "QuestTracker_CheckboxLabel", "レイド中追跡" },
+
+            // 設定UI
+            { "Settings_Title", "EfD Enhanced 設定" },
+            { "Settings_ResetButton", "デフォルトに戻す" },
+            { "Settings_CloseButton", "閉じる (Alt+O)" },
+            { "Settings_ModSettings_Button", "EfD Enhanced 設定" },
+
+            // 設定カテゴリ
+            { "Settings_Category_PreRaidCheck", "レイド前チェック" },
+            { "Settings_Category_QuestTracker", "クエストトラッカー" },
+
+            // Pre-Raid Check 設定
+            { "Settings_EnableRaidCheck_Name", "レイド前チェックを有効化" },
+            { "Settings_EnableRaidCheck_Desc", "レイド前チェックシステム全体を有効化" },
+            { "Settings_CheckWeapon_Name", "武器チェック" },
+            { "Settings_CheckWeapon_Desc", "武器を装備していない場合に警告" },
+            { "Settings_CheckAmmo_Name", "弾薬チェック" },
+            { "Settings_CheckAmmo_Desc", "弾薬がない場合に警告" },
+            { "Settings_CheckMeds_Name", "医療品チェック" },
+            { "Settings_CheckMeds_Desc", "医療品がない場合に警告" },
+            { "Settings_CheckFood_Name", "食料/水チェック" },
+            { "Settings_CheckFood_Desc", "食料または水がない場合に警告" },
+            { "Settings_CheckWeather_Name", "嵐の天候警告" },
+            { "Settings_CheckWeather_Desc", "嵐の天候状態を警告" },
+
+            // Quest Tracker 設定
+            { "Settings_EnableQuestTracker_Name", "クエストトラッカーHUDを有効化" },
+            { "Settings_EnableQuestTracker_Desc", "レイド中にアクティブクエストトラッカーを表示" },
+            { "Settings_TrackerPositionX_Name", "トラッカー水平位置" },
+            { "Settings_TrackerPositionX_Desc", "水平位置 (0=左, 1=右)" },
+            { "Settings_TrackerPositionY_Name", "トラッカー垂直位置" },
+            { "Settings_TrackerPositionY_Desc", "垂直位置 (0=下, 1=上)" },
+            { "Settings_TrackerScale_Name", "トラッカースケール" },
+            { "Settings_TrackerScale_Desc", "UIスケール倍率" },
+            { "Settings_TrackerShowDescription_Name", "クエスト説明を表示" },
+            { "Settings_TrackerShowDescription_Desc", "トラッカーにクエスト説明を表示" },
         };
         
         ModLogger.Log("Localization", $"Loaded translations for {LocalizationData.Count} languages");

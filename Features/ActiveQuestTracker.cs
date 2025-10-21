@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Duckov.Quests;
 using EfDEnhanced.Utils;
+using EfDEnhanced.Utils.Settings;
 using LeTai.TrueShadow;
 using TMPro;
 using UnityEngine;
@@ -104,14 +105,14 @@ public class ActiveQuestTracker : MonoBehaviour
 
             // 不添加GraphicRaycaster，使UI不响应鼠标操作
             
-            // 创建主面板（右上角）
+            // 创建主面板（左上角）
             _questPanel = new GameObject("QuestPanel");
             _questPanel.transform.SetParent(_rootCanvas.transform, false);
             
             RectTransform panelRect = _questPanel.AddComponent<RectTransform>();
-            panelRect.anchorMin = new Vector2(1, 1); // 右上角锚点
-            panelRect.anchorMax = new Vector2(1, 1); // 右上角锚点
-            panelRect.pivot = new Vector2(1, 1); // 轴心点在右上角
+            panelRect.anchorMin = new Vector2(0, 1); // 左上角锚点
+            panelRect.anchorMax = new Vector2(0, 1); // 左上角锚点
+            panelRect.pivot = new Vector2(0, 1); // 轴心点在左上角
             
             // 计算高度：屏幕高度的 40%
             float screenHeight = Screen.height;
@@ -120,7 +121,7 @@ public class ActiveQuestTracker : MonoBehaviour
             // 设置尺寸
             panelRect.sizeDelta = new Vector2(280, maxHeight);
             
-            // 设置位置：右上角向左和向下偏移（负值）
+            // 设置位置：左上角向右和向下偏移（负值）
             panelRect.anchoredPosition = new Vector2(-10, -10);
             
             ModLogger.Log("QuestTracker", $"Screen: {Screen.width}x{Screen.height}, Panel size: 280x{maxHeight}, Position: {panelRect.anchoredPosition}");
@@ -172,28 +173,48 @@ public class ActiveQuestTracker : MonoBehaviour
         try
         {
             ModLogger.Log("QuestTracker", $"Enable called. _rootCanvas null? {_rootCanvas == null}, _isActive: {_isActive}");
-            
+
+            // 检查设置是否启用任务追踪器
+            bool isEnabled = ModSettings.EnableQuestTracker.Value;
+            ModLogger.Log("QuestTracker", $"Quest tracker enabled in settings? {isEnabled}, Key: {ModSettings.EnableQuestTracker.Key}");
+
+            if (!isEnabled)
+            {
+                ModLogger.Log("QuestTracker", "Quest tracker is disabled in settings - not enabling");
+                return;
+            }
+
             if (_isActive)
             {
                 ModLogger.LogWarning("QuestTracker", "Already enabled");
                 return;
             }
-            
+
             if (_rootCanvas == null)
             {
                 ModLogger.LogError("QuestTracker.Enable: _rootCanvas is null!");
                 return;
             }
-            
+
             _isActive = true;
             _rootCanvas.SetActive(true);
+
+            // 应用设置中的位置和缩放
+            ApplySettingsToUI();
+
             ModLogger.Log("QuestTracker", $"Canvas activated. Active: {_rootCanvas.activeSelf}");
-            
+
             // 订阅所有事件
             RegisterEvents();
-            
+
+            // 订阅设置变化事件以实时更新UI
+            ModSettings.TrackerPositionX.ValueChanged += OnTrackerPositionChanged;
+            ModSettings.TrackerPositionY.ValueChanged += OnTrackerPositionChanged;
+            ModSettings.TrackerScale.ValueChanged += OnTrackerScaleChanged;
+            ModSettings.TrackerShowDescription.ValueChanged += OnShowDescriptionChanged;
+
             RefreshQuestList();
-            
+
             ModLogger.Log("QuestTracker", "Tracker enabled");
         }
         catch (Exception ex)
@@ -214,14 +235,20 @@ public class ActiveQuestTracker : MonoBehaviour
             {
                 return;
             }
-            
+
             _isActive = false;
             _rootCanvas?.SetActive(false);
             ClearQuestList();
-            
+
             // 取消订阅所有事件
             UnregisterEvents();
-            
+
+            // 取消订阅设置变化事件
+            ModSettings.TrackerPositionX.ValueChanged -= OnTrackerPositionChanged;
+            ModSettings.TrackerPositionY.ValueChanged -= OnTrackerPositionChanged;
+            ModSettings.TrackerScale.ValueChanged -= OnTrackerScaleChanged;
+            ModSettings.TrackerShowDescription.ValueChanged -= OnShowDescriptionChanged;
+
             ModLogger.Log("QuestTracker", "Tracker disabled");
         }
         catch (Exception ex)
@@ -462,12 +489,12 @@ public class ActiveQuestTracker : MonoBehaviour
             progressBadgeLayout.minWidth = 40;
             progressBadgeLayout.preferredHeight = -1;
             
-            // 任务描述（简介）
-            if (!string.IsNullOrEmpty(quest.Description))
+            // 任务描述（简介）- 根据设置决定是否显示
+            if (ModSettings.TrackerShowDescription.Value && !string.IsNullOrEmpty(quest.Description))
             {
                 GameObject descObj = new GameObject("QuestDescription");
                 descObj.transform.SetParent(entryObj.transform, false);
-                
+
                 TextMeshProUGUI descText = descObj.AddComponent<TextMeshProUGUI>();
                 descText.text = quest.Description;
                 descText.fontSize = 12;
@@ -475,7 +502,7 @@ public class ActiveQuestTracker : MonoBehaviour
                 descText.color = new Color(0.85f, 0.85f, 0.85f, 1f);
                 descText.enableWordWrapping = true;
                 descText.overflowMode = TextOverflowModes.Truncate;
-                
+
                 // 使用TrueShadow
                 TrueShadow descShadow = descObj.AddComponent<TrueShadow>();
                 descShadow.Size = 16f;
@@ -483,7 +510,7 @@ public class ActiveQuestTracker : MonoBehaviour
                 descShadow.OffsetAngle = -90f;
                 descShadow.OffsetDistance = 2f;
                 descShadow.Color = new Color(0, 0, 0, 0.7f);
-                
+
                 LayoutElement descLayout = descObj.AddComponent<LayoutElement>();
                 descLayout.preferredHeight = -1;
                 descLayout.flexibleWidth = 1; // 允许自适应宽度
@@ -654,7 +681,7 @@ public class ActiveQuestTracker : MonoBehaviour
             {
                 return;
             }
-            
+
             // 只更新已追踪的任务
             if (QuestTrackingManager.IsQuestTracked(quest.ID))
             {
@@ -669,6 +696,78 @@ public class ActiveQuestTracker : MonoBehaviour
         catch (Exception ex)
         {
             ModLogger.LogError($"QuestTracker.OnTaskFinished failed: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// 应用设置到UI（位置、缩放）
+    /// </summary>
+    private void ApplySettingsToUI()
+    {
+        try
+        {
+            if (_questPanel == null) return;
+
+            RectTransform panelRect = _questPanel.GetComponent<RectTransform>();
+            if (panelRect == null) return;
+
+            // 应用位置设置
+            float screenWidth = Screen.width;
+            float screenHeight = Screen.height;
+
+            // 将归一化坐标(0-1)转换为屏幕坐标
+            // Since we're using right-top anchored position, we use negative X (right to left)
+            // but positive Y (top to bottom) would be incorrect - it should be negative too
+            float xPos = ModSettings.TrackerPositionX.Value * screenWidth;
+            float yPos = -ModSettings.TrackerPositionY.Value * screenHeight;
+
+            ModLogger.Log("QuestTracker", $"Position calculation: X={ModSettings.TrackerPositionX.Value} * {screenWidth} = {xPos}, Y={ModSettings.TrackerPositionY.Value} * {screenHeight} = {yPos}");
+
+            panelRect.anchoredPosition = new Vector2(xPos, yPos);
+
+            // 应用缩放设置
+            float scale = ModSettings.TrackerScale.Value;
+            panelRect.localScale = new Vector3(scale, scale, 1f);
+
+            ModLogger.Log("QuestTracker", $"Applied settings - Position: ({xPos}, {yPos}), Scale: {scale}");
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestTracker.ApplySettingsToUI failed: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// 位置设置变化回调
+    /// </summary>
+    private void OnTrackerPositionChanged(object? sender, SettingsValueChangedEventArgs<float> args)
+    {
+        if (_isActive)
+        {
+            ApplySettingsToUI();
+        }
+    }
+
+    /// <summary>
+    /// 缩放设置变化回调
+    /// </summary>
+    private void OnTrackerScaleChanged(object? sender, SettingsValueChangedEventArgs<float> args)
+    {
+        if (_isActive)
+        {
+            ApplySettingsToUI();
+        }
+    }
+
+    /// <summary>
+    /// 显示描述设置变化回调
+    /// </summary>
+    private void OnShowDescriptionChanged(object? sender, SettingsValueChangedEventArgs<bool> args)
+    {
+        if (_isActive)
+        {
+            // 刷新任务列表以更新描述显示
+            RefreshQuestList();
         }
     }
 }

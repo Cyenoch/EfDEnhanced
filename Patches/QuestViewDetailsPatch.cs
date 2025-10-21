@@ -27,14 +27,7 @@ public class QuestViewDetailsPatch
         public Sprite UncheckedSprite;
         public Sprite CheckedSprite;
         public bool UsingNativeSprites;
-    }
-    
-    private class IconData
-    {
-        public Image StatusImage;
-        public Sprite UncheckedSprite;
-        public Sprite CheckedSprite;
-        public bool UsingNativeSprites;
+        public GameObject IconContainer;
     }
     
     /// <summary>
@@ -46,18 +39,39 @@ public class QuestViewDetailsPatch
     {
         try
         {
-            _currentQuest = quest;
-            
-            bool hasButton = _trackButtons.ContainsKey(__instance) && _trackButtons[__instance]?.ButtonObject != null;
-            
-            // 确保追踪UI已创建
-            if (!hasButton)
+            // Check for null parameters
+            if (__instance == null)
             {
-                CreateTrackButton(__instance);
+                ModLogger.LogError("QuestViewDetailsPatch.Setup_Postfix: __instance is null");
+                return;
             }
-            
-            // 更新按钮状态
-            UpdateButtonState(__instance, quest);
+
+            if (quest == null)
+            {
+                ModLogger.Log("QuestTracker", "Setup called with null quest, cleaning up existing button");
+
+                // Clean up existing button if quest is null
+                if (_trackButtons.ContainsKey(__instance) && _trackButtons[__instance]?.ButtonObject != null)
+                {
+                    UnityEngine.Object.Destroy(_trackButtons[__instance].ButtonObject);
+                    _trackButtons.Remove(__instance);
+                }
+
+                _currentQuest = null;
+                return;
+            }
+
+            _currentQuest = quest;
+
+            // 销毁旧按钮（如果存在）
+            if (_trackButtons.ContainsKey(__instance) && _trackButtons[__instance]?.ButtonObject != null)
+            {
+                UnityEngine.Object.Destroy(_trackButtons[__instance].ButtonObject);
+                _trackButtons.Remove(__instance);
+            }
+
+            // 为新任务创建按钮
+            CreateTrackButton(__instance, quest);
         }
         catch (Exception ex)
         {
@@ -68,11 +82,24 @@ public class QuestViewDetailsPatch
     /// <summary>
     /// 创建追踪按钮
     /// </summary>
-    private static void CreateTrackButton(QuestViewDetails questViewDetails)
+    private static void CreateTrackButton(QuestViewDetails questViewDetails, Quest quest)
     {
         try
         {
-            ModLogger.Log("QuestTracker", "Creating track button in QuestViewDetails");
+            // Additional safety checks
+            if (questViewDetails == null)
+            {
+                ModLogger.LogError("CreateTrackButton: questViewDetails is null");
+                return;
+            }
+
+            if (quest == null)
+            {
+                ModLogger.LogError("CreateTrackButton: quest is null");
+                return;
+            }
+
+            ModLogger.Log("QuestTracker", $"Creating track button for quest {quest.ID}");
             
             // 尝试获取游戏原生的任务图标
             Sprite uncheckedSprite = null;
@@ -149,18 +176,13 @@ public class QuestViewDetailsPatch
             layoutGroup.spacing = 12; // 增大图标和文字之间的间距
             layoutGroup.padding = new RectOffset(10, 10, 8, 8); // 增加内边距
             
-            // 创建状态图标（使用游戏原生样式）
+            // 创建复选框容器
             GameObject iconObj = new GameObject("StatusIcon");
             iconObj.transform.SetParent(buttonContainer.transform, false);
-            
-            Image statusImage = iconObj.AddComponent<Image>();
-            // 使用游戏原生图标，如果没有则使用简单方块
-            statusImage.sprite = uncheckedSprite != null ? uncheckedSprite : CreateWhiteSquareSprite();
-            statusImage.color = uncheckedSprite != null ? Color.white : new Color(0.6f, 0.6f, 0.6f, 1f);
-            
-            RectTransform iconRect = iconObj.GetComponent<RectTransform>();
-            iconRect.sizeDelta = new Vector2(32, 32); // 增大到32x32
-            
+
+            RectTransform iconRect = iconObj.AddComponent<RectTransform>();
+            iconRect.sizeDelta = new Vector2(32, 32);
+
             // 添加 LayoutElement 确保大小不被布局组改变
             LayoutElement iconLayout = iconObj.AddComponent<LayoutElement>();
             iconLayout.minWidth = 32;
@@ -169,23 +191,51 @@ public class QuestViewDetailsPatch
             iconLayout.preferredHeight = 32;
             iconLayout.flexibleWidth = 0;
             iconLayout.flexibleHeight = 0;
-            
-            // 存储图标的引用和sprite
-            var iconData = new IconData
-            {
-                StatusImage = statusImage,
-                UncheckedSprite = uncheckedSprite != null ? uncheckedSprite : CreateWhiteSquareSprite(),
-                CheckedSprite = checkedSprite != null ? checkedSprite : CreateWhiteSquareSprite(),
-                UsingNativeSprites = uncheckedSprite != null && checkedSprite != null
-            };
-            
+
+            // 背景
+            Image bgImage = iconObj.AddComponent<Image>();
+            bgImage.color = new Color(0.15f, 0.15f, 0.15f, 0.9f);
+
+            // 边框（使用Outline组件模拟）
+            // 稍后会根据追踪状态设置颜色
+            Outline borderOutline = iconObj.AddComponent<Outline>();
+            borderOutline.effectDistance = new Vector2(2, -2);
+
+            // 状态图标（内部的勾选标记）
+            GameObject checkmarkObj = new GameObject("Checkmark");
+            checkmarkObj.transform.SetParent(iconObj.transform, false);
+
+            RectTransform checkmarkRect = checkmarkObj.AddComponent<RectTransform>();
+            checkmarkRect.anchorMin = Vector2.zero;
+            checkmarkRect.anchorMax = Vector2.one;
+            checkmarkRect.offsetMin = new Vector2(4, 4);
+            checkmarkRect.offsetMax = new Vector2(-4, -4);
+
+            Image statusImage = checkmarkObj.AddComponent<Image>();
+
+            // 确定是否使用原生图标
+            bool usingNativeSprites = uncheckedSprite != null && checkedSprite != null;
+            Sprite finalUncheckedSprite = usingNativeSprites ? uncheckedSprite : CreateWhiteSquareSprite();
+            Sprite finalCheckedSprite = usingNativeSprites ? checkedSprite : CreateWhiteSquareSprite();
+
+            // 根据当前追踪状态设置初始图标和颜色
+            bool isTracked = QuestTrackingManager.IsQuestTracked(quest.ID);
+            statusImage.sprite = isTracked ? finalCheckedSprite : finalUncheckedSprite;
+            statusImage.color = usingNativeSprites ? Color.white : (isTracked ? new Color(0.3f, 1f, 0.3f, 1f) : new Color(0.6f, 0.6f, 0.6f, 1f));
+
+            // 设置边框颜色
+            Color borderColor = isTracked
+                ? new Color(0.4f, 1f, 0.4f, 1f)  // 绿色边框
+                : new Color(0.5f, 0.5f, 0.5f, 1f); // 灰色边框
+            borderOutline.effectColor = borderColor;
+
             // 创建文本标签
             GameObject labelObj = new GameObject("Label");
             labelObj.transform.SetParent(buttonContainer.transform, false);
             
             TextMeshProUGUI labelText = labelObj.AddComponent<TextMeshProUGUI>();
             labelText.text = LocalizationHelper.Get("QuestTracker_CheckboxLabel");
-            labelText.fontSize = 20;
+            labelText.fontSize = 28;
             labelText.color = new Color(1f, 1f, 1f, 1f);
             labelText.alignment = TextAlignmentOptions.MidlineLeft;
             
@@ -195,19 +245,20 @@ public class QuestViewDetailsPatch
             // 添加Button组件（整个容器可点击）
             Button button = buttonContainer.AddComponent<Button>();
             button.targetGraphic = statusImage;
-            button.onClick.AddListener(() => OnTrackButtonClicked(questViewDetails));
-            
-            // 存储引用
+            button.onClick.AddListener(() => OnTrackButtonClicked(questViewDetails, quest));
+
+            // 存储引用（仅用于稍后销毁）
             _trackButtons[questViewDetails] = new ButtonData
             {
                 ButtonObject = buttonContainer,
-                StatusImage = iconData.StatusImage,
-                UncheckedSprite = iconData.UncheckedSprite,
-                CheckedSprite = iconData.CheckedSprite,
-                UsingNativeSprites = iconData.UsingNativeSprites
+                StatusImage = statusImage,
+                UncheckedSprite = finalUncheckedSprite,
+                CheckedSprite = finalCheckedSprite,
+                UsingNativeSprites = usingNativeSprites,
+                IconContainer = iconObj
             };
-            
-            ModLogger.Log("QuestTracker", $"Track button created successfully (native sprites: {iconData.UsingNativeSprites})");
+
+            ModLogger.Log("QuestTracker", $"Track button created for quest {quest.ID} (tracked: {isTracked}, native sprites: {usingNativeSprites})");
         }
         catch (Exception ex)
         {
@@ -236,71 +287,38 @@ public class QuestViewDetailsPatch
     }
     
     /// <summary>
-    /// 更新按钮状态
-    /// </summary>
-    private static void UpdateButtonState(QuestViewDetails instance, Quest? quest)
-    {
-        try
-        {
-            if (!_trackButtons.ContainsKey(instance))
-            {
-                return;
-            }
-            
-            var buttonData = _trackButtons[instance];
-            if (buttonData == null || buttonData.ButtonObject == null)
-            {
-                return;
-            }
-            
-            if (quest == null)
-            {
-                // 没有任务时隐藏按钮
-                buttonData.ButtonObject.SetActive(false);
-                return;
-            }
-            
-            // 有任务时显示按钮
-            buttonData.ButtonObject.SetActive(true);
-            
-            // 更新图标状态
-            bool isTracked = QuestTrackingManager.IsQuestTracked(quest.ID);
-            buttonData.StatusImage.sprite = isTracked ? buttonData.CheckedSprite : buttonData.UncheckedSprite;
-            
-            // 如果不使用原生sprite，用颜色区分
-            if (!buttonData.UsingNativeSprites)
-            {
-                buttonData.StatusImage.color = isTracked ? new Color(0.3f, 1f, 0.3f, 1f) : new Color(0.6f, 0.6f, 0.6f, 1f);
-            }
-            
-            ModLogger.Log("QuestTracker", $"Updated button for quest {quest.ID}: tracked={isTracked}");
-        }
-        catch (Exception ex)
-        {
-            ModLogger.LogError($"QuestViewDetailsPatch.UpdateButtonState failed: {ex}");
-        }
-    }
-    
-    /// <summary>
     /// 按钮点击事件
     /// </summary>
-    private static void OnTrackButtonClicked(QuestViewDetails instance)
+    private static void OnTrackButtonClicked(QuestViewDetails instance, Quest quest)
     {
         try
         {
-            if (_currentQuest == null)
+            // Safety checks
+            if (instance == null)
             {
+                ModLogger.LogError("OnTrackButtonClicked: instance is null");
                 return;
             }
-            
+
+            if (quest == null)
+            {
+                ModLogger.LogError("OnTrackButtonClicked: quest is null");
+                return;
+            }
+
             // 切换追踪状态
-            bool currentlyTracked = QuestTrackingManager.IsQuestTracked(_currentQuest.ID);
-            QuestTrackingManager.SetQuestTracked(_currentQuest.ID, !currentlyTracked);
-            
-            // 立即更新UI
-            UpdateButtonState(instance, _currentQuest);
-            
-            ModLogger.Log("QuestTracker", $"Quest {_currentQuest.ID} tracking toggled to: {!currentlyTracked}");
+            bool currentlyTracked = QuestTrackingManager.IsQuestTracked(quest.ID);
+            QuestTrackingManager.SetQuestTracked(quest.ID, !currentlyTracked);
+
+            // 重新创建按钮以反映新状态
+            if (_trackButtons.ContainsKey(instance) && _trackButtons[instance]?.ButtonObject != null)
+            {
+                UnityEngine.Object.Destroy(_trackButtons[instance].ButtonObject);
+                _trackButtons.Remove(instance);
+            }
+            CreateTrackButton(instance, quest);
+
+            ModLogger.Log("QuestTracker", $"Quest {quest.ID} tracking toggled to: {!currentlyTracked}");
         }
         catch (Exception ex)
         {
