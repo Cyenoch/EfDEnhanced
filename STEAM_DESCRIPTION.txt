@@ -1,0 +1,165 @@
+[h1]EfD Enhanced - 游戏体验增强模组[/h1]
+
+为 Escape from Duckov 提供局内任务追踪、移动增强和传送前装备检查等功能。
+
+[h2]核心功能[/h2]
+
+[h3]🎯 局内任务追踪[/h3]
+在任务详情页面勾选"局内追踪"，进入突袭后在左上角实时显示任务进度。
+
+[b]功能特点：[/b]
+[list]
+[*]显示任务完成进度（如 2/3）
+[*]标记已完成的子任务（✓）
+[*]智能地图过滤（只显示当前地图的任务）
+[*]可调整显示位置、缩放、是否显示描述
+[*]打开菜单时自动隐藏
+[*]追踪选择持久化保存
+[/list]
+
+[h3]🏃 移动增强[/h3]
+优化角色移动响应速度，告别"粘滞感"。
+
+[b]4档位可调：[/b]
+[list]
+[*][b]禁用[/b] - 保持原版手感
+[*][b]轻度[/b] - 2倍加速/制动，1.5倍转向
+[*][b]中度[/b] - 4倍加速/制动，2.5倍转向（推荐）
+[*][b]重度[/b] - 8倍加速/制动，4倍转向
+[/list]
+
+[i]不是增加移动速度，而是调整加速度参数[/i]
+
+[b]特性：[/b]
+[list]
+[*]仅影响玩家角色，不影响NPC
+[*]加速、制动、转向同步优化
+[*]支持瞬时方向切换
+[*]实时切换无需重启
+[/list]
+
+[h3]✅ 传送前装备检查[/h3]
+进入地图前自动检查并提醒：
+[list]
+[*]武器和弹药
+[*]医疗用品
+[*]食物和水
+[*]天气状况（风暴警告）
+[*]任务所需物品（按地图过滤）
+[/list]
+
+检测到缺少装备时会弹出提示，可选择继续或返回准备。
+
+[h3]🎨 完整设置面板[/h3]
+在暂停菜单中可以配置：
+[list]
+[*]传送前检查项目单独开关
+[*]移动增强4档位调节
+[*]任务追踪器位置、大小、显示选项
+[*]一键重置所有设置
+[/list]
+
+[h2]多语言支持[/h2]
+完整支持：简体中文、繁体中文、English、日本語
+
+[h2]已知限制[/h2]
+[b]传送前检查：[/b]
+[list]
+[*]不检查弹药类型匹配
+[*]不验证最小携带数量
+[/list]
+
+[b]移动增强：[/b]
+[list]
+[*]较高档位可能过于灵敏
+[*]精确瞄准场景建议使用低档位
+[/list]
+
+[h2]反馈[/h2]
+遇到问题或建议请在创意工坊页面留言或访问 GitHub。
+
+[url=https://github.com/Cyenoch/EfDEnhanced]GitHub 项目地址[/url]
+
+[hr][/hr]
+
+[h1]EfD Enhanced - Gameplay Enhancement Mod[/h1]
+
+Provides in-raid quest tracking, movement enhancement, and pre-raid equipment check features for Escape from Duckov.
+
+[h2]Core Features[/h2]
+
+[h3]🎯 In-Raid Quest Tracking[/h3]
+Check "In-Raid Tracking" on the quest details page to display quest progress in the upper left during raids.
+
+[b]Features:[/b]
+[list]
+[*]Shows quest completion progress (e.g., 2/3)
+[*]Marks completed sub-tasks (✓)
+[*]Smart map filtering (only shows quests for current map)
+[*]Adjustable position, scale, and description display
+[*]Automatically hides when opening the menu
+[*]Tracking selections are persistently saved
+[/list]
+
+[h3]🏃 Movement Enhancement[/h3]
+Optimize character movement response, say goodbye to "sticky" feeling.
+
+[b]4 Adjustment Levels:[/b]
+[list]
+[*][b]Disabled[/b] - Keep vanilla feel
+[*][b]Light[/b] - 2x accel/brake, 1.5x turning
+[*][b]Medium[/b] - 4x accel/brake, 2.5x turning (Recommended)
+[*][b]Heavy[/b] - 8x accel/brake, 4x turning
+[/list]
+
+[i]Not increase movement speed, but adjust acceleration parameters.[/i]
+
+[b]Features:[/b]
+[list]
+[*]Only affects player character, not NPCs
+[*]Synchronized acceleration, braking, and turning optimization
+[*]Supports instant direction changes
+[*]Real-time switching without restart
+[/list]
+
+[h3]✅ Pre-Raid Loadout Check[/h3]
+Automatically checks and reminds you before entering the map:
+[list]
+[*]Weapons and ammunition
+[*]Medical supplies
+[*]Food and water
+[*]Weather conditions (storm warning)
+[*]Required quest items (filtered by map)
+[/list]
+
+If missing equipment is detected, a prompt will appear allowing you to continue or go back and prepare.
+
+[h3]🎨 Full Settings Panel[/h3]
+Configurable in the pause menu:
+[list]
+[*]Individual toggles for pre-raid checks
+[*]Movement enhancement 4-level adjustment
+[*]Quest tracker position, size, display options
+[*]One-click reset all settings
+[/list]
+
+[h2]Multi-Language Support[/h2]
+Fully supports: Simplified Chinese, Traditional Chinese, English, and Japanese
+
+[h2]Known Limitations[/h2]
+[b]Pre-Raid Check:[/b]
+[list]
+[*]Does not check for correct ammo types
+[*]Does not verify minimum carry quantities
+[/list]
+
+[b]Movement Enhancement:[/b]
+[list]
+[*]Higher levels may feel too sensitive
+[*]Lower levels recommended for precise aiming
+[/list]
+
+[h2]Feedback[/h2]
+For issues or suggestions, please leave a comment on the Workshop page or visit GitHub.
+
+[url=https://github.com/Cyenoch/EfDEnhanced]GitHub Repository[/url]
