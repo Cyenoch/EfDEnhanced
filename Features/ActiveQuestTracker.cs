@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Duckov.Quests;
+using Duckov.UI;
 using EfDEnhanced.Utils;
 using EfDEnhanced.Utils.Settings;
 using LeTai.TrueShadow;
@@ -197,12 +198,16 @@ public class ActiveQuestTracker : MonoBehaviour
             }
 
             _isActive = true;
-            _rootCanvas.SetActive(true);
+
+            // 检查初始UI状态 - 如果有菜单打开则隐藏追踪器
+            bool anyMenuOpen = View.ActiveView != null;
+            bool shouldShow = !anyMenuOpen;
+            _rootCanvas.SetActive(shouldShow);
 
             // 应用设置中的位置和缩放
             ApplySettingsToUI();
 
-            ModLogger.Log("QuestTracker", $"Canvas activated. Active: {_rootCanvas.activeSelf}");
+            ModLogger.Log("QuestTracker", $"Canvas activated. Menu open: {anyMenuOpen}, Tracker visible: {shouldShow}");
 
             // 订阅所有事件
             RegisterEvents();
@@ -266,19 +271,22 @@ public class ActiveQuestTracker : MonoBehaviour
         {
             // 追踪状态变化（手动勾选/取消追踪）
             QuestTrackingManager.OnTrackingChanged += OnQuestTrackingChanged;
-            
+
             // 任务列表变化（新任务、任务完成等）
             QuestManager.onQuestListsChanged += OnQuestListsChanged;
-            
+
             // 任务状态变化
             Quest.onQuestStatusChanged += OnQuestStatusChanged;
-            
+
             // 任务完成
             Quest.onQuestCompleted += OnQuestCompleted;
-            
+
             // 子任务完成
             QuestManager.OnTaskFinishedEvent += OnTaskFinished;
-            
+
+            // UI状态变化（菜单打开/关闭时隐藏/显示追踪器）
+            View.OnActiveViewChanged += OnUIStateChanged;
+
             ModLogger.Log("QuestTracker", "Events registered");
         }
         catch (Exception ex)
@@ -299,7 +307,8 @@ public class ActiveQuestTracker : MonoBehaviour
             Quest.onQuestStatusChanged -= OnQuestStatusChanged;
             Quest.onQuestCompleted -= OnQuestCompleted;
             QuestManager.OnTaskFinishedEvent -= OnTaskFinished;
-            
+            View.OnActiveViewChanged -= OnUIStateChanged;
+
             ModLogger.Log("QuestTracker", "Events unregistered");
         }
         catch (Exception ex)
@@ -307,7 +316,37 @@ public class ActiveQuestTracker : MonoBehaviour
             ModLogger.LogError($"QuestTracker.UnregisterEvents failed: {ex}");
         }
     }
-    
+
+    /// <summary>
+    /// UI状态变化回调（菜单打开/关闭时调用）
+    /// </summary>
+    private void OnUIStateChanged()
+    {
+        try
+        {
+            if (!_isActive || _rootCanvas == null)
+            {
+                return;
+            }
+
+            // 检查是否有任何菜单打开
+            bool anyMenuOpen = View.ActiveView != null;
+
+            // 当有菜单打开时隐藏追踪器，没有菜单时显示追踪器
+            bool shouldShow = !anyMenuOpen;
+
+            if (_rootCanvas.activeSelf != shouldShow)
+            {
+                _rootCanvas.SetActive(shouldShow);
+                ModLogger.Log("QuestTracker", $"UI state changed - Menu open: {anyMenuOpen}, Tracker visible: {shouldShow}");
+            }
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestTracker.OnUIStateChanged failed: {ex}");
+        }
+    }
+
     /// <summary>
     /// 刷新任务列表
     /// </summary>
