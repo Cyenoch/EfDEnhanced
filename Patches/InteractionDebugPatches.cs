@@ -303,37 +303,9 @@ namespace EfDEnhanced.Patches
 
         #endregion
 
-        #region Scene Loading Detection
-
-        [HarmonyPatch(typeof(SceneLoader), "LoadScene", new Type[] { typeof(string), typeof(Eflatun.SceneReference.SceneReference), typeof(bool) })]
-        public class SceneLoader_LoadScene_Patch
-        {
-            static void Prefix(string sceneID)
-            {
-                if (!EnableDebugLogging) return;
-
-                try
-                {
-                    ModLogger.Log("SceneLoader", "========== Loading Scene ==========");
-                    ModLogger.Log("SceneLoader", $"SceneID: {sceneID}");
-                    
-                    var sceneInfo = SceneInfoCollection.GetSceneInfo(sceneID);
-                    if (sceneInfo != null)
-                    {
-                        ModLogger.Log("SceneLoader", $"DisplayName: {sceneInfo.DisplayName}");
-                        ModLogger.Log("SceneLoader", $"Description: {sceneInfo.Description}");
-                    }
-                    
-                    ModLogger.Log("SceneLoader", "===================================");
-                }
-                catch (Exception ex)
-                {
-                    ModLogger.LogError($"SceneLoader_LoadScene_Patch failed: {ex}");
-                }
-            }
-        }
-
-        #endregion
+        // Note: Scene loading detection has been removed due to incorrect method signature
+        // If you need to monitor scene loading, use Unity's SceneManager.sceneLoaded event
+        // in your ModBehaviour.Awake() method instead.
     }
 }
 
