@@ -116,6 +116,76 @@ public class RaidCheckResult
 public static class RaidCheckUtility
 {
     /// <summary>
+    /// 需要进行 Raid 检查的地图列表
+    /// 排除新手引导关卡（Level_Guide_1, Level_Guide_2）
+    /// </summary>
+    private static readonly HashSet<string> RaidMapsToCheck = new HashSet<string>
+    {
+        // 农场系列
+        "Level_Farm_Main",
+        "Level_Farm_01",
+        "Level_Farm_JLab_Facility",
+        
+        // 零号区
+        "Level_GroundZero_Main",
+        "Level_GroundZero_1",
+        "Level_GroundZero_Cave",
+        
+        // 隐藏仓库
+        "Level_HiddenWarehouse",
+        "Level_HiddenWarehouse_Main",
+        "Level_HiddenWarehouse_CellarUnderGround",
+        
+        // 实验室
+        "Level_JLab_Main",
+        "Level_JLab_1",
+        "Level_JLab_2",
+        
+        // 挑战关卡
+        "Level_DemoChallenge_1",
+        "Level_DemoChallenge_Main",
+        
+        // 风暴区
+        "Level_StormZone_1",
+        "Level_StormZone_Main",
+        "Level_StormZone_B0",
+        "Level_StormZone_B1",
+        "Level_StormZone_B2",
+        "Level_StormZone_B3",
+        "Level_StormZone_B4"
+    };
+    
+    /// <summary>
+    /// 判断指定场景是否需要进行 Raid 检查
+    /// </summary>
+    /// <param name="sceneID">场景ID（不包含.unity后缀）</param>
+    /// <returns>是否需要检查</returns>
+    public static bool ShouldCheckRaidMap(string sceneID)
+    {
+        if (string.IsNullOrEmpty(sceneID))
+        {
+            ModLogger.LogWarning("RaidCheck", "Scene ID is null or empty");
+            return false;
+        }
+        
+        // 移除可能的路径前缀和.unity后缀
+        var cleanSceneID = sceneID;
+        if (cleanSceneID.Contains("/"))
+        {
+            cleanSceneID = cleanSceneID.Substring(cleanSceneID.LastIndexOf('/') + 1);
+        }
+        if (cleanSceneID.EndsWith(".unity"))
+        {
+            cleanSceneID = cleanSceneID.Replace(".unity", "");
+        }
+        
+        bool shouldCheck = RaidMapsToCheck.Contains(cleanSceneID);
+        ModLogger.Log("RaidCheck", $"Scene '{sceneID}' (cleaned: '{cleanSceneID}') should check: {shouldCheck}");
+        
+        return shouldCheck;
+    }
+    
+    /// <summary>
     /// 检查玩家是否准备好进入Raid
     /// </summary>
     /// <param name="targetSceneID">目标场景ID（可选，如果提供则只检查该场景相关的任务）</param>

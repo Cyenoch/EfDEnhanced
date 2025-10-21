@@ -61,6 +61,13 @@ public class RaidEntryPatches
             // 获取目标场景ID
             string sceneID = mapSelectionEntry.SceneID;
             
+            // 判断该地图是否需要进行 Raid 检查（排除新手引导等）
+            if (!RaidCheckUtility.ShouldCheckRaidMap(sceneID))
+            {
+                ModLogger.Log("RaidCheck", $"Scene '{sceneID}' does not require raid check, allowing entry");
+                return true;
+            }
+            
             // 执行检查，传入场景ID以便只检查该场景相关的任务
             ModLogger.Log("RaidCheck", $"Starting raid readiness check for scene: {sceneID}");
             var result = RaidCheckUtility.CheckPlayerReadiness(sceneID);

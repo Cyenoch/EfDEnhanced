@@ -130,9 +130,34 @@ namespace EfDEnhanced.Patches
                     ModLogger.Log("InteractableBase", "========== Start Interaction ==========");
                     ModLogger.Log("InteractableBase", $"Type: {__instance.GetType().Name}");
                     ModLogger.Log("InteractableBase", $"GameObject: {__instance.gameObject.name}");
+                    ModLogger.Log("InteractableBase", $"GameObject.Tag: {__instance.gameObject.tag}");
+                    ModLogger.Log("InteractableBase", $"GameObject.Layer: {LayerMask.LayerToName(__instance.gameObject.layer)}");
                     ModLogger.Log("InteractableBase", $"InteractName: {__instance.InteractName}");
                     ModLogger.Log("InteractableBase", $"InteractTime: {__instance.InteractTime}");
                     ModLogger.Log("InteractableBase", $"RequireItem: {__instance.requireItem}");
+                    ModLogger.Log("InteractableBase", $"CurrentScene: {__instance.gameObject.scene.name}");
+                    ModLogger.Log("InteractableBase", $"Position: {__instance.transform.position}");
+                    
+                    // Log all components on the GameObject
+                    var components = __instance.gameObject.GetComponents<Component>();
+                    ModLogger.Log("InteractableBase", $"Components count: {components.Length}");
+                    foreach (var comp in components)
+                    {
+                        if (comp != null)
+                        {
+                            ModLogger.Log("InteractableBase", $"  - Component: {comp.GetType().Name}");
+                        }
+                    }
+                    
+                    // Check parent objects for context
+                    if (__instance.transform.parent != null)
+                    {
+                        ModLogger.Log("InteractableBase", $"Parent GameObject: {__instance.transform.parent.gameObject.name}");
+                        if (__instance.transform.parent.parent != null)
+                        {
+                            ModLogger.Log("InteractableBase", $"GrandParent GameObject: {__instance.transform.parent.parent.gameObject.name}");
+                        }
+                    }
                     
                     if (__instance.requireItem)
                     {
@@ -148,7 +173,12 @@ namespace EfDEnhanced.Patches
                         }
                     }
                     
-                    ModLogger.Log("InteractableBase", "=======================================");
+                    // Check if this might be a scene transition
+                    string goName = __instance.gameObject.name;
+                    if (goName.Contains("GoTo") || goName.Contains("Interact") || goName.Contains("Enter") || goName.Contains("Exit"))
+                    {
+                        ModLogger.Log("InteractableBase", $"*** POTENTIAL SCENE TRANSITION: {goName} ***");
+                    }
                 }
                 catch (Exception ex)
                 {
