@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Duckov.ItemUsage;
 using Duckov.Quests;
+using Duckov.Scenes;
 using Duckov.Weathers;
 using ItemStatsSystem;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace EfDEnhanced.Utils;
 
@@ -460,11 +462,19 @@ public static class RaidCheckUtility
     
     /// <summary>
     /// 检查天气是否安全（非风暴）
+    /// 如果当前已在raid地图且正处于风暴中，则不检测风暴（已经在里面了）
     /// </summary>
     private static bool IsWeatherSafe()
     {
         try
         {
+            // 如果已在raid地图且处于风暴中，不检测风暴
+            if (IsInRaidMapDuringStorm())
+            {
+                ModLogger.Log("RaidCheck", "Already in raid map during storm, skipping weather check");
+                return true;
+            }
+            
             Weather currentWeather = WeatherManager.GetWeather();
             bool isSafe = currentWeather != Weather.Stormy_I && currentWeather != Weather.Stormy_II;
             
@@ -481,11 +491,19 @@ public static class RaidCheckUtility
     
     /// <summary>
     /// 检查风暴是否即将来临（24小时内）
+    /// 如果当前已在raid地图且正处于风暴中，则不检测风暴预警（已经在里面了）
     /// </summary>
     private static bool IsStormComingSoon()
     {
         try
         {
+            // 如果已在raid地图且处于风暴中，不检测风暴预警
+            if (IsInRaidMapDuringStorm())
+            {
+                ModLogger.Log("RaidCheck", "Already in raid map during storm, skipping storm warning check");
+                return false;
+            }
+            
             Weather currentWeather = WeatherManager.GetWeather();
             
             // 如果已经在风暴中，不需要再警告"即将来临"
@@ -627,6 +645,40 @@ public static class RaidCheckUtility
         }
         
         return questItems;
+    }
+
+    /// <summary>
+    /// 检查是否当前在raid地图内且处于风暴中
+    /// </summary>
+    private static bool IsInRaidMapDuringStorm()
+    {
+        try
+        {
+            // 检查是否处于风暴
+            Weather currentWeather = WeatherManager.GetWeather();
+            if (currentWeather != Weather.Stormy_I && currentWeather != Weather.Stormy_II)
+            {
+                return false; // 不处于风暴
+            }
+
+            // 检查当前场景是否是raid地图
+            // Scene currentScene = SceneManager.GetActiveScene();
+            string currentSceneName = MultiSceneCore.MainSceneID;
+            
+            // 使用现有的方法检查是否是raid地图
+            if (ShouldCheckRaidMap(currentSceneName))
+            {
+                ModLogger.Log("RaidCheck", $"Currently in raid map '{currentSceneName}' during storm");
+                return true;
+            }
+            
+            return false;
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"IsInRaidMapDuringStorm check failed: {ex}");
+            return false; // 出错时假设不在raid地图
+        }
     }
 }
 

@@ -38,6 +38,23 @@
 [*]实时切换无需重启
 [/list]
 
+[h3]🔫 武器对比[/h3]
+在库存中选中武器后，悬停到其他武器会自动显示属性对比。
+
+[b]特性：[/b]
+[list]
+[*]选中武器 + 悬停武器 = 自动对比
+[*]绿色/红色标识优劣，一目了然
+[*]智能识别属性正向性和负向性
+[*]支持所有武器属性（伤害、射速、后坐力等）
+[*]可在设置中开关，默认启用
+[/list]
+
+[b]显示格式：[/b] [选中武器值] → [悬停武器值]
+- 绿色：悬停武器更好
+- 红色：选中武器更好  
+- 白色：中性或相同
+
 [h3]✅ 传送前装备检查[/h3]
 进入地图前自动检查并提醒：
 [list]
@@ -56,6 +73,7 @@
 [*]传送前检查项目单独开关
 [*]移动增强4档位调节
 [*]任务追踪器位置、大小、显示选项
+[*]界面增强功能开关（武器对比等）
 [*]一键重置所有设置
 [/list]
 
@@ -122,6 +140,23 @@ Optimize character movement response, say goodbye to "sticky" feeling.
 [*]Real-time switching without restart
 [/list]
 
+[h3]🔫 Weapon Comparison[/h3]
+Automatically shows stat comparison when hovering over weapons while one is selected.
+
+[b]Features:[/b]
+[list]
+[*]Select weapon + Hover weapon = Auto comparison
+[*]Green/red indicators show better/worse stats at a glance
+[*]Smart polarity detection (damage higher = better, recoil lower = better)
+[*]Supports all weapon stats (damage, fire rate, recoil, etc.)
+[*]Toggleable in settings, enabled by default
+[/list]
+
+[b]Display Format:[/b] [Selected Value] → [Hovered Value]
+- Green: Hovered weapon is better
+- Red: Selected weapon is better
+- White: Neutral or equal
+
 [h3]✅ Pre-Raid Loadout Check[/h3]
 Automatically checks and reminds you before entering the map:
 [list]
@@ -140,6 +175,7 @@ Configurable in the pause menu:
 [*]Individual toggles for pre-raid checks
 [*]Movement enhancement 4-level adjustment
 [*]Quest tracker position, size, display options
+[*]UI enhancement toggles (weapon comparison, etc.)
 [*]One-click reset all settings
 [/list]
 

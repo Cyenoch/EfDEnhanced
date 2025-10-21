@@ -257,6 +257,11 @@ namespace EfDEnhanced.Features
 
                 // Build the form using our elegant builder pattern
                 _formBuilder
+                    // UI Enhancement Section
+                    .AddSection("Settings_Category_UI")
+                    .AddToggle("Settings_EnableWeaponComparison_Name", ModSettings.EnableWeaponComparison)
+                    .AddSpacer()
+
                     // Pre-Raid Check Section
                     .AddSection("Settings_Category_PreRaidCheck")
                     .AddToggle("Settings_EnableRaidCheck_Name", ModSettings.EnableRaidCheck)
@@ -266,16 +271,17 @@ namespace EfDEnhanced.Features
                     .AddToggle("Settings_CheckFood_Name", ModSettings.CheckFood, ModSettings.EnableRaidCheck, 30)
                     .AddToggle("Settings_CheckWeather_Name", ModSettings.CheckWeather, ModSettings.EnableRaidCheck, 30)
                     .AddSpacer()
-                    
+
                     // Movement Enhancement Section
                     .AddSection("Settings_Category_Movement")
                     .AddDropdown("Settings_MovementEnhancement_Name", ModSettings.MovementEnhancement)
                     .AddSpacer()
-                    
+
                     // Quest Tracker Section
                     .AddSection("Settings_Category_QuestTracker")
                     .AddToggle("Settings_EnableQuestTracker_Name", ModSettings.EnableQuestTracker)
                     .AddToggle("Settings_TrackerShowDescription_Name", ModSettings.TrackerShowDescription, ModSettings.EnableQuestTracker, 30)
+                    .AddToggle("Settings_TrackerFilterByMap_Name", ModSettings.TrackerFilterByMap, ModSettings.EnableQuestTracker, 30)
                     .AddSlider("Settings_TrackerPositionX_Name", 0f, 1f, ModSettings.TrackerPositionX, visibilityCondition: ModSettings.EnableQuestTracker, leftPadding: 30)
                     .AddSlider("Settings_TrackerPositionY_Name", 0f, 1f, ModSettings.TrackerPositionY, visibilityCondition: ModSettings.EnableQuestTracker, leftPadding: 30)
                     .AddSlider("Settings_TrackerScale_Name", 0.5f, 2f, ModSettings.TrackerScale, visibilityCondition: ModSettings.EnableQuestTracker, leftPadding: 30);

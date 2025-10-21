@@ -17,6 +17,7 @@ namespace EfDEnhanced.Utils
         private const string CATEGORY_RAID_CHECK = "Settings_Category_PreRaidCheck";
         private const string CATEGORY_QUEST_TRACKER = "Settings_Category_QuestTracker";
         private const string CATEGORY_MOVEMENT = "Settings_Category_Movement";
+        private const string CATEGORY_UI = "Settings_Category_UI";
 
         // All settings entries
         private static readonly List<object> _allSettings = [];
@@ -184,6 +185,21 @@ namespace EfDEnhanced.Utils
                 },
                 CATEGORY_MOVEMENT,
                 "Settings_MovementEnhancement_Desc"
+            )
+        );
+
+        #endregion
+
+        #region UI Enhancement Settings
+
+        public static readonly BoolSettingsEntry EnableWeaponComparison = Register(
+            new BoolSettingsEntry(
+                PREFIX,
+                "EnableWeaponComparison",
+                "Settings_EnableWeaponComparison_Name",
+                true,
+                CATEGORY_UI,
+                "Settings_EnableWeaponComparison_Desc"
             )
         );
 

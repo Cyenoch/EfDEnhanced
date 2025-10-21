@@ -126,6 +126,7 @@ public static class LocalizationHelper
             { "Settings_Category_PreRaidCheck", "Raid前检查" },
             { "Settings_Category_QuestTracker", "任务追踪器" },
             { "Settings_Category_Movement", "移动优化" },
+            { "Settings_Category_UI", "界面增强" },
 
             // Pre-Raid Check 设置
             { "Settings_EnableRaidCheck_Name", "启用Raid前检查" },
@@ -162,6 +163,10 @@ public static class LocalizationHelper
             { "Settings_Movement_Light", "轻度优化" },
             { "Settings_Movement_Medium", "中度优化" },
             { "Settings_Movement_Heavy", "重度优化" },
+
+            // UI Enhancement Settings
+            { "Settings_EnableWeaponComparison_Name", "启用武器对比" },
+            { "Settings_EnableWeaponComparison_Desc", "在鼠标悬停时对比选中武器和悬停武器的属性，显示差异并用颜色标识优劣" },
         };
         
         // 繁体中文
@@ -198,6 +203,7 @@ public static class LocalizationHelper
             { "Settings_Category_PreRaidCheck", "Raid前檢查" },
             { "Settings_Category_QuestTracker", "任務追蹤器" },
             { "Settings_Category_Movement", "移動優化" },
+            { "Settings_Category_UI", "界面增強" },
 
             // Pre-Raid Check 設置
             { "Settings_EnableRaidCheck_Name", "啟用Raid前檢查" },
@@ -234,6 +240,10 @@ public static class LocalizationHelper
             { "Settings_Movement_Light", "輕度優化" },
             { "Settings_Movement_Medium", "中度優化" },
             { "Settings_Movement_Heavy", "重度優化" },
+
+            // UI Enhancement Settings
+            { "Settings_EnableWeaponComparison_Name", "啟用武器對比" },
+            { "Settings_EnableWeaponComparison_Desc", "在鼠標懸停時對比選中武器和懸停武器的屬性，顯示差異並用顏色標識優劣" },
         };
         
         // 英语
@@ -270,6 +280,7 @@ public static class LocalizationHelper
             { "Settings_Category_PreRaidCheck", "Pre-Raid Check" },
             { "Settings_Category_QuestTracker", "Quest Tracker" },
             { "Settings_Category_Movement", "Movement Enhancement" },
+            { "Settings_Category_UI", "UI Enhancement" },
 
             // Pre-Raid Check Settings
             { "Settings_EnableRaidCheck_Name", "Enable Pre-Raid Check" },
@@ -306,6 +317,10 @@ public static class LocalizationHelper
             { "Settings_Movement_Light", "Light Optimization" },
             { "Settings_Movement_Medium", "Medium Optimization" },
             { "Settings_Movement_Heavy", "Heavy Optimization" },
+
+            // UI Enhancement Settings
+            { "Settings_EnableWeaponComparison_Name", "Enable Weapon Comparison" },
+            { "Settings_EnableWeaponComparison_Desc", "Compare selected weapon with hovered weapon in inventory, showing differences with color-coded indicators" },
         };
         
         // 日语
@@ -342,6 +357,7 @@ public static class LocalizationHelper
             { "Settings_Category_PreRaidCheck", "レイド前チェック" },
             { "Settings_Category_QuestTracker", "クエストトラッカー" },
             { "Settings_Category_Movement", "移動最適化" },
+            { "Settings_Category_UI", "UI強化" },
 
             // Pre-Raid Check 設定
             { "Settings_EnableRaidCheck_Name", "レイド前チェックを有効化" },
@@ -378,6 +394,10 @@ public static class LocalizationHelper
             { "Settings_Movement_Light", "軽量最適化" },
             { "Settings_Movement_Medium", "中程度最適化" },
             { "Settings_Movement_Heavy", "重量最適化" },
+
+            // UI Enhancement Settings
+            { "Settings_EnableWeaponComparison_Name", "武器比較を有効化" },
+            { "Settings_EnableWeaponComparison_Desc", "インベントリで選択した武器とホバーした武器を比較し、差異を色付きインジケーターで表示" },
         };
         
         ModLogger.Log("Localization", $"Loaded translations for {LocalizationData.Count} languages");

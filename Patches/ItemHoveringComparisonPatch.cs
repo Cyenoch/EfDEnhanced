@@ -7,20 +7,15 @@ using HarmonyLib;
 using ItemStatsSystem;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using EfDEnhanced.Utils;
-
-// Note: Using game's built-in Polarity system to determine if higher/lower values are better
-// Polarity.Positive = higher is better (e.g. damage, accuracy)
-// Polarity.Negative = lower is better (e.g. recoil, weight)
-// Polarity.Neutral = no preference
+using System.Collections;
 
 namespace EfDEnhanced.Patches
 {
   /// <summary>
-  /// Patch for ItemHoveringUI to show comparison with selected item
-  /// Supports:
-  /// - Variables/Constants/Stats: Numeric comparison with color coding
-  /// - Modifiers: Effect-based comparison, shown separately
+  /// Patch for ItemHoveringUI to show weapon comparison with selected weapon
+  /// Only supports weapons identified by IsGun flag
   /// </summary>
   [HarmonyPatch]
   public class ItemHoveringComparisonPatch
@@ -28,37 +23,14 @@ namespace EfDEnhanced.Patches
     // Store comparison data for each LabelAndValue entry
     private static Dictionary<LabelAndValue, ComparisonData> comparisonDataMap = new Dictionary<LabelAndValue, ComparisonData>();
 
-    // Store additional effect displays
-    private static List<GameObject> additionalEffectDisplays = new List<GameObject>();
-
     private class ComparisonData
     {
-      public TextMeshProUGUI? selectedValueText;
-      public TextMeshProUGUI? originalValueText;
-      public Vector2 originalPosition;
-    }
-
-    // Structured property data
-    private class PropertyData
-    {
-      public string key = "";           // Internal key for matching
-      public string displayName = "";   // Display name
-      public string displayValue = "";  // Display value
-      public Polarity polarity;         // Polarity for comparison
-      public PropertyType type;         // Type of property
-      public object? rawValue;          // Raw value for numeric comparison
-    }
-
-    private enum PropertyType
-    {
-      Variable,    // CustomData Variable
-      Constant,    // CustomData Constant
-      Stat,        // Stat
-      Modifier     // ModifierDescription (effects)
+      public TextMeshProUGUI? valueText;
+      public string? originalText;
     }
 
     /// <summary>
-    /// Patch ItemPropertiesDisplay.Setup to add comparison values
+    /// Patch ItemPropertiesDisplay.Setup to add weapon comparison values
     /// </summary>
     [HarmonyPatch(typeof(ItemPropertiesDisplay), "Setup")]
     [HarmonyPostfix]
@@ -69,35 +41,46 @@ namespace EfDEnhanced.Patches
         // Always clean up previous comparison data first
         CleanupComparisonData();
 
+        // Check if feature is enabled
+        if (!ModSettings.EnableWeaponComparison.Value)
+        {
+          return;
+        }
+
         if (targetItem == null)
         {
-          ModLogger.Log("ItemComparison", "Target item is null, skipping comparison");
+          ModLogger.Log("WeaponComparison", "Target item is null, skipping comparison");
+          return;
+        }
+
+        // Check if target item is a weapon
+        if (!IsWeapon(targetItem))
+        {
           return;
         }
 
         Item selectedItem = ItemUIUtilities.SelectedItem;
 
-        // Only show comparison if an item is selected and it's different from hover item
-        if (selectedItem == null || selectedItem == targetItem)
+        // Only show comparison if a weapon is selected and it's different from hover item
+        if (selectedItem == null || selectedItem == targetItem || !IsWeapon(selectedItem))
         {
           return;
         }
 
-        // Check if items are comparable (tags intersection)
-        if (!AreItemsComparable(selectedItem, targetItem))
-        {
-          ModLogger.Log("ItemComparison", $"Items not comparable: {selectedItem.DisplayName} vs {targetItem.DisplayName}");
-          return;
-        }
-
-        ModLogger.Log("ItemComparison",
-            $"Comparing items:\n" +
+        ModLogger.Log("WeaponComparison",
+            $"Comparing weapons:\n" +
             $"  Selected: {selectedItem.DisplayName} (ID: {selectedItem.TypeID})\n" +
             $"  Hovering: {targetItem.DisplayName} (ID: {targetItem.TypeID})");
 
-        // Extract structured property data from both items
-        var selectedProps = ExtractProperties(selectedItem);
-        var hoverProps = ExtractProperties(targetItem);
+        // Extract properties from both weapons
+        var selectedProps = ExtractWeaponStats(selectedItem);
+        var hoverProps = ExtractWeaponStats(targetItem);
+
+        if (selectedProps.Count == 0 || hoverProps.Count == 0)
+        {
+          ModLogger.Log("WeaponComparison", "One or both weapons have no comparable stats");
+          return;
+        }
 
         // Find all LabelAndValue components in the display
         var entries = __instance.GetComponentsInChildren<LabelAndValue>(includeInactive: false);
@@ -108,44 +91,24 @@ namespace EfDEnhanced.Patches
           return;
         }
 
-        // Separate properties by type
-        var selectedNumerics = selectedProps.Where(p => p.type != PropertyType.Modifier).ToList();
-        var hoverNumerics = hoverProps.Where(p => p.type != PropertyType.Modifier).ToList();
-
-        var selectedModifiers = selectedProps.Where(p => p.type == PropertyType.Modifier).ToList();
-        var hoverModifiers = hoverProps.Where(p => p.type == PropertyType.Modifier).ToList();
-
-        // Check if numeric properties have exactly matching keys
-        bool numericKeysMatch = CheckNumericKeysMatch(selectedNumerics, hoverNumerics);
-
-        if (!numericKeysMatch)
-        {
-          ModLogger.Log("ItemComparison",
-              "Numeric properties keys don't match exactly, skipping numeric comparison");
-          return;
-        }
-
-        ModLogger.Log("ItemComparison", "Numeric properties keys match, proceeding with comparison");
-
-        // Compare numeric properties (Variables/Constants/Stats)
+        // Compare stats
         int entryIndex = 0;
-        foreach (var hoverProp in hoverNumerics)
+        foreach (var hoverProp in hoverProps)
         {
           if (entryIndex >= entries.Length) break;
 
-          var entry = entries[entryIndex];
-
           // Find matching property by key
-          var selectedProp = selectedNumerics.FirstOrDefault(p => p.key == hoverProp.key);
+          var selectedProp = selectedProps.FirstOrDefault(p => p.Key == hoverProp.Key);
 
           if (selectedProp != null)
           {
+            var entry = entries[entryIndex];
             // Found matching property, add comparison
-            AddComparisonToEntry(entry, selectedProp.displayValue, hoverProp.displayValue,
-                hoverProp.displayName, hoverProp.polarity, selectedProp.rawValue, hoverProp.rawValue);
+            AddComparisonToEntry(entry, selectedProp.Value, hoverProp.Value,
+                hoverProp.Key, selectedProp.Polarity, selectedProp.RawValue, hoverProp.RawValue);
+            
+            entryIndex++;
           }
-
-          entryIndex++;
         }
       }
       catch (Exception ex)
@@ -155,174 +118,42 @@ namespace EfDEnhanced.Patches
     }
 
     /// <summary>
-    /// Check if numeric properties have exactly matching keys (same count and all keys present in both)
+    /// Check if item is a weapon using official game flag
     /// </summary>
-    private static bool CheckNumericKeysMatch(List<PropertyData> list1, List<PropertyData> list2)
+    private static bool IsWeapon(Item item)
     {
       try
       {
-        // First check: same count
-        if (list1.Count != list2.Count)
-        {
-          ModLogger.Log("ItemComparison",
-              $"Key count mismatch: {list1.Count} vs {list2.Count}");
-          return false;
-        }
-
-        // Second check: all keys in list1 are in list2
-        var keys1 = list1.Select(p => p.key).ToHashSet();
-        var keys2 = list2.Select(p => p.key).ToHashSet();
-
-        bool allKeysMatch = keys1.SetEquals(keys2);
-
-        if (!allKeysMatch)
-        {
-          var onlyInList1 = keys1.Except(keys2).ToList();
-          var onlyInList2 = keys2.Except(keys1).ToList();
-
-          if (onlyInList1.Any())
-          {
-            ModLogger.Log("ItemComparison",
-                $"Keys only in selected: [{string.Join(", ", onlyInList1)}]");
-          }
-          if (onlyInList2.Any())
-          {
-            ModLogger.Log("ItemComparison",
-                $"Keys only in hover: [{string.Join(", ", onlyInList2)}]");
-          }
-        }
-
-        return allKeysMatch;
+        return item.GetBool("IsGun", false);
       }
       catch (Exception ex)
       {
-        ModLogger.LogError($"Error checking numeric keys match: {ex}");
+        ModLogger.LogError($"Error checking if item is weapon: {ex}");
         return false;
       }
     }
 
     /// <summary>
-    /// Check if two items are comparable based on tag intersection
+    /// Extract weapon stats into a list of comparable data
     /// </summary>
-    private static bool AreItemsComparable(Item item1, Item item2)
+    private static List<StatData> ExtractWeaponStats(Item item)
     {
+      var stats = new List<StatData>();
       try
       {
-        // Same type ID - definitely comparable
-        if (item1.TypeID == item2.TypeID)
-          return true;
-
-        // Check if tags have any intersection
-        var tags1 = item1.Tags.ToList();
-        var tags2 = item2.Tags.ToList();
-
-        bool hasCommonTags = tags1.Intersect(tags2).Any();
-
-        if (hasCommonTags)
-        {
-          ModLogger.Log("ItemComparison",
-              $"Items comparable via tags: [{string.Join(", ", tags1.Intersect(tags2))}]");
-        }
-
-        return hasCommonTags;
-      }
-      catch (Exception ex)
-      {
-        ModLogger.LogError($"Error checking item comparability: {ex}");
-        return false;
-      }
-    }
-
-    /// <summary>
-    /// Extract all properties from an item into structured data
-    /// </summary>
-    private static List<PropertyData> ExtractProperties(Item item)
-    {
-      var properties = new List<PropertyData>();
-
-      try
-      {
-        // Extract Variables
-        if (item.Variables != null)
-        {
-          foreach (CustomData variable in item.Variables)
-          {
-            if (variable.Display)
-            {
-              properties.Add(new PropertyData
-              {
-                key = variable.Key,
-                displayName = variable.DisplayName,
-                displayValue = variable.GetValueDisplayString(),
-                polarity = Polarity.Neutral,
-                type = PropertyType.Variable,
-                rawValue = GetRawValue(variable)
-              });
-            }
-          }
-        }
-
-        // Extract Constants
-        if (item.Constants != null)
-        {
-          foreach (CustomData constant in item.Constants)
-          {
-            if (constant.Display)
-            {
-              properties.Add(new PropertyData
-              {
-                key = constant.Key,
-                displayName = constant.DisplayName,
-                displayValue = constant.GetValueDisplayString(),
-                polarity = Polarity.Neutral,
-                type = PropertyType.Constant,
-                rawValue = GetRawValue(constant)
-              });
-            }
-          }
-        }
-
-        // Extract Stats
         if (item.Stats != null)
         {
           foreach (Stat stat in item.Stats)
           {
             if (stat.Display)
             {
-              properties.Add(new PropertyData
+              stats.Add(new StatData
               {
-                key = stat.Key,
-                displayName = stat.DisplayName,
-                displayValue = stat.Value.ToString(),
-                polarity = Polarity.Neutral,
-                type = PropertyType.Stat,
-                rawValue = stat.Value
-              });
-            }
-          }
-        }
-
-        // Extract Modifiers (effects)
-        if (item.Modifiers != null)
-        {
-          foreach (ModifierDescription modifier in item.Modifiers)
-          {
-            if (modifier.Display)
-            {
-              Polarity polarity = StatInfoDatabase.GetPolarity(modifier.Key);
-              if (modifier.Value < 0f)
-              {
-                polarity = (Polarity)(0 - polarity);
-              }
-
-              properties.Add(new PropertyData
-              {
-                key = modifier.Key,
-                displayName = modifier.DisplayName,
-                displayValue = modifier.GetDisplayValueString(),
-                polarity = polarity,
-                type = PropertyType.Modifier,
-                rawValue = modifier.Value
+                Key = stat.Key,
+                DisplayName = stat.DisplayName,
+                Value = stat.Value.ToString(),
+                Polarity = StatPolarityMap.GetPolarity(stat.Key),
+                RawValue = stat.Value
               });
             }
           }
@@ -330,41 +161,24 @@ namespace EfDEnhanced.Patches
       }
       catch (Exception ex)
       {
-        ModLogger.LogError($"Error extracting properties: {ex}");
+        ModLogger.LogError($"Error extracting weapon stats: {ex}");
       }
 
-      return properties;
+      return stats;
     }
 
-    /// <summary>
-    /// Get raw numeric value from CustomData
-    /// </summary>
-    private static object? GetRawValue(CustomData data)
+    private class StatData
     {
-      try
-      {
-        switch (data.DataType)
-        {
-          case CustomDataType.Float:
-            return data.GetFloat();
-          case CustomDataType.Int:
-            return data.GetInt();
-          case CustomDataType.Bool:
-            return data.GetBool();
-          case CustomDataType.String:
-            return data.GetString();
-          default:
-            return null;
-        }
-      }
-      catch
-      {
-        return null;
-      }
+      public string Key = "";
+      public string DisplayName = "";
+      public string Value = "";
+      public Polarity Polarity;
+      public object? RawValue;
     }
 
     /// <summary>
     /// Add comparison display to a LabelAndValue entry with color coding
+    /// Modifies the original Value text to show: [Selected] → [Hover] with rich text colors
     /// </summary>
     private static void AddComparisonToEntry(LabelAndValue entry, string selectedValue, string hoverValue,
         string propertyName, Polarity polarity, object? selectedRaw, object? hoverRaw)
@@ -378,77 +192,45 @@ namespace EfDEnhanced.Patches
           comparisonDataMap[entry] = compData;
         }
 
-        // Find the existing value text component
-        var valueTextComponents = entry.GetComponentsInChildren<TextMeshProUGUI>(includeInactive: false);
-        TextMeshProUGUI? originalValueText = null;
-
-        foreach (var textComp in valueTextComponents)
+        // Entry structure: [Label] [Value]
+        Transform? valueTransform = null;
+        
+        // Try to find Value child by name
+        for (int i = 0; i < entry.transform.childCount; i++)
         {
-          // The value text is typically the second text component (first is label)
-          if (textComp.text == hoverValue || textComp.text.Contains(hoverValue))
+          var child = entry.transform.GetChild(i);
+          if (child.name == "Value")
           {
-            originalValueText = textComp;
+            valueTransform = child;
             break;
           }
         }
 
-        if (originalValueText == null)
+        if (valueTransform == null)
         {
-          ModLogger.LogWarning("Could not find original value text component");
+          ModLogger.LogWarning($"Could not find Value transform for {propertyName}");
           return;
         }
 
-        RectTransform originalRect = originalValueText.GetComponent<RectTransform>();
-
-        // Store original position and reference
-        if (compData.originalValueText == null)
+        TextMeshProUGUI? valueText = valueTransform.GetComponent<TextMeshProUGUI>();
+        if (valueText == null)
         {
-          compData.originalValueText = originalValueText;
-          compData.originalPosition = originalRect.anchoredPosition;
+          ModLogger.LogWarning($"Value transform has no TextMeshProUGUI component for {propertyName}");
+          return;
         }
 
-        // Create or update selected value text (appears on LEFT side, faded)
-        if (compData.selectedValueText == null)
+        // Store original text and reference on first use
+        if (compData.valueText == null)
         {
-          // Create a new GameObject for selected value
-          GameObject selectedValueObj = new GameObject("SelectedValueText");
-          selectedValueObj.transform.SetParent(originalValueText.transform.parent, false);
-
-          compData.selectedValueText = selectedValueObj.AddComponent<TextMeshProUGUI>();
-
-          // Copy settings from original text
-          compData.selectedValueText.font = originalValueText.font;
-          compData.selectedValueText.fontSize = originalValueText.fontSize;
-          compData.selectedValueText.fontStyle = originalValueText.fontStyle;
-          // Use same alignment as original (usually right-aligned for values)
-          compData.selectedValueText.alignment = originalValueText.alignment;
-
-          // Set color to slightly faded white (60% opacity)
-          compData.selectedValueText.color = new Color(1f, 1f, 1f, 0.6f);
-
-          // Position it
-          RectTransform selectedRect = selectedValueObj.GetComponent<RectTransform>();
-
-          // Copy size and anchors from original
-          selectedRect.anchorMin = originalRect.anchorMin;
-          selectedRect.anchorMax = originalRect.anchorMax;
-          selectedRect.pivot = originalRect.pivot;
-          selectedRect.sizeDelta = originalRect.sizeDelta;
-
-          // Place selected value to the RIGHT of hovering item value
-          // Hovering item value stays at original position (left side)
-          selectedRect.anchoredPosition = compData.originalPosition + new Vector2(70f, 0f);
+          compData.valueText = valueText;
+          compData.originalText = valueText.text;
         }
 
-        // Update text values
-        compData.selectedValueText.text = $"({selectedValue})";
-        originalValueText.text = hoverValue;
-
-        // Apply color coding based on value comparison and polarity
-        ApplyComparisonColors(compData.selectedValueText, originalValueText, propertyName, polarity, selectedRaw, hoverRaw);
-
-        // Ensure components are active
-        compData.selectedValueText.gameObject.SetActive(true);
+        // Build comparison text with colors using TextMeshPro rich text tags
+        string comparisonText = BuildComparisonText(selectedValue, hoverValue, propertyName, polarity, selectedRaw, hoverRaw);
+        
+        // Update the text
+        valueText.text = comparisonText;
       }
       catch (Exception ex)
       {
@@ -457,27 +239,24 @@ namespace EfDEnhanced.Patches
     }
 
     /// <summary>
-    /// Apply color coding to comparison values based on polarity and numeric difference
+    /// Build comparison text with color coding based on polarity and numeric difference
+    /// Returns formatted text: [Selected] → [Hover] with rich text color tags
     /// </summary>
-    private static void ApplyComparisonColors(TextMeshProUGUI selectedText, TextMeshProUGUI hoverText,
+    private static string BuildComparisonText(string selectedValue, string hoverValue,
         string propertyName, Polarity polarity, object? selectedRaw, object? hoverRaw)
     {
       try
       {
-        // Define colors
-        Color betterColor = new Color(0.4f, 1f, 0.4f, 1f);      // Green for better
-        Color worseColor = new Color(1f, 0.4f, 0.4f, 1f);       // Red for worse
-        Color neutralColor = new Color(1f, 1f, 1f, 1f);         // White for neutral
-        Color fadedBetterColor = new Color(0.4f, 1f, 0.4f, 0.6f);  // Faded green for selected
-        Color fadedWorseColor = new Color(1f, 0.4f, 0.4f, 0.6f);   // Faded red for selected
-        Color fadedNeutralColor = new Color(1f, 1f, 1f, 0.6f);     // Faded white for selected
+        // Define colors as hex codes for rich text tags
+        string betterColor = "#66FF66";      // Green for better
+        string worseColor = "#FF6666";       // Red for worse
+        string neutralColor = "#FFFFFF";     // White for neutral
+        string arrowColor = "#CCCCCC";       // Light gray for arrow
 
-        // If polarity is neutral, use neutral colors
+        // If polarity is neutral, use neutral colors for both
         if (polarity == Polarity.Neutral)
         {
-          selectedText.color = fadedNeutralColor;
-          hoverText.color = neutralColor;
-          return;
+          return $"<color={neutralColor}>{selectedValue}</color> <color={arrowColor}>→</color> <color={neutralColor}>{hoverValue}</color>";
         }
 
         // Try to convert raw values to numeric
@@ -498,47 +277,49 @@ namespace EfDEnhanced.Patches
             hoverIsBetter = hoverNum < selectedNum;
           }
 
-          // Apply colors
+          // Determine colors for each value
+          string selectedColor, hoverColor;
           if (Math.Abs(hoverNum - selectedNum) < 0.001f)
           {
             // Values are equal
-            selectedText.color = fadedNeutralColor;
-            hoverText.color = neutralColor;
+            selectedColor = neutralColor;
+            hoverColor = neutralColor;
           }
           else if (hoverIsBetter)
           {
-            // Hover item is better
-            selectedText.color = fadedWorseColor;
-            hoverText.color = betterColor;
+            // Hover item is better (right side green, left side red)
+            selectedColor = worseColor;
+            hoverColor = betterColor;
           }
           else
           {
-            // Selected item is better
-            selectedText.color = fadedBetterColor;
-            hoverText.color = worseColor;
+            // Selected item is better (left side green, right side red)
+            selectedColor = betterColor;
+            hoverColor = worseColor;
           }
 
           // Detailed logging for color application
           string comparisonResult = hoverIsBetter ? "Better" : "Worse";
           string colorInfo = hoverIsBetter ? "Green" : "Red";
 
-          ModLogger.Log("ItemComparison",
+          ModLogger.Log("WeaponComparison",
               $"  {propertyName}: [{selectedNum}] → [{hoverNum}] | " +
               $"Polarity: {polarity} | Result: {comparisonResult} ({colorInfo})");
+
+          // Build rich text string with colors
+          return $"<color={selectedColor}>{selectedValue}</color> <color={arrowColor}>→</color> <color={hoverColor}>{hoverValue}</color>";
         }
         else
         {
           // Non-numeric values, use neutral colors
-          selectedText.color = fadedNeutralColor;
-          hoverText.color = neutralColor;
+          return $"<color={neutralColor}>{selectedValue}</color> <color={arrowColor}>→</color> <color={neutralColor}>{hoverValue}</color>";
         }
       }
       catch (Exception ex)
       {
-        ModLogger.LogError($"Error applying comparison colors: {ex}");
-        // Fallback to neutral colors
-        selectedText.color = new Color(1f, 1f, 1f, 0.6f);
-        hoverText.color = new Color(1f, 1f, 1f, 1f);
+        ModLogger.LogError($"Error building comparison text: {ex}");
+        // Fallback - return plain text
+        return $"{selectedValue} → {hoverValue}";
       }
     }
 
@@ -575,10 +356,6 @@ namespace EfDEnhanced.Patches
           result = b ? 1f : 0f;
           return true;
         }
-        else if (value is string s)
-        {
-          return TryParseNumericValue(s, out result);
-        }
 
         return false;
       }
@@ -589,76 +366,29 @@ namespace EfDEnhanced.Patches
     }
 
     /// <summary>
-    /// Try to parse a numeric value from a string, handling various formats
-    /// </summary>
-    private static bool TryParseNumericValue(string value, out float result)
-    {
-      result = 0f;
-
-      if (string.IsNullOrWhiteSpace(value))
-        return false;
-
-      // Remove common non-numeric suffixes and prefixes
-      string cleaned = value.Trim()
-          .Replace("%", "")      // Remove percentage
-          .Replace("+", "")      // Remove plus sign
-          .Replace("kg", "")     // Remove weight unit
-          .Replace("m", "")      // Remove meter unit
-          .Replace("s", "")      // Remove seconds (but be careful with numbers ending in 's')
-          .Trim();
-
-      // Try to parse as float
-      return float.TryParse(cleaned, System.Globalization.NumberStyles.Any,
-          System.Globalization.CultureInfo.InvariantCulture, out result);
-    }
-
-    /// <summary>
-    /// Clean up all comparison data and UI elements
+    /// Clean up all comparison data and restore original text
     /// </summary>
     private static void CleanupComparisonData()
     {
       try
       {
         int comparisonCount = comparisonDataMap.Count;
-        int effectCount = additionalEffectDisplays.Count;
 
-        if (comparisonCount > 0 || effectCount > 0)
+        if (comparisonCount > 0)
         {
-          ModLogger.Log("ItemComparison", $"Cleaning up: {comparisonCount} comparisons, {effectCount} effect displays");
+          ModLogger.Log("WeaponComparison", $"Cleaning up: {comparisonCount} comparisons");
         }
 
-        // Clean up all comparison data
+        // Restore original text for all entries
         foreach (var kvp in comparisonDataMap)
         {
-          // Restore original position of value text
-          if (kvp.Value.originalValueText != null)
+          if (kvp.Value.valueText != null && kvp.Value.originalText != null)
           {
-            RectTransform rect = kvp.Value.originalValueText.GetComponent<RectTransform>();
-            if (rect != null)
-            {
-              rect.anchoredPosition = kvp.Value.originalPosition;
-            }
-          }
-
-          // Destroy comparison UI elements
-          if (kvp.Value.selectedValueText != null)
-          {
-            UnityEngine.Object.Destroy(kvp.Value.selectedValueText.gameObject);
+            kvp.Value.valueText.text = kvp.Value.originalText;
           }
         }
 
         comparisonDataMap.Clear();
-
-        // Clean up additional effect displays
-        foreach (var effectObj in additionalEffectDisplays)
-        {
-          if (effectObj != null)
-          {
-            UnityEngine.Object.Destroy(effectObj);
-          }
-        }
-
-        additionalEffectDisplays.Clear();
       }
       catch (Exception ex)
       {
