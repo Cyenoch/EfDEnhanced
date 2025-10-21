@@ -43,9 +43,9 @@ namespace EfDEnhanced.Utils.UI.Core
             {
                 base.OnOpen();
                 IsShowing = true;
-                
+
                 ModLogger.Log("ModPanel", $"{GetType().Name} opened");
-                
+
                 OnPanelOpened?.Invoke();
             }
             catch (Exception ex)
@@ -60,9 +60,9 @@ namespace EfDEnhanced.Utils.UI.Core
             {
                 base.OnClose();
                 IsShowing = false;
-                
+
                 ModLogger.Log("ModPanel", $"{GetType().Name} closed");
-                
+
                 OnPanelClosed?.Invoke();
 
                 if (DestroyOnClose && gameObject != null)
@@ -85,7 +85,7 @@ namespace EfDEnhanced.Utils.UI.Core
             {
                 // 手动触发OnOpen
                 OnOpen();
-                
+
                 // 如果有FadeGroup，显示它
                 fadeGroup?.Show();
             }
@@ -104,7 +104,7 @@ namespace EfDEnhanced.Utils.UI.Core
             {
                 // 调用基本的Open方法
                 Open();
-                
+
                 if (fadeGroup != null)
                 {
                     // FadeGroup会自动处理动画
@@ -181,11 +181,11 @@ namespace EfDEnhanced.Utils.UI.Core
             {
                 // 停止所有DOTween动画
                 ModAnimations.KillAllTweens(gameObject);
-                
+
                 // 清空事件订阅
                 OnPanelOpened = null;
                 OnPanelClosed = null;
-                
+
                 ModLogger.Log("ModPanel", $"{GetType().Name} destroyed");
             }
             catch (Exception ex)

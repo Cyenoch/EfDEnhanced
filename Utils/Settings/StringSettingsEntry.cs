@@ -6,19 +6,15 @@ namespace EfDEnhanced.Utils.Settings
     /// <summary>
     /// String settings entry
     /// </summary>
-    public class StringSettingsEntry : SettingsEntry<string>
+    public class StringSettingsEntry(
+        string prefix,
+        string key,
+        string name,
+        string defaultValue,
+        string category = "General",
+        string? description = null,
+        int version = 1) : SettingsEntry<string>(prefix, key, name, defaultValue, category, description, version)
     {
-        public StringSettingsEntry(
-            string prefix,
-            string key,
-            string name,
-            string defaultValue,
-            string category = "General",
-            string? description = null,
-            int version = 1)
-            : base(prefix, key, name, defaultValue, category, description, version)
-        {
-        }
     }
 
     /// <summary>

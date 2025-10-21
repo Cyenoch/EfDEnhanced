@@ -12,33 +12,28 @@ namespace EfDEnhanced.Utils.UI.Builders
     /// 表单构建器 - 自动生成设置UI
     /// 使用Builder模式链式调用，大幅减少重复代码
     /// </summary>
-    public class FormBuilder
+    /// <remarks>
+    /// 创建FormBuilder
+    /// </remarks>
+    /// <param name="parent">父级Transform（通常是ScrollView的Content）</param>
+    public class FormBuilder(Transform parent)
     {
-        private readonly Transform _parent;
-        private readonly List<GameObject> _elements = new List<GameObject>();
-        private readonly Dictionary<GameObject, BoolSettingsEntry> _conditionalElements = new Dictionary<GameObject, BoolSettingsEntry>();
-
-        /// <summary>
-        /// 创建FormBuilder
-        /// </summary>
-        /// <param name="parent">父级Transform（通常是ScrollView的Content）</param>
-        public FormBuilder(Transform parent)
-        {
-            _parent = parent;
-        }
+        private readonly Transform _parent = parent;
+        private readonly List<GameObject> _elements = [];
+        private readonly Dictionary<GameObject, BoolSettingsEntry> _conditionalElements = [];
 
         /// <summary>
         /// 添加分节标题
         /// </summary>
         public FormBuilder AddSection(string titleLocalizationKey)
         {
-            GameObject sectionObj = new GameObject($"Section_{titleLocalizationKey}");
+            var sectionObj = new GameObject($"Section_{titleLocalizationKey}");
             sectionObj.transform.SetParent(_parent, false);
 
-            RectTransform rect = sectionObj.AddComponent<RectTransform>();
+            var rect = sectionObj.AddComponent<RectTransform>();
             rect.sizeDelta = new Vector2(0, 36);
 
-            TextMeshProUGUI text = sectionObj.AddComponent<TextMeshProUGUI>();
+            var text = sectionObj.AddComponent<TextMeshProUGUI>();
             text.text = LocalizationHelper.Get(titleLocalizationKey);
             text.fontSize = UIConstants.SETTINGS_SECTION_FONT_SIZE;
             text.fontStyle = FontStyles.Bold;
@@ -56,7 +51,7 @@ namespace EfDEnhanced.Utils.UI.Builders
         /// <param name="setting">绑定的设置项</param>
         /// <param name="visibilityCondition">可见性条件（可选）</param>
         /// <param name="leftPadding">左边距（用于表示层级关系，默认0）</param>
-        public FormBuilder AddToggle(string labelLocalizationKey, BoolSettingsEntry setting, 
+        public FormBuilder AddToggle(string labelLocalizationKey, BoolSettingsEntry setting,
                                       BoolSettingsEntry? visibilityCondition = null, int leftPadding = 0)
         {
             if (setting == null)
@@ -91,10 +86,7 @@ namespace EfDEnhanced.Utils.UI.Builders
                 // 监听条件变化
                 visibilityCondition.ValueChanged += (sender, args) =>
                 {
-                    if (element != null)
-                    {
-                        element.SetActive(args.NewValue);
-                    }
+                    element?.SetActive(args.NewValue);
                 };
             }
 
@@ -110,7 +102,7 @@ namespace EfDEnhanced.Utils.UI.Builders
         /// <param name="setting">绑定的设置项</param>
         /// <param name="visibilityCondition">可见性条件（可选）</param>
         /// <param name="leftPadding">左边距（用于表示层级关系，默认0）</param>
-        public FormBuilder AddSlider(string labelLocalizationKey, float min, float max, 
+        public FormBuilder AddSlider(string labelLocalizationKey, float min, float max,
                                       RangedFloatSettingsEntry setting,
                                       BoolSettingsEntry? visibilityCondition = null, int leftPadding = 0)
         {
@@ -152,10 +144,7 @@ namespace EfDEnhanced.Utils.UI.Builders
                 // 监听条件变化
                 visibilityCondition.ValueChanged += (sender, args) =>
                 {
-                    if (element != null)
-                    {
-                        element.SetActive(args.NewValue);
-                    }
+                    element?.SetActive(args.NewValue);
                 };
             }
 
@@ -171,7 +160,7 @@ namespace EfDEnhanced.Utils.UI.Builders
         /// <param name="setting">绑定的设置项</param>
         /// <param name="visibilityCondition">可见性条件（可选）</param>
         /// <param name="leftPadding">左边距（用于表示层级关系，默认0）</param>
-        public FormBuilder AddSlider(string labelLocalizationKey, int min, int max, 
+        public FormBuilder AddSlider(string labelLocalizationKey, int min, int max,
                                       RangedIntSettingsEntry setting,
                                       BoolSettingsEntry? visibilityCondition = null, int leftPadding = 0)
         {
@@ -214,10 +203,7 @@ namespace EfDEnhanced.Utils.UI.Builders
                 // 监听条件变化
                 visibilityCondition.ValueChanged += (sender, args) =>
                 {
-                    if (element != null)
-                    {
-                        element.SetActive(args.NewValue);
-                    }
+                    element?.SetActive(args.NewValue);
                 };
             }
 
@@ -252,10 +238,7 @@ namespace EfDEnhanced.Utils.UI.Builders
                 // 监听条件变化
                 visibilityCondition.ValueChanged += (sender, args) =>
                 {
-                    if (container != null)
-                    {
-                        container.SetActive(args.NewValue);
-                    }
+                    container?.SetActive(args.NewValue);
                 };
             }
 
@@ -263,18 +246,18 @@ namespace EfDEnhanced.Utils.UI.Builders
         }
 
         /// <summary>
-        /// 创建Dropdown元素
+        /// 创建Dropdown元素（使用var简化类型声明）
         /// </summary>
         private GameObject CreateDropdownElement(string labelLocalizationKey, IndexedOptionsSettingsEntry setting, int leftPadding)
         {
             // Container
-            GameObject container = new GameObject($"Dropdown_{setting.Key}");
+            var container = new GameObject($"Dropdown_{setting.Key}");
             container.transform.SetParent(_parent, false);
 
-            RectTransform containerRect = container.AddComponent<RectTransform>();
+            var containerRect = container.AddComponent<RectTransform>();
             containerRect.sizeDelta = new Vector2(0, UIConstants.SETTINGS_FIELD_HEIGHT);
 
-            VerticalLayoutGroup containerLayout = container.AddComponent<VerticalLayoutGroup>();
+            var containerLayout = container.AddComponent<VerticalLayoutGroup>();
             containerLayout.childControlHeight = false;
             containerLayout.childControlWidth = true;
             containerLayout.childForceExpandHeight = false;
@@ -283,30 +266,30 @@ namespace EfDEnhanced.Utils.UI.Builders
             containerLayout.padding = new RectOffset(leftPadding, 0, 0, 0);
 
             // Label
-            GameObject labelObj = new GameObject("Label");
+            var labelObj = new GameObject("Label");
             labelObj.transform.SetParent(container.transform, false);
 
-            RectTransform labelRect = labelObj.AddComponent<RectTransform>();
+            var labelRect = labelObj.AddComponent<RectTransform>();
             labelRect.sizeDelta = new Vector2(0, 20);
 
-            TextMeshProUGUI labelText = labelObj.AddComponent<TextMeshProUGUI>();
+            var labelText = labelObj.AddComponent<TextMeshProUGUI>();
             labelText.text = LocalizationHelper.Get(labelLocalizationKey);
             labelText.fontSize = UIConstants.SETTINGS_LABEL_FONT_SIZE;
             labelText.color = UIConstants.SETTINGS_TEXT_COLOR;
             labelText.alignment = TextAlignmentOptions.Left;
 
             // Dropdown
-            GameObject dropdownObj = new GameObject("Dropdown");
+            var dropdownObj = new GameObject("Dropdown");
             dropdownObj.transform.SetParent(container.transform, false);
 
-            RectTransform dropdownRect = dropdownObj.AddComponent<RectTransform>();
+            var dropdownRect = dropdownObj.AddComponent<RectTransform>();
             dropdownRect.sizeDelta = new Vector2(0, 30);
 
-            Image dropdownBg = dropdownObj.AddComponent<Image>();
+            var dropdownBg = dropdownObj.AddComponent<Image>();
             dropdownBg.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
 
-            TMP_Dropdown dropdown = dropdownObj.AddComponent<TMP_Dropdown>();
-            
+            var dropdown = dropdownObj.AddComponent<TMP_Dropdown>();
+
             // Configure dropdown template (required for TMP_Dropdown)
             CreateDropdownTemplate(dropdownObj, dropdown);
 
@@ -330,8 +313,8 @@ namespace EfDEnhanced.Utils.UI.Builders
                 }
             });
 
-            // Listen to setting changes from other sources
-            setting.ValueChanged += (sender, args) =>
+            // Listen to setting changes from other sources（使用discards简化）
+            setting.ValueChanged += (_, args) =>
             {
                 if (dropdown != null && dropdown.value != args.NewValue)
                 {
@@ -349,55 +332,55 @@ namespace EfDEnhanced.Utils.UI.Builders
         private void CreateDropdownTemplate(GameObject dropdownObj, TMP_Dropdown dropdown)
         {
             // ===== Caption Label (显示当前选中值) =====
-            GameObject captionLabel = new GameObject("Label");
+            var captionLabel = new GameObject("Label");
             captionLabel.transform.SetParent(dropdownObj.transform, false);
 
-            RectTransform captionRect = captionLabel.AddComponent<RectTransform>();
+            var captionRect = captionLabel.AddComponent<RectTransform>();
             captionRect.anchorMin = Vector2.zero;
             captionRect.anchorMax = Vector2.one;
             captionRect.sizeDelta = Vector2.zero;
             captionRect.offsetMin = new Vector2(10, 2);
             captionRect.offsetMax = new Vector2(-30, -2); // 留出箭头空间
 
-            TextMeshProUGUI captionText = captionLabel.AddComponent<TextMeshProUGUI>();
+            var captionText = captionLabel.AddComponent<TextMeshProUGUI>();
             captionText.fontSize = UIConstants.SETTINGS_FONT_SIZE;
             captionText.color = UIConstants.SETTINGS_TEXT_COLOR;
             captionText.alignment = TextAlignmentOptions.Left;
             captionText.verticalAlignment = VerticalAlignmentOptions.Middle;
 
             // ===== Arrow (可选的下拉箭头) =====
-            GameObject arrow = new GameObject("Arrow");
+            var arrow = new GameObject("Arrow");
             arrow.transform.SetParent(dropdownObj.transform, false);
 
-            RectTransform arrowRect = arrow.AddComponent<RectTransform>();
+            var arrowRect = arrow.AddComponent<RectTransform>();
             arrowRect.anchorMin = new Vector2(1, 0.5f);
             arrowRect.anchorMax = new Vector2(1, 0.5f);
             arrowRect.pivot = new Vector2(1, 0.5f);
             arrowRect.sizeDelta = new Vector2(20, 20);
             arrowRect.anchoredPosition = new Vector2(-5, 0);
 
-            TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
+            var arrowText = arrow.AddComponent<TextMeshProUGUI>();
             arrowText.text = "▼";
             arrowText.fontSize = 14;
             arrowText.color = UIConstants.SETTINGS_TEXT_COLOR;
             arrowText.alignment = TextAlignmentOptions.Center;
 
             // ===== Template (隐藏的弹出列表) =====
-            GameObject template = new GameObject("Template");
+            var template = new GameObject("Template");
             template.transform.SetParent(dropdownObj.transform, false);
             template.SetActive(false);
 
-            RectTransform templateRect = template.AddComponent<RectTransform>();
+            var templateRect = template.AddComponent<RectTransform>();
             templateRect.anchorMin = new Vector2(0, 0);
             templateRect.anchorMax = new Vector2(1, 0);
             templateRect.pivot = new Vector2(0.5f, 1);
             templateRect.sizeDelta = new Vector2(0, 180);
             templateRect.anchoredPosition = new Vector2(0, -2); // 向下偏移，显示在 dropdown 下方
 
-            Image templateBg = template.AddComponent<Image>();
+            var templateBg = template.AddComponent<Image>();
             templateBg.color = new Color(0.15f, 0.15f, 0.15f, 0.95f);
 
-            ScrollRect templateScroll = template.AddComponent<ScrollRect>();
+            var templateScroll = template.AddComponent<ScrollRect>();
             templateScroll.horizontal = false;
             templateScroll.vertical = true;
             templateScroll.movementType = ScrollRect.MovementType.Clamped;
@@ -407,10 +390,10 @@ namespace EfDEnhanced.Utils.UI.Builders
             templateScroll.elasticity = 0.1f;
 
             // Viewport (带裁剪功能)
-            GameObject viewport = new GameObject("Viewport");
+            var viewport = new GameObject("Viewport");
             viewport.transform.SetParent(template.transform, false);
 
-            RectTransform viewportRect = viewport.AddComponent<RectTransform>();
+            var viewportRect = viewport.AddComponent<RectTransform>();
             viewportRect.anchorMin = Vector2.zero;
             viewportRect.anchorMax = Vector2.one;
             viewportRect.sizeDelta = Vector2.zero;
@@ -418,51 +401,51 @@ namespace EfDEnhanced.Utils.UI.Builders
             viewportRect.offsetMax = new Vector2(-5, -5);
 
             // 使用 RectMask2D 进行裁剪（比 Mask 更适合 UI，不需要 Image sprite）
-            RectMask2D rectMask = viewport.AddComponent<RectMask2D>();
-            rectMask.padding = new Vector4(0, 0, 0, 0);
+            var rectMask = viewport.AddComponent<RectMask2D>();
+            rectMask.padding = Vector4.zero;
 
             // Content
-            GameObject content = new GameObject("Content");
+            var content = new GameObject("Content");
             content.transform.SetParent(viewport.transform, false);
 
-            RectTransform contentRect = content.AddComponent<RectTransform>();
+            var contentRect = content.AddComponent<RectTransform>();
             contentRect.anchorMin = new Vector2(0, 1);
             contentRect.anchorMax = new Vector2(1, 1);
             contentRect.pivot = new Vector2(0.5f, 1);
-            contentRect.sizeDelta = new Vector2(0, 0);
+            contentRect.sizeDelta = Vector2.zero;
             contentRect.anchoredPosition = Vector2.zero;
 
-            VerticalLayoutGroup contentLayout = content.AddComponent<VerticalLayoutGroup>();
+            var contentLayout = content.AddComponent<VerticalLayoutGroup>();
             contentLayout.childControlHeight = false; // 不控制高度，让 LayoutElement 决定
             contentLayout.childControlWidth = true;
             contentLayout.childForceExpandHeight = false;
             contentLayout.childForceExpandWidth = true;
             contentLayout.spacing = 2; // 添加小间距，防止选项紧贴
 
-            ContentSizeFitter contentFitter = content.AddComponent<ContentSizeFitter>();
+            var contentFitter = content.AddComponent<ContentSizeFitter>();
             contentFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             contentFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
 
             // Item (template for each option)
-            GameObject item = new GameObject("Item");
+            var item = new GameObject("Item");
             item.transform.SetParent(content.transform, false);
 
-            RectTransform itemRect = item.AddComponent<RectTransform>();
+            var itemRect = item.AddComponent<RectTransform>();
             itemRect.sizeDelta = new Vector2(0, 32);
-            
+
             // 添加 LayoutElement 来明确指定每个选项的高度
-            LayoutElement itemLayout = item.AddComponent<LayoutElement>();
+            var itemLayout = item.AddComponent<LayoutElement>();
             itemLayout.minHeight = 32;
             itemLayout.preferredHeight = 32;
 
-            Toggle itemToggle = item.AddComponent<Toggle>();
+            var itemToggle = item.AddComponent<Toggle>();
             itemToggle.transition = Selectable.Transition.ColorTint;
 
-            Image itemBg = item.AddComponent<Image>();
+            var itemBg = item.AddComponent<Image>();
             itemBg.color = new Color(0.2f, 0.2f, 0.2f, 0f);
             itemToggle.targetGraphic = itemBg;
 
-            ColorBlock colors = itemToggle.colors;
+            var colors = itemToggle.colors;
             colors.normalColor = new Color(1, 1, 1, 0);
             colors.highlightedColor = new Color(1, 1, 1, 0.2f);
             colors.pressedColor = new Color(1, 1, 1, 0.3f);
@@ -471,17 +454,17 @@ namespace EfDEnhanced.Utils.UI.Builders
             itemToggle.colors = colors;
 
             // Item Label
-            GameObject itemLabel = new GameObject("Item Label");
+            var itemLabel = new GameObject("Item Label");
             itemLabel.transform.SetParent(item.transform, false);
 
-            RectTransform itemLabelRect = itemLabel.AddComponent<RectTransform>();
+            var itemLabelRect = itemLabel.AddComponent<RectTransform>();
             itemLabelRect.anchorMin = Vector2.zero;
             itemLabelRect.anchorMax = Vector2.one;
             itemLabelRect.sizeDelta = Vector2.zero;
             itemLabelRect.offsetMin = new Vector2(10, 2);
             itemLabelRect.offsetMax = new Vector2(-10, -2);
 
-            TextMeshProUGUI itemLabelText = itemLabel.AddComponent<TextMeshProUGUI>();
+            var itemLabelText = itemLabel.AddComponent<TextMeshProUGUI>();
             itemLabelText.fontSize = UIConstants.SETTINGS_FONT_SIZE;
             itemLabelText.color = UIConstants.SETTINGS_TEXT_COLOR;
             itemLabelText.alignment = TextAlignmentOptions.Left;
@@ -499,7 +482,7 @@ namespace EfDEnhanced.Utils.UI.Builders
         /// <summary>
         /// 添加自定义Toggle（不绑定到Setting）
         /// </summary>
-        public FormBuilder AddCustomToggle(string labelLocalizationKey, bool initialValue, 
+        public FormBuilder AddCustomToggle(string labelLocalizationKey, bool initialValue,
                                             System.Action<bool> onValueChanged)
         {
             var toggle = ModToggle.Create(_parent, "CustomToggle")
@@ -518,7 +501,7 @@ namespace EfDEnhanced.Utils.UI.Builders
         /// <summary>
         /// 添加自定义Slider（不绑定到Setting）
         /// </summary>
-        public FormBuilder AddCustomSlider(string labelLocalizationKey, float min, float max, 
+        public FormBuilder AddCustomSlider(string labelLocalizationKey, float min, float max,
                                             float initialValue, System.Action<float> onValueChanged)
         {
             var slider = ModSlider.Create(_parent, "CustomSlider")
@@ -541,12 +524,13 @@ namespace EfDEnhanced.Utils.UI.Builders
         /// </summary>
         public FormBuilder AddSpacer(float height = -1f)
         {
-            if (height < 0) height = UIConstants.SECTION_SPACING;
+            // Use conditional assignment
+            height = height < 0 ? UIConstants.SECTION_SPACING : height;
 
-            GameObject spacer = new GameObject("Spacer");
+            var spacer = new GameObject("Spacer");
             spacer.transform.SetParent(_parent, false);
 
-            RectTransform rect = spacer.AddComponent<RectTransform>();
+            var rect = spacer.AddComponent<RectTransform>();
             rect.sizeDelta = new Vector2(0, height);
 
             _elements.Add(spacer);
@@ -558,13 +542,13 @@ namespace EfDEnhanced.Utils.UI.Builders
         /// </summary>
         public FormBuilder AddDescription(string textLocalizationKey)
         {
-            GameObject descObj = new GameObject("Description");
+            var descObj = new GameObject("Description");
             descObj.transform.SetParent(_parent, false);
 
-            RectTransform rect = descObj.AddComponent<RectTransform>();
+            var rect = descObj.AddComponent<RectTransform>();
             rect.sizeDelta = new Vector2(0, 40);
 
-            TextMeshProUGUI text = descObj.AddComponent<TextMeshProUGUI>();
+            var text = descObj.AddComponent<TextMeshProUGUI>();
             text.text = LocalizationHelper.Get(textLocalizationKey);
             text.fontSize = 16;
             text.fontStyle = FontStyles.Italic;
@@ -572,7 +556,7 @@ namespace EfDEnhanced.Utils.UI.Builders
             text.alignment = TextAlignmentOptions.Left;
             text.enableWordWrapping = true;
 
-            LayoutElement layout = descObj.AddComponent<LayoutElement>();
+            var layout = descObj.AddComponent<LayoutElement>();
             layout.preferredHeight = -1;
 
             _elements.Add(descObj);

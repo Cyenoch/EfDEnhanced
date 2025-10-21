@@ -4,25 +4,61 @@ using Duckov.Options;
 namespace EfDEnhanced.Utils.Settings
 {
     /// <summary>
+    /// Non-generic interface for settings entries
+    /// Used for storing heterogeneous settings in a single collection
+    /// </summary>
+    public interface ISettingsEntry
+    {
+        string Key { get; }
+        string NameKey { get; }
+        string? DescriptionKey { get; }
+        string CategoryKey { get; }
+        string Name { get; }
+        string? Description { get; }
+        string Category { get; }
+        int Version { get; }
+        bool WasModifiedByUser { get; }
+        void Reset();
+        void Reload();
+    }
+
+    /// <summary>
+    /// Generic interface for settings entries with type information
+    /// Provides type-safe access to the value
+    /// Note: Cannot use 'out T' because Value property is both readable and writable
+    /// </summary>
+    public interface ISettingsEntry<T> : ISettingsEntry
+    {
+        /// <summary>
+        /// Event fired when the setting value changes
+        /// </summary>
+        event EventHandler<SettingsValueChangedEventArgs<T>>? ValueChanged;
+
+        /// <summary>
+        /// Current value of this setting (type-safe)
+        /// </summary>
+        T Value { get; set; }
+
+        /// <summary>
+        /// Default value for this setting
+        /// </summary>
+        T DefaultValue { get; }
+    }
+
+    /// <summary>
     /// Event arguments for settings value changes
     /// </summary>
-    public class SettingsValueChangedEventArgs<T> : EventArgs
+    public class SettingsValueChangedEventArgs<T>(T oldValue, T newValue) : EventArgs
     {
-        public T OldValue { get; }
-        public T NewValue { get; }
-
-        public SettingsValueChangedEventArgs(T oldValue, T newValue)
-        {
-            OldValue = oldValue;
-            NewValue = newValue;
-        }
+        public T OldValue { get; } = oldValue;
+        public T NewValue { get; } = newValue;
     }
 
     /// <summary>
     /// Base class for all settings entries
     /// Provides persistence, events, default value management, and version control
     /// </summary>
-    public abstract class SettingsEntry<T>
+    public abstract class SettingsEntry<T>(string prefix, string key, string nameKey, T defaultValue, string categoryKey, string? descriptionKey = null, int version = 1) : ISettingsEntry<T>
     {
         /// <summary>
         /// Event fired when the setting value changes
@@ -32,22 +68,22 @@ namespace EfDEnhanced.Utils.Settings
         /// <summary>
         /// Unique key for this setting (used for persistence)
         /// </summary>
-        public string Key { get; }
+        public string Key { get; } = $"{prefix}_{key}";
 
         /// <summary>
         /// Localization key for the setting name
         /// </summary>
-        public string NameKey { get; }
+        public string NameKey { get; } = nameKey;
 
         /// <summary>
         /// Localization key for the setting description
         /// </summary>
-        public string? DescriptionKey { get; }
+        public string? DescriptionKey { get; } = descriptionKey;
 
         /// <summary>
         /// Localization key for the category
         /// </summary>
-        public string CategoryKey { get; }
+        public string CategoryKey { get; } = categoryKey;
 
         /// <summary>
         /// Get localized name for this setting
@@ -67,30 +103,17 @@ namespace EfDEnhanced.Utils.Settings
         /// <summary>
         /// Default value for this setting
         /// </summary>
-        public T DefaultValue { get; }
+        public T DefaultValue { get; } = defaultValue;
 
         /// <summary>
         /// Version of this setting's default value
         /// Increment this when changing default values to trigger migration
         /// </summary>
-        public int Version { get; }
+        public int Version { get; } = version;
 
-        private T _cachedValue;
-        private bool _isInitialized;
-        private bool _wasModifiedByUser;
-
-        protected SettingsEntry(string prefix, string key, string nameKey, T defaultValue, string categoryKey, string? descriptionKey = null, int version = 1)
-        {
-            Key = $"{prefix}_{key}";
-            NameKey = nameKey;
-            CategoryKey = categoryKey;
-            DescriptionKey = descriptionKey;
-            DefaultValue = defaultValue;
-            Version = version;
-            _cachedValue = defaultValue;
-            _isInitialized = false;
-            _wasModifiedByUser = false;
-        }
+        private T _cachedValue = defaultValue;
+        private bool _isInitialized = false;
+        private bool _wasModifiedByUser = false;
 
         /// <summary>
         /// Current value of this setting

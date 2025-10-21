@@ -41,12 +41,7 @@ namespace EfDEnhanced.Utils.UI.Constants
         /// </summary>
         public static void ApplyStandardTextShadow(GameObject textObject, bool isTitle = false)
         {
-            var shadow = textObject.GetComponent<LeTai.TrueShadow.TrueShadow>();
-            if (shadow == null)
-            {
-                shadow = textObject.AddComponent<LeTai.TrueShadow.TrueShadow>();
-            }
-
+            var shadow = textObject.GetComponent<LeTai.TrueShadow.TrueShadow>() ?? textObject.AddComponent<LeTai.TrueShadow.TrueShadow>();
             if (isTitle)
             {
                 shadow.Size = UIConstants.TITLE_SHADOW_SIZE;
@@ -106,7 +101,7 @@ namespace EfDEnhanced.Utils.UI.Constants
         {
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
-            
+
             // 使用游戏本体的自适应逻辑
             float screenAspect = (float)Screen.width / Screen.height;
             float refAspect = 1920f / 1080f; // 16:9

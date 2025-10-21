@@ -17,7 +17,7 @@ namespace EfDEnhanced.Utils.Settings
         /// <summary>
         /// Get localized option names
         /// </summary>
-        public string[] Options => OptionKeys.Select(key => LocalizationHelper.Get(key)).ToArray();
+        public string[] Options => [.. OptionKeys.Select(key => LocalizationHelper.Get(key))];
 
         /// <summary>
         /// Get the currently selected option text
@@ -65,7 +65,7 @@ namespace EfDEnhanced.Utils.Settings
         {
             if (value < 0)
             {
-                Utils.ModLogger.LogWarning("OptionsSettingsEntry", 
+                Utils.ModLogger.LogWarning("OptionsSettingsEntry",
                     $"{Key}: Value {value} is below minimum, clamping to 0");
                 return 0;
             }

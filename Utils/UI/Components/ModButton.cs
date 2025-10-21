@@ -23,26 +23,26 @@ namespace EfDEnhanced.Utils.UI.Components
         private TextMeshProUGUI? _text;
         private ButtonAnimation? _animation;
         private RectTransform? _rectTransform;
-        
+
         private Tween? _currentTween;
         private UIStyles.ButtonStyle _currentStyle = UIStyles.ButtonStyle.Secondary;
 
         /// <summary>
         /// 按钮的Button组件
         /// </summary>
-        public Button Button => _button;
+        public Button Button => _button!;
 
         /// <summary>
         /// 按钮文本组件
         /// </summary>
-        public TextMeshProUGUI TextComponent => _text;
+        public TextMeshProUGUI TextComponent => _text!;
 
         private void Awake()
         {
             _button = GetComponent<Button>();
             _buttonImage = GetComponent<Image>();
             _rectTransform = GetComponent<RectTransform>();
-            
+
             // 如果没有ButtonAnimation，添加一个
             _animation = GetComponent<ButtonAnimation>();
         }
@@ -52,7 +52,7 @@ namespace EfDEnhanced.Utils.UI.Components
         /// </summary>
         public static ModButton Create(Transform parent, string name = "ModButton")
         {
-            GameObject buttonObj = new GameObject(name);
+            GameObject buttonObj = new(name);
             buttonObj.transform.SetParent(parent, false);
 
             // 添加RectTransform
@@ -71,7 +71,7 @@ namespace EfDEnhanced.Utils.UI.Components
             ButtonAnimation buttonAnim = buttonObj.AddComponent<ButtonAnimation>();
 
             // 创建文本子对象
-            GameObject textObj = new GameObject("Text");
+            GameObject textObj = new("Text");
             textObj.transform.SetParent(buttonObj.transform, false);
 
             RectTransform textRect = textObj.AddComponent<RectTransform>();
@@ -159,10 +159,7 @@ namespace EfDEnhanced.Utils.UI.Components
         /// </summary>
         public ModButton OnClick(UnityAction action)
         {
-            if (_button != null)
-            {
-                _button.onClick.AddListener(action);
-            }
+            _button?.onClick.AddListener(action);
             return this;
         }
 
@@ -171,10 +168,7 @@ namespace EfDEnhanced.Utils.UI.Components
         /// </summary>
         public ModButton ClearClickListeners()
         {
-            if (_button != null)
-            {
-                _button.onClick.RemoveAllListeners();
-            }
+            _button?.onClick.RemoveAllListeners();
             return this;
         }
 
@@ -211,7 +205,7 @@ namespace EfDEnhanced.Utils.UI.Components
 
         public void OnPointerEnter(PointerEventData eventData)
         {
-            if (!_button.interactable) return;
+            if (_button == null || !_button.interactable) return;
 
             _currentTween?.Kill();
             _currentTween = ModAnimations.ButtonHoverScale(transform, 1.05f);
@@ -219,7 +213,7 @@ namespace EfDEnhanced.Utils.UI.Components
 
         public void OnPointerExit(PointerEventData eventData)
         {
-            if (!_button.interactable) return;
+            if (_button == null || !_button.interactable) return;
 
             _currentTween?.Kill();
             _currentTween = ModAnimations.ButtonReleaseScale(transform);
@@ -227,7 +221,7 @@ namespace EfDEnhanced.Utils.UI.Components
 
         public void OnPointerDown(PointerEventData eventData)
         {
-            if (!_button.interactable) return;
+            if (_button == null || !_button.interactable) return;
 
             _currentTween?.Kill();
             _currentTween = ModAnimations.ButtonPressScale(transform);
@@ -235,7 +229,7 @@ namespace EfDEnhanced.Utils.UI.Components
 
         public void OnPointerUp(PointerEventData eventData)
         {
-            if (!_button.interactable) return;
+            if (_button == null || !_button.interactable) return;
 
             _currentTween?.Kill();
             _currentTween = ModAnimations.ButtonReleaseScale(transform);

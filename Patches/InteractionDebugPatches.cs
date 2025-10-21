@@ -16,7 +16,7 @@ namespace EfDEnhanced.Patches
     public class InteractionDebugPatches
     {
         // Toggle this to enable/disable debug logging
-        private static bool EnableDebugLogging = true;
+        private static readonly bool EnableDebugLogging = true;
 
         #region MultiInteraction Patches
 
@@ -33,10 +33,10 @@ namespace EfDEnhanced.Patches
                     ModLogger.Log("MultiInteraction", $"GameObject: {__instance.gameObject.name}");
                     ModLogger.Log("MultiInteraction", $"Position: {__instance.transform.position}");
                     ModLogger.Log("MultiInteraction", $"Scene: {__instance.gameObject.scene.name}");
-                    
+
                     var interactables = __instance.Interactables;
                     ModLogger.Log("MultiInteraction", $"Total Interactables: {interactables.Count}");
-                    
+
                     for (int i = 0; i < interactables.Count; i++)
                     {
                         var interactable = interactables[i];
@@ -54,7 +54,7 @@ namespace EfDEnhanced.Patches
                             LogCostTakerDetails(costTaker, i);
                         }
                     }
-                    
+
                     ModLogger.Log("MultiInteraction", "==========================================================");
                 }
                 catch (Exception ex)
@@ -80,9 +80,9 @@ namespace EfDEnhanced.Patches
                     ModLogger.Log("CostTaker", "========== CostTaker Interaction Finished ==========");
                     ModLogger.Log("CostTaker", $"GameObject: {__instance.gameObject.name}");
                     ModLogger.Log("CostTaker", $"InteractName: {__instance.InteractName}");
-                    
+
                     LogCostTakerDetails(__instance, -1);
-                    
+
                     ModLogger.Log("CostTaker", "=====================================================");
                 }
                 catch (Exception ex)
@@ -137,7 +137,7 @@ namespace EfDEnhanced.Patches
                     ModLogger.Log("InteractableBase", $"RequireItem: {__instance.requireItem}");
                     ModLogger.Log("InteractableBase", $"CurrentScene: {__instance.gameObject.scene.name}");
                     ModLogger.Log("InteractableBase", $"Position: {__instance.transform.position}");
-                    
+
                     // Log all components on the GameObject
                     var components = __instance.gameObject.GetComponents<Component>();
                     ModLogger.Log("InteractableBase", $"Components count: {components.Length}");
@@ -148,7 +148,7 @@ namespace EfDEnhanced.Patches
                             ModLogger.Log("InteractableBase", $"  - Component: {comp.GetType().Name}");
                         }
                     }
-                    
+
                     // Check parent objects for context
                     if (__instance.transform.parent != null)
                     {
@@ -158,21 +158,21 @@ namespace EfDEnhanced.Patches
                             ModLogger.Log("InteractableBase", $"GrandParent GameObject: {__instance.transform.parent.parent.gameObject.name}");
                         }
                     }
-                    
+
                     if (__instance.requireItem)
                     {
                         ModLogger.Log("InteractableBase", $"RequireItemId: {__instance.requireItemId}");
                         ModLogger.Log("InteractableBase", $"RequireItemName: {__instance.GetRequiredItemName()}");
-                        
-                        var itemCheck = __instance.TryGetRequiredItem(_interactCharacter);
-                        ModLogger.Log("InteractableBase", $"HasRequiredItem: {itemCheck.hasItem}");
-                        if (itemCheck.ItemInstance != null)
+
+                        var (hasItem, ItemInstance) = __instance.TryGetRequiredItem(_interactCharacter);
+                        ModLogger.Log("InteractableBase", $"HasRequiredItem: {hasItem}");
+                        if (ItemInstance != null)
                         {
-                            ModLogger.Log("InteractableBase", $"ItemInstance: {itemCheck.ItemInstance.DisplayName}");
-                            ModLogger.Log("InteractableBase", $"ItemStackCount: {itemCheck.ItemInstance.StackCount}");
+                            ModLogger.Log("InteractableBase", $"ItemInstance: {ItemInstance.DisplayName}");
+                            ModLogger.Log("InteractableBase", $"ItemStackCount: {ItemInstance.StackCount}");
                         }
                     }
-                    
+
                     // Check if this might be a scene transition
                     string goName = __instance.gameObject.name;
                     if (goName.Contains("GoTo") || goName.Contains("Interact") || goName.Contains("Enter") || goName.Contains("Exit"))
@@ -222,7 +222,7 @@ namespace EfDEnhanced.Patches
                     ModLogger.Log("Cost", $"Money: {__instance.money}");
                     ModLogger.Log("Cost", $"Enough: {__instance.Enough}");
                     ModLogger.Log("Cost", $"IsFree: {__instance.IsFree}");
-                    
+
                     if (__instance.items != null && __instance.items.Length > 0)
                     {
                         ModLogger.Log("Cost", $"Items Count: {__instance.items.Length}");
@@ -232,7 +232,7 @@ namespace EfDEnhanced.Patches
                             ModLogger.Log("Cost", $"  - {meta.DisplayName} (ID: {item.id}) x{item.amount}");
                         }
                     }
-                    
+
                     ModLogger.Log("Cost", "=================================");
                 }
                 catch (Exception ex)
@@ -266,12 +266,12 @@ namespace EfDEnhanced.Patches
             {
                 var cost = costTaker.Cost;
                 string prefix = index >= 0 ? $"      " : "";
-                
+
                 ModLogger.Log("CostTaker", $"{prefix}Cost Details:");
                 ModLogger.Log("CostTaker", $"{prefix}  Money: {cost.money}");
                 ModLogger.Log("CostTaker", $"{prefix}  IsFree: {cost.IsFree}");
                 ModLogger.Log("CostTaker", $"{prefix}  Enough: {cost.Enough}");
-                
+
                 if (cost.items != null && cost.items.Length > 0)
                 {
                     ModLogger.Log("CostTaker", $"{prefix}  Required Items: {cost.items.Length}");
@@ -314,7 +314,7 @@ namespace EfDEnhanced.Patches
                 try
                 {
                     ModLogger.Log("CostTaker", $"CostTaker Enabled: {__instance.gameObject.name}");
-                    
+
                     // Monitor onPayed event
                     __instance.onPayed += (ct) =>
                     {

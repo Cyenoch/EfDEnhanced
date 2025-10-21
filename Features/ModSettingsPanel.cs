@@ -54,22 +54,22 @@ namespace EfDEnhanced.Features
 
                 // Setup canvas components
                 SetupCanvas();
-                
+
                 // Create background
                 CreateBackground();
-                
+
                 // Create content panel
                 CreateContentPanel();
-                
+
                 // Create header
                 CreateHeader();
-                
+
                 // Create scroll view and build form
                 CreateScrollViewAndBuildForm();
-                
+
                 // Create footer with buttons
                 CreateFooter();
-                
+
                 // Start hidden
                 if (_canvasGroup != null)
                 {

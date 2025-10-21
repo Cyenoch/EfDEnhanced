@@ -20,18 +20,18 @@ namespace EfDEnhanced.Features;
 public class ActiveQuestTracker : MonoBehaviour
 {
     private static ActiveQuestTracker? _instance;
-    
+
     // UI元素
     private GameObject? _rootCanvas;
     private GameObject? _questPanel;
     private GameObject? _questListContainer;
-    private readonly List<QuestEntryUI> _questEntries = new List<QuestEntryUI>();
-    
+    private readonly List<QuestEntryUI> _questEntries = [];
+
     // 配置
     private bool _isActive;
-    
+
     public static ActiveQuestTracker? Instance => _instance;
-    
+
     /// <summary>
     /// 创建追踪器实例
     /// </summary>
@@ -41,19 +41,19 @@ public class ActiveQuestTracker : MonoBehaviour
         {
             return _instance;
         }
-        
-        GameObject trackerObject = new GameObject("ActiveQuestTracker");
+
+        GameObject trackerObject = new("ActiveQuestTracker");
         DontDestroyOnLoad(trackerObject);
-        
+
         ActiveQuestTracker tracker = trackerObject.AddComponent<ActiveQuestTracker>();
         tracker.BuildUI();
-        
+
         _instance = tracker;
         ModLogger.Log("QuestTracker", "Quest tracker created successfully");
-        
+
         return tracker;
     }
-    
+
     private void Awake()
     {
         if (_instance == null)
@@ -66,18 +66,18 @@ public class ActiveQuestTracker : MonoBehaviour
             Destroy(gameObject);
         }
     }
-    
+
     private void OnDestroy()
     {
         if (_instance == this)
         {
             _instance = null;
         }
-        
+
         // 取消订阅所有事件
         UnregisterEvents();
     }
-    
+
     /// <summary>
     /// 构建UI
     /// </summary>
@@ -88,49 +88,49 @@ public class ActiveQuestTracker : MonoBehaviour
             // 创建Canvas
             _rootCanvas = new GameObject("QuestTrackerCanvas");
             _rootCanvas.transform.SetParent(transform);
-            
+
             Canvas canvas = _rootCanvas.AddComponent<Canvas>();
             UIStyles.ConfigureCanvas(canvas, UIConstants.QUEST_TRACKER_SORT_ORDER);
-            
+
             CanvasScaler scaler = _rootCanvas.AddComponent<CanvasScaler>();
             UIStyles.ConfigureCanvasScaler(scaler);
-            
+
             // 创建主面板（左上角）
             _questPanel = new GameObject("QuestPanel");
             _questPanel.transform.SetParent(_rootCanvas.transform, false);
-            
+
             RectTransform panelRect = _questPanel.AddComponent<RectTransform>();
             panelRect.anchorMin = new Vector2(0, 1); // 左上角锚点
             panelRect.anchorMax = new Vector2(0, 1); // 左上角锚点
             panelRect.pivot = new Vector2(0, 1); // 轴心点在左上角
-            
+
             // 计算高度：屏幕高度的指定比例
             float maxHeight = Screen.height * UIConstants.QUEST_PANEL_SCREEN_HEIGHT_RATIO;
-            
+
             // 设置尺寸
             panelRect.sizeDelta = new Vector2(UIConstants.QUEST_PANEL_WIDTH, maxHeight);
-            
+
             // 设置位置：左上角向右和向下偏移（负值）
             panelRect.anchoredPosition = new Vector2(-10, -10);
-            
+
             // 直接创建任务列表容器（不使用ScrollRect）
             _questListContainer = new GameObject("QuestListContainer");
             _questListContainer.transform.SetParent(_questPanel.transform, false);
-            
+
             RectTransform contentRect = _questListContainer.AddComponent<RectTransform>();
             contentRect.anchorMin = new Vector2(0, 1);
             contentRect.anchorMax = new Vector2(1, 1);
             contentRect.pivot = new Vector2(0.5f, 1);
             contentRect.anchoredPosition = new Vector2(0, -5); // 距离顶部5px
             contentRect.sizeDelta = new Vector2(-10, 0); // 左右各留5px边距
-            
+
             VerticalLayoutGroup layoutGroup = _questListContainer.AddComponent<VerticalLayoutGroup>();
-            UIStyles.ConfigureVerticalLayout(layoutGroup, UIConstants.QUEST_ENTRY_SPACING, 
+            UIStyles.ConfigureVerticalLayout(layoutGroup, UIConstants.QUEST_ENTRY_SPACING,
                 new RectOffset(0, 0, 0, 0));
-            
+
             ContentSizeFitter sizeFitter = _questListContainer.AddComponent<ContentSizeFitter>();
             sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-            
+
             // 默认隐藏
             _rootCanvas.SetActive(false);
         }
@@ -139,7 +139,7 @@ public class ActiveQuestTracker : MonoBehaviour
             ModLogger.LogError($"QuestTracker.BuildUI failed: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 启用追踪器（进入Raid时调用）
     /// </summary>
@@ -184,7 +184,7 @@ public class ActiveQuestTracker : MonoBehaviour
             ModLogger.LogError($"QuestTracker.Enable failed: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 禁用追踪器（离开Raid时调用）
     /// </summary>
@@ -216,7 +216,7 @@ public class ActiveQuestTracker : MonoBehaviour
             ModLogger.LogError($"QuestTracker.Disable failed: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 注册事件监听
     /// </summary>
@@ -247,7 +247,7 @@ public class ActiveQuestTracker : MonoBehaviour
             ModLogger.LogError($"QuestTracker.RegisterEvents failed: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 取消注册事件监听
     /// </summary>
@@ -307,31 +307,31 @@ public class ActiveQuestTracker : MonoBehaviour
             {
                 return;
             }
-            
+
             var activeQuests = QuestManager.Instance.ActiveQuests;
             if (activeQuests == null || activeQuests.Count == 0)
             {
                 ClearQuestList();
                 return;
             }
-            
+
             // 只显示未完成且被追踪的任务
             var trackedIncompleteQuests = activeQuests
                 .Where(q => q != null && !q.Complete && QuestTrackingManager.IsQuestTracked(q.ID))
                 .ToList();
-            
+
             // 根据设置决定是否按地图过滤
             if (ModSettings.TrackerFilterByMap.Value)
             {
                 trackedIncompleteQuests = FilterQuestsByCurrentMap(trackedIncompleteQuests);
             }
-            
+
             if (trackedIncompleteQuests.Count == 0)
             {
                 ClearQuestList();
                 return;
             }
-            
+
             // 更新现有条目或创建新条目
             UpdateQuestEntries(trackedIncompleteQuests);
         }
@@ -340,7 +340,7 @@ public class ActiveQuestTracker : MonoBehaviour
             ModLogger.LogError($"QuestTracker.RefreshQuestList failed: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 根据当前地图过滤任务
     /// 只显示当前地图的任务，以及没有地图限制的任务
@@ -351,29 +351,29 @@ public class ActiveQuestTracker : MonoBehaviour
         {
             // 获取当前地图ID
             string? currentMapID = GetCurrentMapID();
-            
+
             if (string.IsNullOrEmpty(currentMapID))
             {
                 ModLogger.Log("QuestTracker", "Cannot determine current map, showing all quests");
                 return quests;
             }
-            
+
             ModLogger.Log("QuestTracker", $"Filtering quests for current map: {currentMapID}");
-            
+
             // 过滤任务
             var filteredQuests = quests.Where(q =>
             {
                 if (q == null) return false;
-                
+
                 var questSceneInfo = q.RequireSceneInfo;
-                
+
                 // 如果任务没有指定场景要求，显示（可以在任意地图完成）
                 if (questSceneInfo == null || string.IsNullOrEmpty(questSceneInfo.ID))
                 {
                     ModLogger.Log("QuestTracker", $"Quest '{q.DisplayName}' has no map requirement - showing");
                     return true;
                 }
-                
+
                 // 如果任务的场景ID匹配当前地图，显示
                 bool matches = questSceneInfo.ID == currentMapID;
                 if (matches)
@@ -384,12 +384,12 @@ public class ActiveQuestTracker : MonoBehaviour
                 {
                     ModLogger.Log("QuestTracker", $"Quest '{q.DisplayName}' requires map '{questSceneInfo.ID}' but current is '{currentMapID}' - hiding");
                 }
-                
+
                 return matches;
             }).ToList();
-            
+
             ModLogger.Log("QuestTracker", $"Filtered {quests.Count} quests to {filteredQuests.Count} for map '{currentMapID}'");
-            
+
             return filteredQuests;
         }
         catch (Exception ex)
@@ -398,7 +398,7 @@ public class ActiveQuestTracker : MonoBehaviour
             return quests; // 出错时返回所有任务
         }
     }
-    
+
     /// <summary>
     /// 获取当前地图ID
     /// </summary>
@@ -416,7 +416,7 @@ public class ActiveQuestTracker : MonoBehaviour
                     return mainSceneID;
                 }
             }
-            
+
             ModLogger.LogWarning("QuestTracker", "Could not determine current map ID");
             return null;
         }
@@ -426,7 +426,7 @@ public class ActiveQuestTracker : MonoBehaviour
             return null;
         }
     }
-    
+
     /// <summary>
     /// 更新任务条目
     /// </summary>
@@ -444,7 +444,7 @@ public class ActiveQuestTracker : MonoBehaviour
                     _questEntries.RemoveAt(i);
                 }
             }
-            
+
             // 更新或创建任务条目
             foreach (var quest in quests)
             {
@@ -464,7 +464,7 @@ public class ActiveQuestTracker : MonoBehaviour
             ModLogger.LogError($"QuestTracker.UpdateQuestEntries failed: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 创建任务条目UI
     /// </summary>
@@ -476,19 +476,19 @@ public class ActiveQuestTracker : MonoBehaviour
             {
                 return;
             }
-            
-            GameObject entryObj = new GameObject($"QuestEntry_{quest.ID}");
+
+            GameObject entryObj = new($"QuestEntry_{quest.ID}");
             entryObj.transform.SetParent(_questListContainer.transform, false);
-            
+
             RectTransform entryRect = entryObj.AddComponent<RectTransform>();
             entryRect.sizeDelta = new Vector2(0, 0); // 由LayoutGroup控制
-            
+
             // 不添加背景，完全透明
             // 只添加一条分隔线作为边框
             Outline entryOutline = entryObj.AddComponent<Outline>();
             entryOutline.effectColor = new Color(0.6f, 0.6f, 0.6f, 0.3f);
             entryOutline.effectDistance = new Vector2(0, -1); // 只在底部显示线
-            
+
             // 垂直布局
             VerticalLayoutGroup entryLayout = entryObj.AddComponent<VerticalLayoutGroup>();
             entryLayout.childForceExpandWidth = true;
@@ -497,16 +497,16 @@ public class ActiveQuestTracker : MonoBehaviour
             entryLayout.childControlHeight = true;
             entryLayout.spacing = 3; // 增加内部间距
             entryLayout.padding = new RectOffset(8, 8, 6, 6); // 增加内边距
-            
+
             ContentSizeFitter entryFitter = entryObj.AddComponent<ContentSizeFitter>();
             entryFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-            
+
             // 任务标题行（标题 + 进度）
-            GameObject titleRowObj = new GameObject("TitleRow");
+            GameObject titleRowObj = new("TitleRow");
             titleRowObj.transform.SetParent(entryObj.transform, false);
-            
+
             RectTransform titleRowRect = titleRowObj.AddComponent<RectTransform>();
-            
+
             HorizontalLayoutGroup titleRowLayout = titleRowObj.AddComponent<HorizontalLayoutGroup>();
             titleRowLayout.childForceExpandWidth = false;
             titleRowLayout.childForceExpandHeight = false;
@@ -514,15 +514,15 @@ public class ActiveQuestTracker : MonoBehaviour
             titleRowLayout.childControlHeight = true;
             titleRowLayout.childAlignment = TextAnchor.MiddleLeft;
             titleRowLayout.spacing = 5;
-            
+
             ContentSizeFitter titleRowFitter = titleRowObj.AddComponent<ContentSizeFitter>();
             titleRowFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained; // 保持不变，由父容器限制
             titleRowFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-            
+
             // 任务标题（左侧）
-            GameObject titleObj = new GameObject("QuestTitle");
+            GameObject titleObj = new("QuestTitle");
             titleObj.transform.SetParent(titleRowObj.transform, false);
-            
+
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = quest.DisplayName;
             titleText.fontSize = UIConstants.QUEST_TITLE_FONT_SIZE;
@@ -530,19 +530,19 @@ public class ActiveQuestTracker : MonoBehaviour
             titleText.color = UIConstants.QUEST_TITLE_COLOR;
             titleText.enableWordWrapping = false;
             titleText.overflowMode = TextOverflowModes.Ellipsis;
-            
+
             // 使用TrueShadow获得更好的阴影效果
             UIStyles.ApplyStandardTextShadow(titleObj, isTitle: true);
-            
+
             LayoutElement titleLayout = titleObj.AddComponent<LayoutElement>();
             titleLayout.flexibleWidth = 1; // 占据剩余空间
             titleLayout.preferredWidth = 200; // 设置首选宽度
             titleLayout.preferredHeight = -1;
-            
+
             // 任务进度（右侧）
-            GameObject progressBadgeObj = new GameObject("ProgressBadge");
+            GameObject progressBadgeObj = new("ProgressBadge");
             progressBadgeObj.transform.SetParent(titleRowObj.transform, false);
-            
+
             TextMeshProUGUI progressBadgeText = progressBadgeObj.AddComponent<TextMeshProUGUI>();
             int finishedTaskCount = quest.Tasks?.Count(t => t != null && t.IsFinished()) ?? 0;
             int totalTaskCount = quest.Tasks?.Count ?? 0;
@@ -551,14 +551,14 @@ public class ActiveQuestTracker : MonoBehaviour
             progressBadgeText.fontStyle = FontStyles.Bold;
             progressBadgeText.color = UIConstants.QUEST_PROGRESS_COLOR;
             progressBadgeText.alignment = TextAlignmentOptions.MidlineRight;
-            
+
             // 使用TrueShadow
             UIStyles.ApplyStandardTextShadow(progressBadgeObj, isTitle: false);
-            
+
             LayoutElement progressBadgeLayout = progressBadgeObj.AddComponent<LayoutElement>();
             progressBadgeLayout.minWidth = 40;
             progressBadgeLayout.preferredHeight = -1;
-            
+
             // 任务描述（简介）- 总是创建，但根据设置控制显示/隐藏
             GameObject? descObj = null;
             if (!string.IsNullOrEmpty(quest.Description))
@@ -580,21 +580,21 @@ public class ActiveQuestTracker : MonoBehaviour
                 LayoutElement descLayout = descObj.AddComponent<LayoutElement>();
                 descLayout.preferredHeight = -1;
                 descLayout.flexibleWidth = 1; // 允许自适应宽度
-                
+
                 // 初始状态根据设置决定
                 descObj.SetActive(ModSettings.TrackerShowDescription.Value);
             }
-            
+
             // 任务进度容器
-            GameObject progressContainer = new GameObject("ProgressContainer");
+            GameObject progressContainer = new("ProgressContainer");
             progressContainer.transform.SetParent(entryObj.transform, false);
-            
+
             VerticalLayoutGroup taskListLayout = progressContainer.AddComponent<VerticalLayoutGroup>();
             UIStyles.ConfigureVerticalLayout(taskListLayout, UIConstants.QUEST_TASK_SPACING);
-            
+
             ContentSizeFitter progressFitter = progressContainer.AddComponent<ContentSizeFitter>();
             progressFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-            
+
             // 创建UI对象
             var questEntry = new QuestEntryUI
             {
@@ -605,12 +605,12 @@ public class ActiveQuestTracker : MonoBehaviour
                 ProgressContainer = progressContainer,
                 DescriptionObject = descObj  // 保存描述对象引用
             };
-            
+
             _questEntries.Add(questEntry);
-            
+
             // 初始化显示
             questEntry.UpdateDisplay(quest);
-            
+
             // 强制刷新布局
             Canvas.ForceUpdateCanvases();
         }
@@ -619,7 +619,7 @@ public class ActiveQuestTracker : MonoBehaviour
             ModLogger.LogError($"QuestTracker.CreateQuestEntry failed: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 清空任务列表
     /// </summary>
@@ -641,7 +641,7 @@ public class ActiveQuestTracker : MonoBehaviour
             ModLogger.LogError($"QuestTracker.ClearQuestList failed: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 任务追踪状态变化回调（手动勾选/取消追踪）
     /// </summary>
@@ -653,7 +653,7 @@ public class ActiveQuestTracker : MonoBehaviour
             {
                 return;
             }
-            
+
             ModLogger.Log("QuestTracker", $"Quest {questId} tracking changed to {isTracked}");
             RefreshQuestList();
         }
@@ -662,7 +662,7 @@ public class ActiveQuestTracker : MonoBehaviour
             ModLogger.LogError($"QuestTracker.OnQuestTrackingChanged failed: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 任务列表变化回调（新任务激活、任务完成等）
     /// </summary>
@@ -674,7 +674,7 @@ public class ActiveQuestTracker : MonoBehaviour
             {
                 return;
             }
-            
+
             ModLogger.Log("QuestTracker", "Quest lists changed");
             RefreshQuestList();
         }
@@ -683,7 +683,7 @@ public class ActiveQuestTracker : MonoBehaviour
             ModLogger.LogError($"QuestTracker.OnQuestListsChanged failed: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 任务状态变化回调
     /// </summary>
@@ -695,7 +695,7 @@ public class ActiveQuestTracker : MonoBehaviour
             {
                 return;
             }
-            
+
             // 只更新已追踪的任务
             if (QuestTrackingManager.IsQuestTracked(quest.ID))
             {
@@ -712,7 +712,7 @@ public class ActiveQuestTracker : MonoBehaviour
             ModLogger.LogError($"QuestTracker.OnQuestStatusChanged failed: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 任务完成回调
     /// </summary>
@@ -724,7 +724,7 @@ public class ActiveQuestTracker : MonoBehaviour
             {
                 return;
             }
-            
+
             ModLogger.Log("QuestTracker", $"Quest {quest.ID} completed");
             RefreshQuestList();
         }
@@ -733,7 +733,7 @@ public class ActiveQuestTracker : MonoBehaviour
             ModLogger.LogError($"QuestTracker.OnQuestCompleted failed: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 子任务完成回调
     /// </summary>
@@ -860,10 +860,10 @@ public class QuestEntryUI
     public TextMeshProUGUI? ProgressBadgeText { get; set; }
     public GameObject? ProgressContainer { get; set; }
     public GameObject? DescriptionObject { get; set; }  // 描述UI元素
-    
-    private readonly List<TaskUIElement> _taskElements = new List<TaskUIElement>();
+
+    private readonly List<TaskUIElement> _taskElements = [];
     private string _lastProgressText = "";
-    
+
     /// <summary>
     /// 更新显示
     /// </summary>
@@ -875,7 +875,7 @@ public class QuestEntryUI
             {
                 return;
             }
-            
+
             // 更新描述显示/隐藏状态（根据设置）
             if (DescriptionObject != null)
             {
@@ -885,20 +885,20 @@ public class QuestEntryUI
                     DescriptionObject.SetActive(shouldShow);
                 }
             }
-            
+
             // 更新进度徽章 (只在变化时更新)
             if (ProgressBadgeText != null && quest.Tasks != null)
             {
                 int finishedCount = quest.Tasks.Count(t => t != null && t.IsFinished());
                 string newProgressText = $"{finishedCount}/{quest.Tasks.Count}";
-                
+
                 if (_lastProgressText != newProgressText)
                 {
                     ProgressBadgeText.text = newProgressText;
                     _lastProgressText = newProgressText;
                 }
             }
-            
+
             // 更新任务进度 (复用现有UI元素)
             if (quest.Tasks != null && quest.Tasks.Count > 0)
             {
@@ -909,24 +909,24 @@ public class QuestEntryUI
                     {
                         continue;
                     }
-                    
+
                     bool isFinished = task.IsFinished();
-                    
+
                     // 格式化任务描述（使用本地化图标）
-                    string statusIcon = isFinished 
-                        ? LocalizationHelper.Get("QuestTracker_TaskComplete") 
+                    string statusIcon = isFinished
+                        ? LocalizationHelper.Get("QuestTracker_TaskComplete")
                         : LocalizationHelper.Get("QuestTracker_TaskPending");
                     string taskDesc = task.Description;
-                    
+
                     // 显示额外描述（如果有）
                     if (task.ExtraDescriptsions != null && task.ExtraDescriptsions.Length > 0)
                     {
                         taskDesc += " " + string.Join(" ", task.ExtraDescriptsions);
                     }
-                    
+
                     string fullText = $"  {statusIcon} {taskDesc}";
                     Color taskColor = isFinished ? UIConstants.QUEST_COMPLETE_COLOR : UIConstants.QUEST_INCOMPLETE_COLOR;
-                    
+
                     // 复用或创建UI元素
                     if (taskIndex < _taskElements.Count)
                     {
@@ -950,23 +950,23 @@ public class QuestEntryUI
                     else
                     {
                         // 创建新元素
-                        GameObject taskObj = new GameObject($"Task_{task.ID}");
+                        GameObject taskObj = new($"Task_{task.ID}");
                         taskObj.transform.SetParent(ProgressContainer.transform, false);
-                        
+
                         TextMeshProUGUI taskText = taskObj.AddComponent<TextMeshProUGUI>();
                         taskText.text = fullText;
                         taskText.fontSize = UIConstants.QUEST_TASK_FONT_SIZE;
                         taskText.color = taskColor;
                         taskText.enableWordWrapping = true;
                         taskText.overflowMode = TextOverflowModes.Truncate; // 防止超出边界
-                        
+
                         // 使用TrueShadow
                         UIStyles.ApplyStandardTextShadow(taskObj, isTitle: false);
-                        
+
                         LayoutElement taskLayout = taskObj.AddComponent<LayoutElement>();
                         taskLayout.preferredHeight = -1;
                         taskLayout.flexibleWidth = 1; // 允许自适应宽度但不超出容器
-                        
+
                         _taskElements.Add(new TaskUIElement
                         {
                             GameObject = taskObj,
@@ -975,10 +975,10 @@ public class QuestEntryUI
                             LastColor = taskColor
                         });
                     }
-                    
+
                     taskIndex++;
                 }
-                
+
                 // 隐藏多余的UI元素 (而不是销毁)
                 for (int i = taskIndex; i < _taskElements.Count; i++)
                 {

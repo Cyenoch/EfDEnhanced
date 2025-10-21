@@ -24,7 +24,7 @@ namespace EfDEnhanced.Utils.UI.Components
         /// <summary>
         /// Slider组件
         /// </summary>
-        public Slider Slider => _slider;
+        public Slider? Slider => _slider;
 
         /// <summary>
         /// 当前值（float）
@@ -42,19 +42,19 @@ namespace EfDEnhanced.Utils.UI.Components
         }
 
         /// <summary>
-        /// 创建ModSlider实例
+        /// 创建ModSlider实例（使用更简洁的对象初始化语法）
         /// </summary>
         public static ModSlider Create(Transform parent, string name = "ModSlider")
         {
-            // 创建容器
-            GameObject containerObj = new GameObject(name);
+            // 创建容器（使用对象初始化器简化代码）
+            var containerObj = new GameObject(name);
             containerObj.transform.SetParent(parent, false);
 
-            RectTransform containerRect = containerObj.AddComponent<RectTransform>();
+            var containerRect = containerObj.AddComponent<RectTransform>();
             containerRect.sizeDelta = new Vector2(0, 80);
 
-            // 添加垂直布局
-            VerticalLayoutGroup layout = containerObj.AddComponent<VerticalLayoutGroup>();
+            // 添加垂直布局（使用对象初始化器）
+            var layout = containerObj.AddComponent<VerticalLayoutGroup>();
             layout.spacing = 2;
             layout.padding = new RectOffset(8, 8, 4, 4);
             layout.childAlignment = TextAnchor.UpperLeft;
@@ -63,14 +63,14 @@ namespace EfDEnhanced.Utils.UI.Components
             layout.childForceExpandWidth = true;
             layout.childForceExpandHeight = false;
 
-            // 创建标签容器（标签 + 值显示）
-            GameObject labelContainer = new GameObject("LabelContainer");
+            // 创建标签容器（使用var和简化语法）
+            var labelContainer = new GameObject("LabelContainer");
             labelContainer.transform.SetParent(containerObj.transform, false);
 
-            RectTransform labelContainerRect = labelContainer.AddComponent<RectTransform>();
+            var labelContainerRect = labelContainer.AddComponent<RectTransform>();
             labelContainerRect.sizeDelta = new Vector2(0, 24);
 
-            HorizontalLayoutGroup labelLayout = labelContainer.AddComponent<HorizontalLayoutGroup>();
+            var labelLayout = labelContainer.AddComponent<HorizontalLayoutGroup>();
             labelLayout.spacing = 16;
             labelLayout.childAlignment = TextAnchor.MiddleLeft;
             labelLayout.childControlWidth = false;
@@ -79,53 +79,50 @@ namespace EfDEnhanced.Utils.UI.Components
             labelLayout.childForceExpandHeight = false;
 
             // 创建标签
-            GameObject labelObj = new GameObject("Label");
+            var labelObj = new GameObject("Label");
             labelObj.transform.SetParent(labelContainer.transform, false);
 
-            LayoutElement labelObjLayout = labelObj.AddComponent<LayoutElement>();
+            var labelObjLayout = labelObj.AddComponent<LayoutElement>();
             labelObjLayout.flexibleWidth = 1;
             labelObjLayout.minHeight = 24;
 
-            TextMeshProUGUI label = labelObj.AddComponent<TextMeshProUGUI>();
+            var label = labelObj.AddComponent<TextMeshProUGUI>();
             label.fontSize = UIConstants.SETTINGS_LABEL_FONT_SIZE;
             label.color = Color.white;
             label.alignment = TextAlignmentOptions.MidlineLeft;
 
             // 创建值显示
-            GameObject valueObj = new GameObject("Value");
+            var valueObj = new GameObject("Value");
             valueObj.transform.SetParent(labelContainer.transform, false);
 
-            LayoutElement valueLayout = valueObj.AddComponent<LayoutElement>();
+            var valueLayout = valueObj.AddComponent<LayoutElement>();
             valueLayout.minWidth = 80;
             valueLayout.preferredWidth = 80;
             valueLayout.flexibleWidth = 0;
             valueLayout.minHeight = 24;
 
-            TextMeshProUGUI valueText = valueObj.AddComponent<TextMeshProUGUI>();
+            var valueText = valueObj.AddComponent<TextMeshProUGUI>();
             valueText.fontSize = 16;
             valueText.color = new Color(0.8f, 0.8f, 0.8f);
             valueText.alignment = TextAlignmentOptions.MidlineRight;
 
             // 创建Slider容器
-            GameObject sliderContainer = new GameObject("Slider");
+            var sliderContainer = new GameObject("Slider");
             sliderContainer.transform.SetParent(containerObj.transform, false);
 
-            RectTransform sliderContainerRect = sliderContainer.AddComponent<RectTransform>();
+            var sliderContainerRect = sliderContainer.AddComponent<RectTransform>();
             sliderContainerRect.sizeDelta = new Vector2(0, 24);
 
-            Slider slider = CreateSliderComponent(sliderContainer);
+            var slider = CreateSliderComponent(sliderContainer);
 
-            // 添加ModSlider组件
-            ModSlider modSlider = containerObj.AddComponent<ModSlider>();
+            // 添加ModSlider组件（使用对象初始化器）
+            var modSlider = containerObj.AddComponent<ModSlider>();
             modSlider._slider = slider;
             modSlider._label = label;
             modSlider._valueText = valueText;
 
-            // 监听值变化，更新显示
-            slider.onValueChanged.AddListener((value) =>
-            {
-                modSlider.UpdateValueDisplay();
-            });
+            // 监听值变化，更新显示（使用方法组简化Lambda）
+            slider.onValueChanged.AddListener(_ => modSlider.UpdateValueDisplay());
 
             return modSlider;
         }
@@ -135,22 +132,22 @@ namespace EfDEnhanced.Utils.UI.Components
         /// </summary>
         private static Slider CreateSliderComponent(GameObject container)
         {
-            Slider slider = container.AddComponent<Slider>();
+            var slider = container.AddComponent<Slider>();
             slider.minValue = 0f;
             slider.maxValue = 1f;
             slider.value = 0.5f;
             slider.wholeNumbers = false;
 
             // 背景 (Background)
-            GameObject background = new GameObject("Background");
+            var background = new GameObject("Background");
             background.transform.SetParent(container.transform, false);
 
-            RectTransform bgRect = background.AddComponent<RectTransform>();
+            var bgRect = background.AddComponent<RectTransform>();
             bgRect.anchorMin = new Vector2(0f, 0.25f);
             bgRect.anchorMax = new Vector2(1f, 0.75f);
-            bgRect.sizeDelta = new Vector2(0f, 0f);
+            bgRect.sizeDelta = Vector2.zero;
 
-            Image bgImage = background.AddComponent<Image>();
+            var bgImage = background.AddComponent<Image>();
             bgImage.color = new Color(0.2f, 0.2f, 0.2f, 1f);
             bgImage.sprite = CreateSliderSprite();
             bgImage.type = Image.Type.Sliced;
@@ -158,23 +155,23 @@ namespace EfDEnhanced.Utils.UI.Components
             slider.targetGraphic = bgImage;
 
             // Fill Area（填充容器） - 和 Background 一样的位置和大小
-            GameObject fillArea = new GameObject("Fill Area");
+            var fillArea = new GameObject("Fill Area");
             fillArea.transform.SetParent(container.transform, false);
 
-            RectTransform fillAreaRect = fillArea.AddComponent<RectTransform>();
+            var fillAreaRect = fillArea.AddComponent<RectTransform>();
             fillAreaRect.anchorMin = new Vector2(0f, 0.25f);
             fillAreaRect.anchorMax = new Vector2(1f, 0.75f);
             fillAreaRect.anchoredPosition = Vector2.zero;
-            fillAreaRect.sizeDelta = new Vector2(0f, 0f);
+            fillAreaRect.sizeDelta = Vector2.zero;
 
             // Fill（实际的填充条） - 关键是 sizeDelta.x > 0，sizeDelta.y = 0
-            GameObject fill = new GameObject("Fill");
+            var fill = new GameObject("Fill");
             fill.transform.SetParent(fillArea.transform, false);
 
-            RectTransform fillRect = fill.AddComponent<RectTransform>();
+            var fillRect = fill.AddComponent<RectTransform>();
             fillRect.sizeDelta = new Vector2(10f, 0f); // Unity 默认：宽度10，高度0（自动填充）
 
-            Image fillImage = fill.AddComponent<Image>();
+            var fillImage = fill.AddComponent<Image>();
             fillImage.color = new Color(0.3f, 0.7f, 1f, 1f); // 更亮的蓝色
             fillImage.sprite = CreateSliderSprite();
             fillImage.type = Image.Type.Sliced;
@@ -182,27 +179,27 @@ namespace EfDEnhanced.Utils.UI.Components
             slider.fillRect = fillRect;
 
             // Handle Slide Area（滑块容器） - 充满整个 slider
-            GameObject handleArea = new GameObject("Handle Slide Area");
+            var handleArea = new GameObject("Handle Slide Area");
             handleArea.transform.SetParent(container.transform, false);
 
-            RectTransform handleAreaRect = handleArea.AddComponent<RectTransform>();
-            handleAreaRect.anchorMin = new Vector2(0f, 0f);
-            handleAreaRect.anchorMax = new Vector2(1f, 1f);
-            handleAreaRect.sizeDelta = new Vector2(0f, 0f);
+            var handleAreaRect = handleArea.AddComponent<RectTransform>();
+            handleAreaRect.anchorMin = Vector2.zero;
+            handleAreaRect.anchorMax = Vector2.one;
+            handleAreaRect.sizeDelta = Vector2.zero;
 
             // Handle（实际的滑块） - 只设置 sizeDelta
-            GameObject handle = new GameObject("Handle");
+            var handle = new GameObject("Handle");
             handle.transform.SetParent(handleArea.transform, false);
 
-            RectTransform handleRect = handle.AddComponent<RectTransform>();
+            var handleRect = handle.AddComponent<RectTransform>();
             handleRect.sizeDelta = new Vector2(20f, 0f); // Unity 默认：宽度20，高度0（自动填充）
 
-            Image handleImage = handle.AddComponent<Image>();
+            var handleImage = handle.AddComponent<Image>();
             handleImage.color = Color.white; // 纯白色，更醒目
             handleImage.sprite = CreateSliderSprite();
             handleImage.type = Image.Type.Sliced;
 
-            Outline handleOutline = handle.AddComponent<Outline>();
+            var handleOutline = handle.AddComponent<Outline>();
             handleOutline.effectColor = new Color(0.2f, 0.2f, 0.2f, 0.8f);
             handleOutline.effectDistance = new Vector2(1, -1);
 
@@ -217,7 +214,7 @@ namespace EfDEnhanced.Utils.UI.Components
         private static Sprite CreateSliderSprite()
         {
             // 创建一个1x1的白色纹理
-            Texture2D texture = new Texture2D(1, 1);
+            Texture2D texture = new(1, 1);
             texture.SetPixel(0, 0, Color.white);
             texture.Apply();
 
@@ -306,14 +303,8 @@ namespace EfDEnhanced.Utils.UI.Components
                 UpdateValueDisplay();
             }
 
-            // 监听Slider变化
-            _slider?.onValueChanged.AddListener((value) =>
-            {
-                if (_boundFloatSetting != null)
-                {
-                    _boundFloatSetting.Value = value;
-                }
-            });
+            // 监听Slider变化（使用null-conditional和简化Lambda）
+            _slider?.onValueChanged.AddListener(value => _boundFloatSetting.Value = value);
 
             // 监听Setting变化
             setting.ValueChanged += (sender, args) =>
@@ -349,8 +340,8 @@ namespace EfDEnhanced.Utils.UI.Components
                 UpdateValueDisplay();
             }
 
-            // 监听Slider变化
-            _slider?.onValueChanged.AddListener((value) =>
+            // 监听Slider变化（使用简化Lambda表达式）
+            _slider?.onValueChanged.AddListener(value =>
             {
                 int intValue = Mathf.RoundToInt(value);
                 if (_boundIntSetting != null && _boundIntSetting.Value != intValue)

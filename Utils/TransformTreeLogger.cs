@@ -13,7 +13,7 @@ namespace EfDEnhanced.Utils
     public static class TransformTreeLogger
     {
         private const string LOG_COMPONENT = "TransformTreeLogger";
-        
+
         /// <summary>
         /// 记录从Root到指定Transform及其所有子节点的树形结构
         /// </summary>
@@ -80,7 +80,7 @@ namespace EfDEnhanced.Utils
             try
             {
                 ModLogger.Log(LOG_COMPONENT, $"[根] {transform.name}");
-                
+
                 if (transform.childCount > 0)
                 {
                     LogChildrenRecursive(transform, 0, maxDepth);

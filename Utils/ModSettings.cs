@@ -20,7 +20,7 @@ namespace EfDEnhanced.Utils
         private const string CATEGORY_UI = "Settings_Category_UI";
 
         // All settings entries
-        private static readonly List<object> _allSettings = [];
+        private static readonly List<ISettingsEntry> _allSettings = [];
 
         #region Pre-Raid Check Settings
 
@@ -176,13 +176,12 @@ namespace EfDEnhanced.Utils
                 "MovementEnhancement",
                 "Settings_MovementEnhancement_Name",
                 0, // Default: Medium optimization
-                new[]
-                {
+                [
                     "Settings_Movement_Disabled",
                     "Settings_Movement_Light",
                     "Settings_Movement_Medium",
                     "Settings_Movement_Heavy"
-                },
+                ],
                 CATEGORY_MOVEMENT,
                 "Settings_MovementEnhancement_Desc"
             )
@@ -208,7 +207,7 @@ namespace EfDEnhanced.Utils
         /// <summary>
         /// Register a settings entry and add it to the master list
         /// </summary>
-        private static T Register<T>(T entry)
+        private static T Register<T>(T entry) where T : ISettingsEntry
         {
             _allSettings.Add(entry);
             return entry;
@@ -235,40 +234,40 @@ namespace EfDEnhanced.Utils
         /// </summary>
         public static IEnumerable<object> GetSettingsByCategory(string category)
         {
-            return _allSettings.Where(s =>
-            {
-                if (s is BoolSettingsEntry boolEntry) return boolEntry.Category == category;
-                if (s is IntSettingsEntry intEntry) return intEntry.Category == category;
-                if (s is FloatSettingsEntry floatEntry) return floatEntry.Category == category;
-                if (s is StringSettingsEntry strEntry) return strEntry.Category == category;
-                if (s is RangedFloatSettingsEntry rangedFloatEntry) return rangedFloatEntry.Category == category;
-                if (s is RangedIntSettingsEntry rangedIntEntry) return rangedIntEntry.Category == category;
-                if (s is OptionsSettingsEntry optionsEntry) return optionsEntry.Category == category;
-                return false;
-            });
+            // Use pattern matching to simplify category extraction
+            return _allSettings.Where(s => GetSettingCategory(s) == category);
         }
+
+        /// <summary>
+        /// Extract category from a settings entry using pattern matching
+        /// Note: Derived classes must come before base classes
+        /// </summary>
+        private static string? GetSettingCategory(object setting) => setting switch
+        {
+            // Derived classes first
+            RangedFloatSettingsEntry rangedFloatEntry => rangedFloatEntry.Category,
+            RangedIntSettingsEntry rangedIntEntry => rangedIntEntry.Category,
+            IndexedOptionsSettingsEntry indexedOptionsEntry => indexedOptionsEntry.Category,
+            OptionsSettingsEntry optionsEntry => optionsEntry.Category,
+            // Base classes after
+            BoolSettingsEntry boolEntry => boolEntry.Category,
+            IntSettingsEntry intEntry => intEntry.Category,
+            FloatSettingsEntry floatEntry => floatEntry.Category,
+            StringSettingsEntry strEntry => strEntry.Category,
+            _ => null
+        };
 
         /// <summary>
         /// Get all unique categories
         /// </summary>
         public static IEnumerable<string> GetCategories()
         {
-            var categories = new HashSet<string>();
-            foreach (var setting in _allSettings)
-            {
-                string? category = null;
-                if (setting is BoolSettingsEntry boolEntry) category = boolEntry.Category;
-                else if (setting is IntSettingsEntry intEntry) category = intEntry.Category;
-                else if (setting is FloatSettingsEntry floatEntry) category = floatEntry.Category;
-                else if (setting is StringSettingsEntry strEntry) category = strEntry.Category;
-                else if (setting is RangedFloatSettingsEntry rangedFloatEntry) category = rangedFloatEntry.Category;
-                else if (setting is RangedIntSettingsEntry rangedIntEntry) category = rangedIntEntry.Category;
-                else if (setting is OptionsSettingsEntry optionsEntry) category = optionsEntry.Category;
-
-                if (!string.IsNullOrEmpty(category))
-                    categories.Add(category);
-            }
-            return categories;
+            // Use LINQ to extract unique categories in one line
+            return _allSettings
+                .Select(GetSettingCategory)
+                .Where(category => !string.IsNullOrEmpty(category))
+                .Distinct()
+                .Cast<string>();  // Safe cast since we filtered nulls
         }
 
         /// <summary>
@@ -276,15 +275,10 @@ namespace EfDEnhanced.Utils
         /// </summary>
         public static void ResetToDefaults()
         {
+            // Use helper method to reset settings based on type
             foreach (var setting in _allSettings)
             {
-                if (setting is BoolSettingsEntry boolEntry) boolEntry.Reset();
-                else if (setting is IntSettingsEntry intEntry) intEntry.Reset();
-                else if (setting is FloatSettingsEntry floatEntry) floatEntry.Reset();
-                else if (setting is StringSettingsEntry strEntry) strEntry.Reset();
-                else if (setting is RangedFloatSettingsEntry rangedFloatEntry) rangedFloatEntry.Reset();
-                else if (setting is RangedIntSettingsEntry rangedIntEntry) rangedIntEntry.Reset();
-                else if (setting is OptionsSettingsEntry optionsEntry) optionsEntry.Reset();
+                setting.Reset();
             }
 
             ModLogger.Log("ModSettings", "All settings reset to defaults");
@@ -301,20 +295,7 @@ namespace EfDEnhanced.Utils
                 // This ensures all settings are initialized before they're used
                 foreach (var setting in _allSettings)
                 {
-                    if (setting is BoolSettingsEntry boolEntry)
-                        ModLogger.Log("ModSettings", $"Initialized {boolEntry.Key}: {boolEntry.Value}");
-                    else if (setting is IntSettingsEntry intEntry)
-                        ModLogger.Log("ModSettings", $"Initialized {intEntry.Key}: {intEntry.Value}");
-                    else if (setting is FloatSettingsEntry floatEntry)
-                        ModLogger.Log("ModSettings", $"Initialized {floatEntry.Key}: {floatEntry.Value}");
-                    else if (setting is StringSettingsEntry strEntry)
-                        ModLogger.Log("ModSettings", $"Initialized {strEntry.Key}: {strEntry.Value}");
-                    else if (setting is RangedFloatSettingsEntry rangedFloatEntry)
-                        ModLogger.Log("ModSettings", $"Initialized {rangedFloatEntry.Key}: {rangedFloatEntry.Value}");
-                    else if (setting is RangedIntSettingsEntry rangedIntEntry)
-                        ModLogger.Log("ModSettings", $"Initialized {rangedIntEntry.Key}: {rangedIntEntry.Value}");
-                    else if (setting is OptionsSettingsEntry optionsEntry)
-                        ModLogger.Log("ModSettings", $"Initialized {optionsEntry.Key}: {optionsEntry.Value}");
+                    LogSettingInitialization(setting);
                 }
 
                 ModLogger.Log("ModSettings", $"Initialized {_allSettings.Count} settings");
@@ -323,6 +304,30 @@ namespace EfDEnhanced.Utils
             {
                 ModLogger.LogError($"Failed to initialize ModSettings: {ex}");
             }
+        }
+
+        /// <summary>
+        /// Log initialization of a setting using pattern matching
+        /// Note: Derived classes must come before base classes
+        /// </summary>
+        private static void LogSettingInitialization(object setting)
+        {
+            var (key, value) = setting switch
+            {
+                // Derived classes first
+                RangedFloatSettingsEntry e => (e.Key, e.Value.ToString()),
+                RangedIntSettingsEntry e => (e.Key, e.Value.ToString()),
+                IndexedOptionsSettingsEntry e => (e.Key, e.Value.ToString()),
+                OptionsSettingsEntry e => (e.Key, e.Value),
+                // Base classes after
+                BoolSettingsEntry e => (e.Key, e.Value.ToString()),
+                IntSettingsEntry e => (e.Key, e.Value.ToString()),
+                FloatSettingsEntry e => (e.Key, e.Value.ToString()),
+                StringSettingsEntry e => (e.Key, e.Value),
+                _ => ("Unknown", "Unknown")
+            };
+
+            ModLogger.Log("ModSettings", $"Initialized {key}: {value}");
         }
 
         /// <summary>
@@ -336,18 +341,8 @@ namespace EfDEnhanced.Utils
 
                 foreach (var setting in _allSettings)
                 {
-                    if (setting is BoolSettingsEntry boolEntry)
-                    {
-                        bool oldValue = boolEntry.Value;
-                        boolEntry.Reload();
-                        ModLogger.Log("ModSettings", $"Reloaded {boolEntry.Key}: {oldValue} -> {boolEntry.Value}");
-                    }
-                    else if (setting is IntSettingsEntry intEntry) intEntry.Reload();
-                    else if (setting is FloatSettingsEntry floatEntry) floatEntry.Reload();
-                    else if (setting is StringSettingsEntry strEntry) strEntry.Reload();
-                    else if (setting is RangedFloatSettingsEntry rangedFloatEntry) rangedFloatEntry.Reload();
-                    else if (setting is RangedIntSettingsEntry rangedIntEntry) rangedIntEntry.Reload();
-                    else if (setting is OptionsSettingsEntry optionsEntry) optionsEntry.Reload();
+                    setting.Reload();
+                    ModLogger.Log("ModSettings", $"Reloaded {setting.Key}");
                 }
 
                 ModLogger.Log("ModSettings", "All settings reloaded from storage");

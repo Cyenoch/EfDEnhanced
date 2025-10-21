@@ -12,19 +12,19 @@ namespace EfDEnhanced.Utils;
 /// </summary>
 public static class QuestTrackingManager
 {
-    private static HashSet<int> _trackedQuestIds = new HashSet<int>();
+    private static HashSet<int> _trackedQuestIds = [];
     private static string SaveFilePath => Path.Combine(Application.persistentDataPath, "EfDEnhanced", "TrackedQuests.json");
-    
+
     /// <summary>
     /// 获取所有被追踪的任务ID
     /// </summary>
     public static IReadOnlyCollection<int> TrackedQuestIds => _trackedQuestIds;
-    
+
     /// <summary>
     /// 任务追踪状态改变事件
     /// </summary>
     public static event Action<int, bool>? OnTrackingChanged;
-    
+
     /// <summary>
     /// 初始化，从磁盘加载追踪数据
     /// </summary>
@@ -40,7 +40,7 @@ public static class QuestTrackingManager
             ModLogger.LogError($"QuestTrackingManager.Initialize failed: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 检查任务是否被追踪
     /// </summary>
@@ -48,7 +48,7 @@ public static class QuestTrackingManager
     {
         return _trackedQuestIds.Contains(questId);
     }
-    
+
     /// <summary>
     /// 设置任务追踪状态
     /// </summary>
@@ -57,7 +57,7 @@ public static class QuestTrackingManager
         try
         {
             bool wasTracked = _trackedQuestIds.Contains(questId);
-            
+
             if (tracked)
             {
                 if (_trackedQuestIds.Add(questId))
@@ -82,7 +82,7 @@ public static class QuestTrackingManager
             ModLogger.LogError($"QuestTrackingManager.SetQuestTracked failed: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 切换任务追踪状态
     /// </summary>
@@ -90,7 +90,7 @@ public static class QuestTrackingManager
     {
         SetQuestTracked(questId, !IsQuestTracked(questId));
     }
-    
+
     /// <summary>
     /// 从磁盘加载
     /// </summary>
@@ -103,13 +103,13 @@ public static class QuestTrackingManager
                 ModLogger.Log("QuestTracker", "No save file found, starting fresh");
                 return;
             }
-            
+
             string json = File.ReadAllText(SaveFilePath);
             var data = JsonUtility.FromJson<SaveData>(json);
-            
+
             if (data?.TrackedQuestIds != null)
             {
-                _trackedQuestIds = new HashSet<int>(data.TrackedQuestIds);
+                _trackedQuestIds = [.. data.TrackedQuestIds];
                 ModLogger.Log("QuestTracker", $"Loaded {_trackedQuestIds.Count} tracked quests from disk");
             }
         }
@@ -118,7 +118,7 @@ public static class QuestTrackingManager
             ModLogger.LogError($"QuestTrackingManager.LoadFromDisk failed: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 保存到磁盘
     /// </summary>
@@ -131,15 +131,15 @@ public static class QuestTrackingManager
             {
                 Directory.CreateDirectory(directory);
             }
-            
+
             var data = new SaveData
             {
-                TrackedQuestIds = _trackedQuestIds.ToList()
+                TrackedQuestIds = [.. _trackedQuestIds]
             };
-            
+
             string json = JsonUtility.ToJson(data, true);
             File.WriteAllText(SaveFilePath, json);
-            
+
             ModLogger.Log("QuestTracker", $"Saved {_trackedQuestIds.Count} tracked quests to disk");
         }
         catch (Exception ex)
@@ -147,14 +147,14 @@ public static class QuestTrackingManager
             ModLogger.LogError($"QuestTrackingManager.SaveToDisk failed: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 保存数据结构
     /// </summary>
     [Serializable]
     private class SaveData
     {
-        public List<int> TrackedQuestIds = new List<int>();
+        public List<int> TrackedQuestIds = [];
     }
 }
 

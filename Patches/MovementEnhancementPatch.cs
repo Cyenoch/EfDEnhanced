@@ -15,37 +15,29 @@ namespace EfDEnhanced.Patches
     public class MovementEnhancementPatch
     {
         // Cache reflection fields for better performance
-        private static FieldInfo? _characterMovementField;
-        private static FieldInfo? _moveInputField;
-        private static FieldInfo? _movingField;
-        private static FieldInfo? _runningField;
-        private static FieldInfo? _currentMoveDirectionXZField;
-        private static FieldInfo? _targetAimDirectionField;
+        private static readonly FieldInfo? _characterMovementField;
+        private static readonly FieldInfo? _moveInputField;
+        private static readonly FieldInfo? _movingField;
+        private static readonly FieldInfo? _runningField;
+        private static readonly FieldInfo? _currentMoveDirectionXZField;
+        private static readonly FieldInfo? _targetAimDirectionField;
 
         // Movement preset configurations
-        private struct MovementPreset
+        private struct MovementPreset(float accel, float braking, float lerp, bool useDirectLerp)
         {
-            public float AccelerationMultiplier;
-            public float BrakingMultiplier;
-            public float LerpFactor; // For direct lerp interpolation
-            public bool UseDirectLerp;
-
-            public MovementPreset(float accel, float braking, float lerp, bool useDirectLerp)
-            {
-                AccelerationMultiplier = accel;
-                BrakingMultiplier = braking;
-                LerpFactor = lerp;
-                UseDirectLerp = useDirectLerp;
-            }
+            public float AccelerationMultiplier = accel;
+            public float BrakingMultiplier = braking;
+            public float LerpFactor = lerp; // For direct lerp interpolation
+            public bool UseDirectLerp = useDirectLerp;
         }
 
-        private static readonly MovementPreset[] Presets = new MovementPreset[]
-        {
-            new MovementPreset(1.0f, 1.0f, 0f, false),      // 0: Disabled (never used, fallback in Prefix)
-            new MovementPreset(2.0f, 2.0f, 0.05f, false),      // 1: Light - 3x faster
-            new MovementPreset(4.0f, 4.0f, 0.15f, true),    // 2: Medium - 6x with instant direction change
-            new MovementPreset(8.0f, 8.0f, 0.35f, true)    // 3: Heavy - 10x ultra responsive
-        };
+        private static readonly MovementPreset[] Presets =
+        [
+            new(1.0f, 1.0f, 0f, false),      // 0: Disabled (never used, fallback in Prefix)
+            new(2.0f, 2.0f, 0.05f, false),      // 1: Light - 3x faster
+            new(4.0f, 4.0f, 0.15f, true),    // 2: Medium - 6x with instant direction change
+            new(8.0f, 8.0f, 0.35f, true)    // 3: Heavy - 10x ultra responsive
+        ];
 
         private static bool _hasLoggedActivation = false;
         private static int _lastLoggedLevel = -1;
@@ -58,21 +50,21 @@ namespace EfDEnhanced.Patches
             try
             {
                 Type movementType = typeof(Movement);
-                
-                _characterMovementField = movementType.GetField("characterMovement", 
+
+                _characterMovementField = movementType.GetField("characterMovement",
                     BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-                _moveInputField = movementType.GetField("moveInput", 
+                _moveInputField = movementType.GetField("moveInput",
                     BindingFlags.Instance | BindingFlags.NonPublic);
-                _movingField = movementType.GetField("moving", 
+                _movingField = movementType.GetField("moving",
                     BindingFlags.Instance | BindingFlags.NonPublic);
-                _runningField = movementType.GetField("running", 
+                _runningField = movementType.GetField("running",
                     BindingFlags.Instance | BindingFlags.NonPublic);
-                _currentMoveDirectionXZField = movementType.GetField("currentMoveDirectionXZ", 
+                _currentMoveDirectionXZField = movementType.GetField("currentMoveDirectionXZ",
                     BindingFlags.Instance | BindingFlags.NonPublic);
                 _targetAimDirectionField = movementType.GetField("targetAimDirection",
                     BindingFlags.Instance | BindingFlags.Public);
 
-                if (_characterMovementField == null || _moveInputField == null || 
+                if (_characterMovementField == null || _moveInputField == null ||
                     _movingField == null || _runningField == null || _currentMoveDirectionXZField == null ||
                     _targetAimDirectionField == null)
                 {
@@ -104,7 +96,7 @@ namespace EfDEnhanced.Patches
                 }
 
                 int enhancementLevel = ModSettings.MovementEnhancement.Value;
-                
+
                 // Level 0 = disabled, use original logic
                 if (enhancementLevel == 0)
                 {
@@ -118,7 +110,7 @@ namespace EfDEnhanced.Patches
                 }
 
                 // Get required fields via reflection
-                if (!TryGetFields(__instance, out var characterMovement, out var moveInput, 
+                if (!TryGetFields(__instance, out var characterMovement, out var moveInput,
                     out var moving, out var running))
                 {
                     return true; // Fallback to original on error
@@ -129,13 +121,13 @@ namespace EfDEnhanced.Patches
                 {
                     _hasLoggedActivation = true;
                     _lastLoggedLevel = enhancementLevel;
-                    string[] presetNames = { "Disabled", "Light", "Medium", "Heavy" };
+                    string[] presetNames = ["Disabled", "Light", "Medium", "Heavy"];
                     ModLogger.Log("MovementEnhancementPatch", $"Movement enhancement ACTIVE - Level: {presetNames[enhancementLevel]} " +
                         $"(Accel: {Presets[enhancementLevel].AccelerationMultiplier}x, Brake: {Presets[enhancementLevel].BrakingMultiplier}x, " +
                         $"Lerp: {Presets[enhancementLevel].LerpFactor}, DirectLerp: {Presets[enhancementLevel].UseDirectLerp})");
                     ModLogger.Log("MovementEnhancementPatch", $"Base stats - WalkAcc: {__instance.walkAcc}, RunAcc: {__instance.runAcc}, " +
                         $"WalkSpeed: {__instance.walkSpeed}, RunSpeed: {__instance.runSpeed}");
-                    
+
                     // Log actual calculated values for verification
                     float enhancedWalkAcc = __instance.walkAcc * Presets[enhancementLevel].AccelerationMultiplier;
                     float enhancedRunAcc = __instance.runAcc * Presets[enhancementLevel].AccelerationMultiplier;
@@ -143,7 +135,7 @@ namespace EfDEnhanced.Patches
                 }
 
                 // Apply enhanced movement logic
-                ApplyEnhancedMovement(__instance, characterMovement, moveInput, moving, running, 
+                ApplyEnhancedMovement(__instance, characterMovement, moveInput, moving, running,
                     Presets[enhancementLevel]);
 
                 return false; // Skip original method
@@ -158,7 +150,7 @@ namespace EfDEnhanced.Patches
         /// <summary>
         /// Try to get all required fields from Movement instance
         /// </summary>
-        private static bool TryGetFields(Movement instance, 
+        private static bool TryGetFields(Movement instance,
             out CharacterMovement characterMovement,
             out Vector3 moveInput,
             out bool moving,
@@ -171,7 +163,7 @@ namespace EfDEnhanced.Patches
 
             try
             {
-                if (_characterMovementField == null || _moveInputField == null || 
+                if (_characterMovementField == null || _moveInputField == null ||
                     _movingField == null || _runningField == null)
                 {
                     ModLogger.LogError("MovementEnhancementPatch: Required fields not initialized");
@@ -229,7 +221,7 @@ namespace EfDEnhanced.Patches
                     // Combines MoveTowards for acceleration with Lerp for instant direction change
                     float maxDelta = enhancedAcc * Time.deltaTime;
                     velocity = Vector3.MoveTowards(velocity, target, maxDelta);
-                    
+
                     // Additional lerp for instant direction changes when already moving
                     if (velocity.sqrMagnitude > 0.1f)
                     {
@@ -246,11 +238,11 @@ namespace EfDEnhanced.Patches
             {
                 // Enhanced braking when no input
                 float brakingForce = preset.BrakingMultiplier * baseAcc * Time.deltaTime;
-                
+
                 // Preserve Y component during braking
                 float yVel = velocity.y;
                 velocity.y = 0f;
-                
+
                 // Apply stronger braking
                 if (velocity.sqrMagnitude > 0.001f)
                 {
@@ -260,7 +252,7 @@ namespace EfDEnhanced.Patches
                 {
                     velocity = Vector3.zero;
                 }
-                
+
                 // Restore Y component
                 velocity.y = yVel;
             }
@@ -321,7 +313,7 @@ namespace EfDEnhanced.Patches
                 {
                     _hasLoggedActivation = true;
                     _lastLoggedLevel = enhancementLevel;
-                    ModLogger.Log("MovementRotationEnhancementPatch", 
+                    ModLogger.Log("MovementRotationEnhancementPatch",
                         $"Rotation enhancement ACTIVE - Turn speed multiplier: {turnMultiplier}x, Original deltaTime: {deltaTime / turnMultiplier}, Enhanced: {deltaTime}");
                 }
             }

@@ -3,18 +3,19 @@ using ItemStatsSystem;
 
 namespace EfDEnhanced.Utils
 {
-  /// <summary>
-  /// Defines polarity (positive/negative/neutral) for weapon stat keys.
-  /// Used for weapon comparison coloring in UI.
-  /// 
-  /// Positive Polarity: Higher values are better (damage, accuracy, etc.)
-  /// Negative Polarity: Lower values are better (recoil, reload time, etc.)
-  /// Neutral Polarity: Values have no clear "better" direction
-  /// </summary>
-  public static class StatPolarityMap
-  {
-    private static readonly Dictionary<string, Polarity> PolarityDefinitions = new()
+    /// <summary>
+    /// Defines polarity (positive/negative/neutral) for weapon stat keys.
+    /// Used for weapon comparison coloring in UI.
+    /// 
+    /// Positive Polarity: Higher values are better (damage, accuracy, etc.)
+    /// Negative Polarity: Lower values are better (recoil, reload time, etc.)
+    /// Neutral Polarity: Values have no clear "better" direction
+    /// </summary>
+    public static class StatPolarityMap
     {
+        // Use target-typed new (C# 9.0) and make readonly for thread-safety
+        private static readonly Dictionary<string, Polarity> PolarityDefinitions = new()
+        {
       // ===== DAMAGE & EFFECTIVENESS =====
       // Higher is better
       { "Damage", Polarity.Positive },
@@ -84,31 +85,25 @@ namespace EfDEnhanced.Utils
       { "ReloadTime", Polarity.Negative },
     };
 
-    /// <summary>
-    /// Get the polarity for a given stat key
-    /// </summary>
-    public static Polarity GetPolarity(string statKey)
-    {
-      if (string.IsNullOrEmpty(statKey))
-      {
-        return Polarity.Neutral;
-      }
+        /// <summary>
+        /// Get the polarity for a given stat key
+        /// </summary>
+        public static Polarity GetPolarity(string statKey)
+        {
+            // Use null-coalescing and TryGetValue in one expression
+            return string.IsNullOrEmpty(statKey)
+              ? Polarity.Neutral
+              : PolarityDefinitions.TryGetValue(statKey, out var polarity)
+                ? polarity
+                : Polarity.Neutral;
+        }
 
-      if (PolarityDefinitions.TryGetValue(statKey, out var polarity))
-      {
-        return polarity;
-      }
-
-      // Default to neutral for unknown stats
-      return Polarity.Neutral;
+        /// <summary>
+        /// Check if a stat is defined in the polarity map
+        /// </summary>
+        public static bool IsDefined(string statKey)
+        {
+            return PolarityDefinitions.ContainsKey(statKey);
+        }
     }
-
-    /// <summary>
-    /// Check if a stat is defined in the polarity map
-    /// </summary>
-    public static bool IsDefined(string statKey)
-    {
-      return PolarityDefinitions.ContainsKey(statKey);
-    }
-  }
 }
