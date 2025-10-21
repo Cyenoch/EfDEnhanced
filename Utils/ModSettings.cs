@@ -153,6 +153,17 @@ namespace EfDEnhanced.Utils
             )
         );
 
+        public static readonly BoolSettingsEntry TrackerFilterByMap = Register(
+            new BoolSettingsEntry(
+                PREFIX,
+                "TrackerFilterByMap",
+                "Settings_TrackerFilterByMap_Name",
+                true,
+                CATEGORY_QUEST_TRACKER,
+                "Settings_TrackerFilterByMap_Desc"
+            )
+        );
+
         #endregion
 
         /// <summary>

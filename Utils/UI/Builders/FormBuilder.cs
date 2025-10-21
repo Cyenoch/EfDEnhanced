@@ -16,6 +16,7 @@ namespace EfDEnhanced.Utils.UI.Builders
     {
         private readonly Transform _parent;
         private readonly List<GameObject> _elements = new List<GameObject>();
+        private readonly Dictionary<GameObject, BoolSettingsEntry> _conditionalElements = new Dictionary<GameObject, BoolSettingsEntry>();
 
         /// <summary>
         /// 创建FormBuilder
@@ -51,7 +52,12 @@ namespace EfDEnhanced.Utils.UI.Builders
         /// <summary>
         /// 添加Toggle（自动绑定到BoolSettingsEntry）
         /// </summary>
-        public FormBuilder AddToggle(string labelLocalizationKey, BoolSettingsEntry setting)
+        /// <param name="labelLocalizationKey">标签本地化键</param>
+        /// <param name="setting">绑定的设置项</param>
+        /// <param name="visibilityCondition">可见性条件（可选）</param>
+        /// <param name="leftPadding">左边距（用于表示层级关系，默认0）</param>
+        public FormBuilder AddToggle(string labelLocalizationKey, BoolSettingsEntry setting, 
+                                      BoolSettingsEntry? visibilityCondition = null, int leftPadding = 0)
         {
             if (setting == null)
             {
@@ -63,15 +69,50 @@ namespace EfDEnhanced.Utils.UI.Builders
                 .SetLabel(labelLocalizationKey)
                 .BindToSetting(setting);
 
-            _elements.Add(toggle.Build());
+            GameObject element = toggle.Build();
+            _elements.Add(element);
+
+            // 应用左边距
+            if (leftPadding > 0)
+            {
+                var layout = element.GetComponent<HorizontalLayoutGroup>();
+                if (layout != null)
+                {
+                    layout.padding.left += leftPadding;
+                }
+            }
+
+            // 如果有可见性条件，注册并设置初始状态
+            if (visibilityCondition != null)
+            {
+                _conditionalElements[element] = visibilityCondition;
+                element.SetActive(visibilityCondition.Value);
+
+                // 监听条件变化
+                visibilityCondition.ValueChanged += (sender, args) =>
+                {
+                    if (element != null)
+                    {
+                        element.SetActive(args.NewValue);
+                    }
+                };
+            }
+
             return this;
         }
 
         /// <summary>
         /// 添加Float Slider（自动绑定到RangedFloatSettingsEntry）
         /// </summary>
+        /// <param name="labelLocalizationKey">标签本地化键</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="setting">绑定的设置项</param>
+        /// <param name="visibilityCondition">可见性条件（可选）</param>
+        /// <param name="leftPadding">左边距（用于表示层级关系，默认0）</param>
         public FormBuilder AddSlider(string labelLocalizationKey, float min, float max, 
-                                      RangedFloatSettingsEntry setting)
+                                      RangedFloatSettingsEntry setting,
+                                      BoolSettingsEntry? visibilityCondition = null, int leftPadding = 0)
         {
             if (setting == null)
             {
@@ -85,15 +126,54 @@ namespace EfDEnhanced.Utils.UI.Builders
                 .BindToSetting(setting)
                 .WithValuePreview();
 
-            _elements.Add(slider.Build());
+            GameObject element = slider.Build();
+            _elements.Add(element);
+
+            // 应用左边距
+            if (leftPadding > 0)
+            {
+                var rect = element.GetComponent<RectTransform>();
+                if (rect != null)
+                {
+                    var layout = element.GetComponent<VerticalLayoutGroup>();
+                    if (layout != null)
+                    {
+                        layout.padding.left += leftPadding;
+                    }
+                }
+            }
+
+            // 如果有可见性条件，注册并设置初始状态
+            if (visibilityCondition != null)
+            {
+                _conditionalElements[element] = visibilityCondition;
+                element.SetActive(visibilityCondition.Value);
+
+                // 监听条件变化
+                visibilityCondition.ValueChanged += (sender, args) =>
+                {
+                    if (element != null)
+                    {
+                        element.SetActive(args.NewValue);
+                    }
+                };
+            }
+
             return this;
         }
 
         /// <summary>
         /// 添加Int Slider（自动绑定到RangedIntSettingsEntry）
         /// </summary>
+        /// <param name="labelLocalizationKey">标签本地化键</param>
+        /// <param name="min">最小值</param>
+        /// <param name="max">最大值</param>
+        /// <param name="setting">绑定的设置项</param>
+        /// <param name="visibilityCondition">可见性条件（可选）</param>
+        /// <param name="leftPadding">左边距（用于表示层级关系，默认0）</param>
         public FormBuilder AddSlider(string labelLocalizationKey, int min, int max, 
-                                      RangedIntSettingsEntry setting)
+                                      RangedIntSettingsEntry setting,
+                                      BoolSettingsEntry? visibilityCondition = null, int leftPadding = 0)
         {
             if (setting == null)
             {
@@ -108,7 +188,39 @@ namespace EfDEnhanced.Utils.UI.Builders
                 .SetWholeNumbers(true)
                 .WithValuePreview();
 
-            _elements.Add(slider.Build());
+            GameObject element = slider.Build();
+            _elements.Add(element);
+
+            // 应用左边距
+            if (leftPadding > 0)
+            {
+                var rect = element.GetComponent<RectTransform>();
+                if (rect != null)
+                {
+                    var layout = element.GetComponent<VerticalLayoutGroup>();
+                    if (layout != null)
+                    {
+                        layout.padding.left += leftPadding;
+                    }
+                }
+            }
+
+            // 如果有可见性条件，注册并设置初始状态
+            if (visibilityCondition != null)
+            {
+                _conditionalElements[element] = visibilityCondition;
+                element.SetActive(visibilityCondition.Value);
+
+                // 监听条件变化
+                visibilityCondition.ValueChanged += (sender, args) =>
+                {
+                    if (element != null)
+                    {
+                        element.SetActive(args.NewValue);
+                    }
+                };
+            }
+
             return this;
         }
 

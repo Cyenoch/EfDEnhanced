@@ -151,6 +151,8 @@ public static class LocalizationHelper
             { "Settings_TrackerScale_Desc", "UI缩放倍数" },
             { "Settings_TrackerShowDescription_Name", "显示任务描述" },
             { "Settings_TrackerShowDescription_Desc", "在追踪器中显示任务描述" },
+            { "Settings_TrackerFilterByMap_Name", "只显示当前地图任务" },
+            { "Settings_TrackerFilterByMap_Desc", "只显示当前地图相关的任务，以及没有地图限制的任务" },
         };
         
         // 繁体中文
@@ -212,6 +214,8 @@ public static class LocalizationHelper
             { "Settings_TrackerScale_Desc", "UI縮放倍數" },
             { "Settings_TrackerShowDescription_Name", "顯示任務描述" },
             { "Settings_TrackerShowDescription_Desc", "在追蹤器中顯示任務描述" },
+            { "Settings_TrackerFilterByMap_Name", "只顯示當前地圖任務" },
+            { "Settings_TrackerFilterByMap_Desc", "只顯示當前地圖相關的任務，以及沒有地圖限制的任務" },
         };
         
         // 英语
@@ -273,6 +277,8 @@ public static class LocalizationHelper
             { "Settings_TrackerScale_Desc", "UI scale multiplier" },
             { "Settings_TrackerShowDescription_Name", "Show Quest Descriptions" },
             { "Settings_TrackerShowDescription_Desc", "Display quest descriptions in tracker" },
+            { "Settings_TrackerFilterByMap_Name", "Show Only Current Map Quests" },
+            { "Settings_TrackerFilterByMap_Desc", "Show only quests for the current map and quests without map requirements" },
         };
         
         // 日语
@@ -334,6 +340,8 @@ public static class LocalizationHelper
             { "Settings_TrackerScale_Desc", "UIスケール倍率" },
             { "Settings_TrackerShowDescription_Name", "クエスト説明を表示" },
             { "Settings_TrackerShowDescription_Desc", "トラッカーにクエスト説明を表示" },
+            { "Settings_TrackerFilterByMap_Name", "現在のマップのクエストのみ表示" },
+            { "Settings_TrackerFilterByMap_Desc", "現在のマップに関連するクエストと、マップ制限のないクエストのみ表示" },
         };
         
         ModLogger.Log("Localization", $"Loaded translations for {LocalizationData.Count} languages");

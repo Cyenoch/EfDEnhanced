@@ -260,20 +260,20 @@ namespace EfDEnhanced.Features
                     // Pre-Raid Check Section
                     .AddSection("Settings_Category_PreRaidCheck")
                     .AddToggle("Settings_EnableRaidCheck_Name", ModSettings.EnableRaidCheck)
-                    .AddToggle("Settings_CheckWeapon_Name", ModSettings.CheckWeapon)
-                    .AddToggle("Settings_CheckAmmo_Name", ModSettings.CheckAmmo)
-                    .AddToggle("Settings_CheckMeds_Name", ModSettings.CheckMeds)
-                    .AddToggle("Settings_CheckFood_Name", ModSettings.CheckFood)
-                    .AddToggle("Settings_CheckWeather_Name", ModSettings.CheckWeather)
+                    .AddToggle("Settings_CheckWeapon_Name", ModSettings.CheckWeapon, ModSettings.EnableRaidCheck, 30)
+                    .AddToggle("Settings_CheckAmmo_Name", ModSettings.CheckAmmo, ModSettings.EnableRaidCheck, 30)
+                    .AddToggle("Settings_CheckMeds_Name", ModSettings.CheckMeds, ModSettings.EnableRaidCheck, 30)
+                    .AddToggle("Settings_CheckFood_Name", ModSettings.CheckFood, ModSettings.EnableRaidCheck, 30)
+                    .AddToggle("Settings_CheckWeather_Name", ModSettings.CheckWeather, ModSettings.EnableRaidCheck, 30)
                     .AddSpacer()
                     
                     // Quest Tracker Section
                     .AddSection("Settings_Category_QuestTracker")
                     .AddToggle("Settings_EnableQuestTracker_Name", ModSettings.EnableQuestTracker)
-                    .AddSlider("Settings_TrackerPositionX_Name", 0f, 1f, ModSettings.TrackerPositionX)
-                    .AddSlider("Settings_TrackerPositionY_Name", 0f, 1f, ModSettings.TrackerPositionY)
-                    .AddSlider("Settings_TrackerScale_Name", 0.5f, 2f, ModSettings.TrackerScale)
-                    .AddToggle("Settings_TrackerShowDescription_Name", ModSettings.TrackerShowDescription);
+                    .AddToggle("Settings_TrackerShowDescription_Name", ModSettings.TrackerShowDescription, ModSettings.EnableQuestTracker, 30)
+                    .AddSlider("Settings_TrackerPositionX_Name", 0f, 1f, ModSettings.TrackerPositionX, visibilityCondition: ModSettings.EnableQuestTracker, leftPadding: 30)
+                    .AddSlider("Settings_TrackerPositionY_Name", 0f, 1f, ModSettings.TrackerPositionY, visibilityCondition: ModSettings.EnableQuestTracker, leftPadding: 30)
+                    .AddSlider("Settings_TrackerScale_Name", 0.5f, 2f, ModSettings.TrackerScale, visibilityCondition: ModSettings.EnableQuestTracker, leftPadding: 30);
 
                 ModLogger.Log("ModSettingsPanel", "Form built successfully with FormBuilder");
             }

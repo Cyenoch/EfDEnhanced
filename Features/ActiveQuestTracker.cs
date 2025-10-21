@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Duckov.Quests;
+using Duckov.Scenes;
 using Duckov.UI;
 using EfDEnhanced.Utils;
 using EfDEnhanced.Utils.Settings;
@@ -174,6 +175,7 @@ public class ActiveQuestTracker : MonoBehaviour
             ModSettings.TrackerPositionY.ValueChanged += OnTrackerPositionChanged;
             ModSettings.TrackerScale.ValueChanged += OnTrackerScaleChanged;
             ModSettings.TrackerShowDescription.ValueChanged += OnShowDescriptionChanged;
+            ModSettings.TrackerFilterByMap.ValueChanged += OnFilterByMapChanged;
 
             RefreshQuestList();
         }
@@ -207,6 +209,7 @@ public class ActiveQuestTracker : MonoBehaviour
             ModSettings.TrackerPositionY.ValueChanged -= OnTrackerPositionChanged;
             ModSettings.TrackerScale.ValueChanged -= OnTrackerScaleChanged;
             ModSettings.TrackerShowDescription.ValueChanged -= OnShowDescriptionChanged;
+            ModSettings.TrackerFilterByMap.ValueChanged -= OnFilterByMapChanged;
         }
         catch (Exception ex)
         {
@@ -317,6 +320,12 @@ public class ActiveQuestTracker : MonoBehaviour
                 .Where(q => q != null && !q.Complete && QuestTrackingManager.IsQuestTracked(q.ID))
                 .ToList();
             
+            // 根据设置决定是否按地图过滤
+            if (ModSettings.TrackerFilterByMap.Value)
+            {
+                trackedIncompleteQuests = FilterQuestsByCurrentMap(trackedIncompleteQuests);
+            }
+            
             if (trackedIncompleteQuests.Count == 0)
             {
                 ClearQuestList();
@@ -329,6 +338,92 @@ public class ActiveQuestTracker : MonoBehaviour
         catch (Exception ex)
         {
             ModLogger.LogError($"QuestTracker.RefreshQuestList failed: {ex}");
+        }
+    }
+    
+    /// <summary>
+    /// 根据当前地图过滤任务
+    /// 只显示当前地图的任务，以及没有地图限制的任务
+    /// </summary>
+    private List<Quest> FilterQuestsByCurrentMap(List<Quest> quests)
+    {
+        try
+        {
+            // 获取当前地图ID
+            string? currentMapID = GetCurrentMapID();
+            
+            if (string.IsNullOrEmpty(currentMapID))
+            {
+                ModLogger.Log("QuestTracker", "Cannot determine current map, showing all quests");
+                return quests;
+            }
+            
+            ModLogger.Log("QuestTracker", $"Filtering quests for current map: {currentMapID}");
+            
+            // 过滤任务
+            var filteredQuests = quests.Where(q =>
+            {
+                if (q == null) return false;
+                
+                var questSceneInfo = q.RequireSceneInfo;
+                
+                // 如果任务没有指定场景要求，显示（可以在任意地图完成）
+                if (questSceneInfo == null || string.IsNullOrEmpty(questSceneInfo.ID))
+                {
+                    ModLogger.Log("QuestTracker", $"Quest '{q.DisplayName}' has no map requirement - showing");
+                    return true;
+                }
+                
+                // 如果任务的场景ID匹配当前地图，显示
+                bool matches = questSceneInfo.ID == currentMapID;
+                if (matches)
+                {
+                    ModLogger.Log("QuestTracker", $"Quest '{q.DisplayName}' matches current map '{currentMapID}' - showing");
+                }
+                else
+                {
+                    ModLogger.Log("QuestTracker", $"Quest '{q.DisplayName}' requires map '{questSceneInfo.ID}' but current is '{currentMapID}' - hiding");
+                }
+                
+                return matches;
+            }).ToList();
+            
+            ModLogger.Log("QuestTracker", $"Filtered {quests.Count} quests to {filteredQuests.Count} for map '{currentMapID}'");
+            
+            return filteredQuests;
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestTracker.FilterQuestsByCurrentMap failed: {ex}");
+            return quests; // 出错时返回所有任务
+        }
+    }
+    
+    /// <summary>
+    /// 获取当前地图ID
+    /// </summary>
+    private string? GetCurrentMapID()
+    {
+        try
+        {
+            // 方法1：从 MultiSceneCore 获取主场景ID
+            if (MultiSceneCore.Instance != null)
+            {
+                string? mainSceneID = MultiSceneCore.MainSceneID;
+                if (!string.IsNullOrEmpty(mainSceneID))
+                {
+                    ModLogger.Log("QuestTracker", $"Current map ID from MultiSceneCore: {mainSceneID}");
+                    return mainSceneID;
+                }
+            }
+            
+            ModLogger.LogWarning("QuestTracker", "Could not determine current map ID");
+            return null;
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestTracker.GetCurrentMapID failed: {ex}");
+            return null;
         }
     }
     
@@ -464,10 +559,11 @@ public class ActiveQuestTracker : MonoBehaviour
             progressBadgeLayout.minWidth = 40;
             progressBadgeLayout.preferredHeight = -1;
             
-            // 任务描述（简介）- 根据设置决定是否显示
-            if (ModSettings.TrackerShowDescription.Value && !string.IsNullOrEmpty(quest.Description))
+            // 任务描述（简介）- 总是创建，但根据设置控制显示/隐藏
+            GameObject? descObj = null;
+            if (!string.IsNullOrEmpty(quest.Description))
             {
-                GameObject descObj = new GameObject("QuestDescription");
+                descObj = new GameObject("QuestDescription");
                 descObj.transform.SetParent(entryObj.transform, false);
 
                 TextMeshProUGUI descText = descObj.AddComponent<TextMeshProUGUI>();
@@ -484,6 +580,9 @@ public class ActiveQuestTracker : MonoBehaviour
                 LayoutElement descLayout = descObj.AddComponent<LayoutElement>();
                 descLayout.preferredHeight = -1;
                 descLayout.flexibleWidth = 1; // 允许自适应宽度
+                
+                // 初始状态根据设置决定
+                descObj.SetActive(ModSettings.TrackerShowDescription.Value);
             }
             
             // 任务进度容器
@@ -503,7 +602,8 @@ public class ActiveQuestTracker : MonoBehaviour
                 GameObject = entryObj,
                 TitleText = titleText,
                 ProgressBadgeText = progressBadgeText,
-                ProgressContainer = progressContainer
+                ProgressContainer = progressContainer,
+                DescriptionObject = descObj  // 保存描述对象引用
             };
             
             _questEntries.Add(questEntry);
@@ -734,6 +834,19 @@ public class ActiveQuestTracker : MonoBehaviour
             RefreshQuestList();
         }
     }
+
+    /// <summary>
+    /// 地图过滤设置变化回调
+    /// </summary>
+    private void OnFilterByMapChanged(object? sender, SettingsValueChangedEventArgs<bool> args)
+    {
+        if (_isActive)
+        {
+            // 刷新任务列表以应用新的过滤规则
+            ModLogger.Log("QuestTracker", $"Map filter setting changed to: {args.NewValue}");
+            RefreshQuestList();
+        }
+    }
 }
 
 /// <summary>
@@ -746,6 +859,7 @@ public class QuestEntryUI
     public TextMeshProUGUI? TitleText { get; set; }
     public TextMeshProUGUI? ProgressBadgeText { get; set; }
     public GameObject? ProgressContainer { get; set; }
+    public GameObject? DescriptionObject { get; set; }  // 描述UI元素
     
     private readonly List<TaskUIElement> _taskElements = new List<TaskUIElement>();
     private string _lastProgressText = "";
@@ -760,6 +874,16 @@ public class QuestEntryUI
             if (ProgressContainer == null)
             {
                 return;
+            }
+            
+            // 更新描述显示/隐藏状态（根据设置）
+            if (DescriptionObject != null)
+            {
+                bool shouldShow = ModSettings.TrackerShowDescription.Value && !string.IsNullOrEmpty(quest.Description);
+                if (DescriptionObject.activeSelf != shouldShow)
+                {
+                    DescriptionObject.SetActive(shouldShow);
+                }
             }
             
             // 更新进度徽章 (只在变化时更新)
