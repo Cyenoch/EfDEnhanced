@@ -267,6 +267,11 @@ namespace EfDEnhanced.Features
                     .AddToggle("Settings_CheckWeather_Name", ModSettings.CheckWeather, ModSettings.EnableRaidCheck, 30)
                     .AddSpacer()
                     
+                    // Movement Enhancement Section
+                    .AddSection("Settings_Category_Movement")
+                    .AddDropdown("Settings_MovementEnhancement_Name", ModSettings.MovementEnhancement)
+                    .AddSpacer()
+                    
                     // Quest Tracker Section
                     .AddSection("Settings_Category_QuestTracker")
                     .AddToggle("Settings_EnableQuestTracker_Name", ModSettings.EnableQuestTracker)

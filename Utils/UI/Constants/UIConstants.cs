@@ -65,6 +65,11 @@ namespace EfDEnhanced.Utils.UI.Constants
         public const int SETTINGS_ENTRY_SPACING = 8;
         
         /// <summary>
+        /// 设置字段高度
+        /// </summary>
+        public const int SETTINGS_FIELD_HEIGHT = 60;
+        
+        /// <summary>
         /// 分节标题之间的间距
         /// </summary>
         public const int SECTION_SPACING = 10;
@@ -109,6 +114,11 @@ namespace EfDEnhanced.Utils.UI.Constants
         public const int SETTINGS_LABEL_FONT_SIZE = 20;
         
         /// <summary>
+        /// 设置普通文本字体大小
+        /// </summary>
+        public const int SETTINGS_FONT_SIZE = 18;
+        
+        /// <summary>
         /// 按钮文本字体大小
         /// </summary>
         public const int BUTTON_TEXT_FONT_SIZE = 20;
@@ -151,6 +161,11 @@ namespace EfDEnhanced.Utils.UI.Constants
         /// 任务进度徽章颜色
         /// </summary>
         public static readonly Color QUEST_PROGRESS_COLOR = new Color(0.9f, 0.9f, 0.9f, 1f);
+        
+        /// <summary>
+        /// 设置文本颜色
+        /// </summary>
+        public static readonly Color SETTINGS_TEXT_COLOR = new Color(0.9f, 0.9f, 0.9f, 1f);
         
         /// <summary>
         /// 分隔线颜色

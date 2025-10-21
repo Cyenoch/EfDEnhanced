@@ -125,6 +125,7 @@ public static class LocalizationHelper
             // 设置类别
             { "Settings_Category_PreRaidCheck", "Raid前检查" },
             { "Settings_Category_QuestTracker", "任务追踪器" },
+            { "Settings_Category_Movement", "移动优化" },
 
             // Pre-Raid Check 设置
             { "Settings_EnableRaidCheck_Name", "启用Raid前检查" },
@@ -153,6 +154,14 @@ public static class LocalizationHelper
             { "Settings_TrackerShowDescription_Desc", "在追踪器中显示任务描述" },
             { "Settings_TrackerFilterByMap_Name", "只显示当前地图任务" },
             { "Settings_TrackerFilterByMap_Desc", "只显示当前地图相关的任务，以及没有地图限制的任务" },
+
+            // Movement Enhancement Settings
+            { "Settings_MovementEnhancement_Name", "移动响应增强" },
+            { "Settings_MovementEnhancement_Desc", "优化角色移动感觉，减少粘脚感。提供多个档位：禁用、轻度、中度、重度" },
+            { "Settings_Movement_Disabled", "禁用" },
+            { "Settings_Movement_Light", "轻度优化" },
+            { "Settings_Movement_Medium", "中度优化" },
+            { "Settings_Movement_Heavy", "重度优化" },
         };
         
         // 繁体中文
@@ -188,6 +197,7 @@ public static class LocalizationHelper
             // 設置類別
             { "Settings_Category_PreRaidCheck", "Raid前檢查" },
             { "Settings_Category_QuestTracker", "任務追蹤器" },
+            { "Settings_Category_Movement", "移動優化" },
 
             // Pre-Raid Check 設置
             { "Settings_EnableRaidCheck_Name", "啟用Raid前檢查" },
@@ -216,6 +226,14 @@ public static class LocalizationHelper
             { "Settings_TrackerShowDescription_Desc", "在追蹤器中顯示任務描述" },
             { "Settings_TrackerFilterByMap_Name", "只顯示當前地圖任務" },
             { "Settings_TrackerFilterByMap_Desc", "只顯示當前地圖相關的任務，以及沒有地圖限制的任務" },
+
+            // Movement Enhancement Settings
+            { "Settings_MovementEnhancement_Name", "移動響應增強" },
+            { "Settings_MovementEnhancement_Desc", "優化角色移動感覺，減少粘腳感。提供多個檔位：禁用、輕度、中度、重度" },
+            { "Settings_Movement_Disabled", "禁用" },
+            { "Settings_Movement_Light", "輕度優化" },
+            { "Settings_Movement_Medium", "中度優化" },
+            { "Settings_Movement_Heavy", "重度優化" },
         };
         
         // 英语
@@ -251,6 +269,7 @@ public static class LocalizationHelper
             // Settings Categories
             { "Settings_Category_PreRaidCheck", "Pre-Raid Check" },
             { "Settings_Category_QuestTracker", "Quest Tracker" },
+            { "Settings_Category_Movement", "Movement Enhancement" },
 
             // Pre-Raid Check Settings
             { "Settings_EnableRaidCheck_Name", "Enable Pre-Raid Check" },
@@ -279,6 +298,14 @@ public static class LocalizationHelper
             { "Settings_TrackerShowDescription_Desc", "Display quest descriptions in tracker" },
             { "Settings_TrackerFilterByMap_Name", "Show Only Current Map Quests" },
             { "Settings_TrackerFilterByMap_Desc", "Show only quests for the current map and quests without map requirements" },
+
+            // Movement Enhancement Settings
+            { "Settings_MovementEnhancement_Name", "Movement Response Enhancement" },
+            { "Settings_MovementEnhancement_Desc", "Optimize character movement feel, reduce sticky movement. Multiple presets: Disabled, Light, Medium, Heavy" },
+            { "Settings_Movement_Disabled", "Disabled" },
+            { "Settings_Movement_Light", "Light Optimization" },
+            { "Settings_Movement_Medium", "Medium Optimization" },
+            { "Settings_Movement_Heavy", "Heavy Optimization" },
         };
         
         // 日语
@@ -314,6 +341,7 @@ public static class LocalizationHelper
             // 設定カテゴリ
             { "Settings_Category_PreRaidCheck", "レイド前チェック" },
             { "Settings_Category_QuestTracker", "クエストトラッカー" },
+            { "Settings_Category_Movement", "移動最適化" },
 
             // Pre-Raid Check 設定
             { "Settings_EnableRaidCheck_Name", "レイド前チェックを有効化" },
@@ -342,6 +370,14 @@ public static class LocalizationHelper
             { "Settings_TrackerShowDescription_Desc", "トラッカーにクエスト説明を表示" },
             { "Settings_TrackerFilterByMap_Name", "現在のマップのクエストのみ表示" },
             { "Settings_TrackerFilterByMap_Desc", "現在のマップに関連するクエストと、マップ制限のないクエストのみ表示" },
+
+            // Movement Enhancement Settings
+            { "Settings_MovementEnhancement_Name", "移動レスポンス強化" },
+            { "Settings_MovementEnhancement_Desc", "キャラクター移動感を最適化し、粘着感を軽減。複数のプリセット：無効、軽量、中程度、重量" },
+            { "Settings_Movement_Disabled", "無効" },
+            { "Settings_Movement_Light", "軽量最適化" },
+            { "Settings_Movement_Medium", "中程度最適化" },
+            { "Settings_Movement_Heavy", "重量最適化" },
         };
         
         ModLogger.Log("Localization", $"Loaded translations for {LocalizationData.Count} languages");

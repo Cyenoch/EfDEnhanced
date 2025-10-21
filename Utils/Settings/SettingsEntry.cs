@@ -296,6 +296,7 @@ namespace EfDEnhanced.Utils.Settings
         protected virtual void OnValueChanged(T oldValue, T newValue)
         {
             ValueChanged?.Invoke(this, new SettingsValueChangedEventArgs<T>(oldValue, newValue));
+            Utils.ModLogger.Log("SettingsEntry", $"{Key}: Value changed from {oldValue} to {newValue}");
         }
 
         /// <summary>

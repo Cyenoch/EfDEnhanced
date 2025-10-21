@@ -225,6 +225,278 @@ namespace EfDEnhanced.Utils.UI.Builders
         }
 
         /// <summary>
+        /// 添加Dropdown下拉菜单（自动绑定到IndexedOptionsSettingsEntry）
+        /// </summary>
+        /// <param name="labelLocalizationKey">标签本地化键</param>
+        /// <param name="setting">绑定的设置项</param>
+        /// <param name="visibilityCondition">可见性条件（可选）</param>
+        /// <param name="leftPadding">左边距（用于表示层级关系，默认0）</param>
+        public FormBuilder AddDropdown(string labelLocalizationKey, IndexedOptionsSettingsEntry setting,
+                                        BoolSettingsEntry? visibilityCondition = null, int leftPadding = 0)
+        {
+            if (setting == null)
+            {
+                ModLogger.LogWarning($"Attempted to add dropdown with null setting: {labelLocalizationKey}");
+                return this;
+            }
+
+            GameObject container = CreateDropdownElement(labelLocalizationKey, setting, leftPadding);
+            _elements.Add(container);
+
+            // 如果有可见性条件，注册并设置初始状态
+            if (visibilityCondition != null)
+            {
+                _conditionalElements[container] = visibilityCondition;
+                container.SetActive(visibilityCondition.Value);
+
+                // 监听条件变化
+                visibilityCondition.ValueChanged += (sender, args) =>
+                {
+                    if (container != null)
+                    {
+                        container.SetActive(args.NewValue);
+                    }
+                };
+            }
+
+            return this;
+        }
+
+        /// <summary>
+        /// 创建Dropdown元素
+        /// </summary>
+        private GameObject CreateDropdownElement(string labelLocalizationKey, IndexedOptionsSettingsEntry setting, int leftPadding)
+        {
+            // Container
+            GameObject container = new GameObject($"Dropdown_{setting.Key}");
+            container.transform.SetParent(_parent, false);
+
+            RectTransform containerRect = container.AddComponent<RectTransform>();
+            containerRect.sizeDelta = new Vector2(0, UIConstants.SETTINGS_FIELD_HEIGHT);
+
+            VerticalLayoutGroup containerLayout = container.AddComponent<VerticalLayoutGroup>();
+            containerLayout.childControlHeight = false;
+            containerLayout.childControlWidth = true;
+            containerLayout.childForceExpandHeight = false;
+            containerLayout.childForceExpandWidth = true;
+            containerLayout.spacing = 16;
+            containerLayout.padding = new RectOffset(leftPadding, 0, 0, 0);
+
+            // Label
+            GameObject labelObj = new GameObject("Label");
+            labelObj.transform.SetParent(container.transform, false);
+
+            RectTransform labelRect = labelObj.AddComponent<RectTransform>();
+            labelRect.sizeDelta = new Vector2(0, 20);
+
+            TextMeshProUGUI labelText = labelObj.AddComponent<TextMeshProUGUI>();
+            labelText.text = LocalizationHelper.Get(labelLocalizationKey);
+            labelText.fontSize = UIConstants.SETTINGS_LABEL_FONT_SIZE;
+            labelText.color = UIConstants.SETTINGS_TEXT_COLOR;
+            labelText.alignment = TextAlignmentOptions.Left;
+
+            // Dropdown
+            GameObject dropdownObj = new GameObject("Dropdown");
+            dropdownObj.transform.SetParent(container.transform, false);
+
+            RectTransform dropdownRect = dropdownObj.AddComponent<RectTransform>();
+            dropdownRect.sizeDelta = new Vector2(0, 30);
+
+            Image dropdownBg = dropdownObj.AddComponent<Image>();
+            dropdownBg.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
+
+            TMP_Dropdown dropdown = dropdownObj.AddComponent<TMP_Dropdown>();
+            
+            // Configure dropdown template (required for TMP_Dropdown)
+            CreateDropdownTemplate(dropdownObj, dropdown);
+
+            // Populate options
+            dropdown.ClearOptions();
+            dropdown.AddOptions(new List<string>(setting.Options));
+            dropdown.value = setting.Value;
+            dropdown.RefreshShownValue();
+
+            // Bind to setting
+            dropdown.onValueChanged.AddListener((value) =>
+            {
+                try
+                {
+                    setting.Value = value;
+                    ModLogger.Log("FormBuilder", $"Dropdown {setting.Key} changed to {value} ({setting.SelectedOption})");
+                }
+                catch (System.Exception ex)
+                {
+                    ModLogger.LogError($"Failed to update dropdown setting {setting.Key}: {ex}");
+                }
+            });
+
+            // Listen to setting changes from other sources
+            setting.ValueChanged += (sender, args) =>
+            {
+                if (dropdown != null && dropdown.value != args.NewValue)
+                {
+                    dropdown.value = args.NewValue;
+                    dropdown.RefreshShownValue();
+                }
+            };
+
+            return container;
+        }
+
+        /// <summary>
+        /// 创建Dropdown的模板（TMP_Dropdown需要）
+        /// </summary>
+        private void CreateDropdownTemplate(GameObject dropdownObj, TMP_Dropdown dropdown)
+        {
+            // ===== Caption Label (显示当前选中值) =====
+            GameObject captionLabel = new GameObject("Label");
+            captionLabel.transform.SetParent(dropdownObj.transform, false);
+
+            RectTransform captionRect = captionLabel.AddComponent<RectTransform>();
+            captionRect.anchorMin = Vector2.zero;
+            captionRect.anchorMax = Vector2.one;
+            captionRect.sizeDelta = Vector2.zero;
+            captionRect.offsetMin = new Vector2(10, 2);
+            captionRect.offsetMax = new Vector2(-30, -2); // 留出箭头空间
+
+            TextMeshProUGUI captionText = captionLabel.AddComponent<TextMeshProUGUI>();
+            captionText.fontSize = UIConstants.SETTINGS_FONT_SIZE;
+            captionText.color = UIConstants.SETTINGS_TEXT_COLOR;
+            captionText.alignment = TextAlignmentOptions.Left;
+            captionText.verticalAlignment = VerticalAlignmentOptions.Middle;
+
+            // ===== Arrow (可选的下拉箭头) =====
+            GameObject arrow = new GameObject("Arrow");
+            arrow.transform.SetParent(dropdownObj.transform, false);
+
+            RectTransform arrowRect = arrow.AddComponent<RectTransform>();
+            arrowRect.anchorMin = new Vector2(1, 0.5f);
+            arrowRect.anchorMax = new Vector2(1, 0.5f);
+            arrowRect.pivot = new Vector2(1, 0.5f);
+            arrowRect.sizeDelta = new Vector2(20, 20);
+            arrowRect.anchoredPosition = new Vector2(-5, 0);
+
+            TextMeshProUGUI arrowText = arrow.AddComponent<TextMeshProUGUI>();
+            arrowText.text = "▼";
+            arrowText.fontSize = 14;
+            arrowText.color = UIConstants.SETTINGS_TEXT_COLOR;
+            arrowText.alignment = TextAlignmentOptions.Center;
+
+            // ===== Template (隐藏的弹出列表) =====
+            GameObject template = new GameObject("Template");
+            template.transform.SetParent(dropdownObj.transform, false);
+            template.SetActive(false);
+
+            RectTransform templateRect = template.AddComponent<RectTransform>();
+            templateRect.anchorMin = new Vector2(0, 0);
+            templateRect.anchorMax = new Vector2(1, 0);
+            templateRect.pivot = new Vector2(0.5f, 1);
+            templateRect.sizeDelta = new Vector2(0, 180);
+            templateRect.anchoredPosition = new Vector2(0, -2); // 向下偏移，显示在 dropdown 下方
+
+            Image templateBg = template.AddComponent<Image>();
+            templateBg.color = new Color(0.15f, 0.15f, 0.15f, 0.95f);
+
+            ScrollRect templateScroll = template.AddComponent<ScrollRect>();
+            templateScroll.horizontal = false;
+            templateScroll.vertical = true;
+            templateScroll.movementType = ScrollRect.MovementType.Clamped;
+            templateScroll.scrollSensitivity = 20f;
+            templateScroll.inertia = true;
+            templateScroll.decelerationRate = 0.135f;
+            templateScroll.elasticity = 0.1f;
+
+            // Viewport (带裁剪功能)
+            GameObject viewport = new GameObject("Viewport");
+            viewport.transform.SetParent(template.transform, false);
+
+            RectTransform viewportRect = viewport.AddComponent<RectTransform>();
+            viewportRect.anchorMin = Vector2.zero;
+            viewportRect.anchorMax = Vector2.one;
+            viewportRect.sizeDelta = Vector2.zero;
+            viewportRect.offsetMin = new Vector2(5, 5);
+            viewportRect.offsetMax = new Vector2(-5, -5);
+
+            // 使用 RectMask2D 进行裁剪（比 Mask 更适合 UI，不需要 Image sprite）
+            RectMask2D rectMask = viewport.AddComponent<RectMask2D>();
+            rectMask.padding = new Vector4(0, 0, 0, 0);
+
+            // Content
+            GameObject content = new GameObject("Content");
+            content.transform.SetParent(viewport.transform, false);
+
+            RectTransform contentRect = content.AddComponent<RectTransform>();
+            contentRect.anchorMin = new Vector2(0, 1);
+            contentRect.anchorMax = new Vector2(1, 1);
+            contentRect.pivot = new Vector2(0.5f, 1);
+            contentRect.sizeDelta = new Vector2(0, 0);
+            contentRect.anchoredPosition = Vector2.zero;
+
+            VerticalLayoutGroup contentLayout = content.AddComponent<VerticalLayoutGroup>();
+            contentLayout.childControlHeight = false; // 不控制高度，让 LayoutElement 决定
+            contentLayout.childControlWidth = true;
+            contentLayout.childForceExpandHeight = false;
+            contentLayout.childForceExpandWidth = true;
+            contentLayout.spacing = 2; // 添加小间距，防止选项紧贴
+
+            ContentSizeFitter contentFitter = content.AddComponent<ContentSizeFitter>();
+            contentFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            contentFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+
+            // Item (template for each option)
+            GameObject item = new GameObject("Item");
+            item.transform.SetParent(content.transform, false);
+
+            RectTransform itemRect = item.AddComponent<RectTransform>();
+            itemRect.sizeDelta = new Vector2(0, 32);
+            
+            // 添加 LayoutElement 来明确指定每个选项的高度
+            LayoutElement itemLayout = item.AddComponent<LayoutElement>();
+            itemLayout.minHeight = 32;
+            itemLayout.preferredHeight = 32;
+
+            Toggle itemToggle = item.AddComponent<Toggle>();
+            itemToggle.transition = Selectable.Transition.ColorTint;
+
+            Image itemBg = item.AddComponent<Image>();
+            itemBg.color = new Color(0.2f, 0.2f, 0.2f, 0f);
+            itemToggle.targetGraphic = itemBg;
+
+            ColorBlock colors = itemToggle.colors;
+            colors.normalColor = new Color(1, 1, 1, 0);
+            colors.highlightedColor = new Color(1, 1, 1, 0.2f);
+            colors.pressedColor = new Color(1, 1, 1, 0.3f);
+            colors.selectedColor = new Color(1, 1, 1, 0.2f);
+            colors.disabledColor = new Color(1, 1, 1, 0.1f);
+            itemToggle.colors = colors;
+
+            // Item Label
+            GameObject itemLabel = new GameObject("Item Label");
+            itemLabel.transform.SetParent(item.transform, false);
+
+            RectTransform itemLabelRect = itemLabel.AddComponent<RectTransform>();
+            itemLabelRect.anchorMin = Vector2.zero;
+            itemLabelRect.anchorMax = Vector2.one;
+            itemLabelRect.sizeDelta = Vector2.zero;
+            itemLabelRect.offsetMin = new Vector2(10, 2);
+            itemLabelRect.offsetMax = new Vector2(-10, -2);
+
+            TextMeshProUGUI itemLabelText = itemLabel.AddComponent<TextMeshProUGUI>();
+            itemLabelText.fontSize = UIConstants.SETTINGS_FONT_SIZE;
+            itemLabelText.color = UIConstants.SETTINGS_TEXT_COLOR;
+            itemLabelText.alignment = TextAlignmentOptions.Left;
+            itemLabelText.verticalAlignment = VerticalAlignmentOptions.Middle;
+
+            // ===== Link components =====
+            templateScroll.content = contentRect;
+            templateScroll.viewport = viewportRect;
+
+            dropdown.template = templateRect;
+            dropdown.captionText = captionText; // 使用单独创建的 caption text
+            dropdown.itemText = itemLabelText;   // 使用模板中的 item text
+        }
+
+        /// <summary>
         /// 添加自定义Toggle（不绑定到Setting）
         /// </summary>
         public FormBuilder AddCustomToggle(string labelLocalizationKey, bool initialValue, 

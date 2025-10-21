@@ -10,25 +10,53 @@ Never die from forgetting your meds, ammo, or quest items again! Track your acti
 
 ### 🎯 任务追踪 | Quest Tracking
 
-在任务面板中可以追踪任务，并在游戏中于右上角显示。
+在任务面板中可以追踪任务，并在游戏中于左上角显示。
 
-Quests can be tracked in the quest panel, and will be displayed in the upper right corner of the game.
+Quests can be tracked in the quest panel, and will be displayed in the upper left corner of the game.
 
 **功能特性 | Features:**
 - **选择性追踪** | Selective Tracking - 使用任务面板中的复选框选择要追踪的任务
-- **局内显示** | In-Raid Display - 仅追踪的任务会显示在右上角
+- **局内显示** | In-Raid Display - 仅追踪的任务会显示在左上角
 - **原生UI风格** | Native UI Style - 使用游戏原生任务图标实现无缝集成
 - **进度追踪** | Progress Tracking - 显示每个任务的完成/总数（例如 "2/3"）
 - **任务状态** | Task Status - ✓ 表示已完成，○ 表示待完成
+- **地图过滤** | Map Filtering - 自动只显示当前地图相关的任务
+- **可调外观** | Customizable - 调整位置、缩放、是否显示描述
 - **持久化设置** | Persistent Settings - 追踪偏好会在会话间保存
-- **自动显隐** | Auto Show/Hide - 仅在突袭时可见，基地中隐藏
+- **自动显隐** | Auto Show/Hide - 仅在突袭时可见，打开菜单时隐藏
 - **多语言支持** | Multi-language - 完整支持中文、英文和日文
 
 **使用方法 | How to use:**
 1. 打开任务面板（Tab 键）| Open quest panel (Tab key)
 2. 点击任意任务查看详情 | Click any quest to view details
 3. 勾选任务标题下方的"局内追踪"复选框 | Check the "Track in Raid" checkbox below the quest title
-4. 进入突袭后在右上角查看追踪的任务！| Enter raid and see your tracked quests in top-right corner!
+4. 进入突袭后在左上角查看追踪的任务！| Enter raid and see your tracked quests in top-left corner!
+
+---
+
+### 🏃 移动增强 | Movement Enhancement
+
+优化角色移动响应速度，告别"粘滞感"。
+
+Optimize character movement response, say goodbye to "sticky" feeling.
+
+**4档位可调 | 4 Adjustment Levels:**
+- **禁用** | Disabled - 保持原版手感
+- **轻度** | Light - 2倍加速/制动，1.5倍转向
+- **中度** | Medium - 4倍加速/制动，2.5倍转向，支持瞬时方向切换
+- **重度** | Heavy - 8倍加速/制动，4倍转向，极致响应速度
+
+**特性 | Features:**
+- 仅影响玩家角色，不影响NPC | Only affects player character, not NPCs
+- 加速度和制动力同步提升 | Synchronized acceleration and braking enhancement
+- 转向速度独立优化 | Independent turning speed optimization
+- 保持垂直速度（跳跃/下落）| Preserves vertical velocity (jumping/falling)
+- 实时切换无需重启 | Real-time switching without restart
+
+**使用场景 | Use Cases:**
+- 轻度：略微改善操作手感，接近原版体验
+- 中度：显著提升响应速度，适合大多数玩家（推荐）
+- 重度：极致灵敏操作，适合高手玩家和快节奏战斗
 
 ---
 
@@ -65,7 +93,8 @@ If any issues are detected, a clear dialog shows you:
 Adds "EfD Enhanced Settings" button to pause menu:
 
 - **传送前检查设置** | Pre-Raid Check Settings - 启用/禁用各项检查
-- **任务追踪器设置** | Quest Tracker Settings - 调整位置、大小、显示选项
+- **移动增强设置** | Movement Enhancement Settings - 4档位调节移动手感
+- **任务追踪器设置** | Quest Tracker Settings - 调整位置、大小、显示选项、地图过滤
 - **一键重置** | Reset to Defaults - 恢复所有设置为默认值
 - **实时生效** | Live Updates - 设置立即生效无需重启
 
@@ -195,11 +224,16 @@ tail -f ~/Library/Logs/TeamSoda/Duckov/Player.log
 
 ## Known Limitations
 
+### Pre-Raid Check:
 - Doesn't check if ammo matches your gun type
 - Doesn't verify minimum quantities (just checks if you have any)
 - Quest item checks only verify `RequiredItemID` (items you must bring)
-- Doesn't check quest scene requirements (you might have items but wrong map)
 - Doesn't check `SubmitItems` (items to find and turn in later)
+
+### Movement Enhancement:
+- Changes base game movement mechanics (can be disabled anytime)
+- May feel too sensitive on higher levels for some players
+- Not recommended for precise aiming scenarios (use lower levels)
 
 ## Technical Details
 
@@ -216,6 +250,7 @@ tail -f ~/Library/Logs/TeamSoda/Duckov/Player.log
 EfDEnhanced/
 ├── ModBehaviour.cs              # Mod entry point and initialization
 ├── Patches/
+│   ├── MovementEnhancementPatch.cs # Movement system optimization
 │   ├── PauseMenuPatch.cs       # Adds settings button to pause menu
 │   ├── QuestViewDetailsPatch.cs # Adds tracking checkbox to quest details
 │   ├── RaidEntryPatches.cs     # Intercepts raid entry for checks
@@ -230,11 +265,21 @@ EfDEnhanced/
     ├── ModSettings.cs          # Centralized settings manager
     ├── QuestTrackingManager.cs # Quest tracking persistence
     ├── RaidCheckUtility.cs     # Pre-raid check logic
-    └── Settings/               # Settings entry classes
-        ├── BoolSettingsEntry.cs
-        ├── FloatSettingsEntry.cs
-        ├── IntSettingsEntry.cs
-        └── SettingsEntry.cs
+    ├── Settings/               # Settings entry classes
+    │   ├── BoolSettingsEntry.cs
+    │   ├── FloatSettingsEntry.cs
+    │   ├── IntSettingsEntry.cs
+    │   ├── OptionsSettingsEntry.cs
+    │   └── SettingsEntry.cs
+    └── UI/                     # Reusable UI components
+        ├── Builders/
+        │   └── FormBuilder.cs  # Automatic form generation
+        ├── Components/
+        │   ├── ModButton.cs
+        │   ├── ModSlider.cs
+        │   └── ModToggle.cs
+        └── Constants/
+            └── UIConstants.cs
 ```
 
 ## Development

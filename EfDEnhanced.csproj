@@ -35,6 +35,7 @@
         <Reference Include="$(DuckovDataPath)\Managed\SodaLocalization.dll" />
         <Reference Include="$(DuckovDataPath)\Managed\ItemStatsSystem.dll" />
         <Reference Include="$(DuckovDataPath)\Managed\FMODUnity.dll" />
+        <Reference Include="$(DuckovDataPath)\Managed\ECM2.dll" />
         <Reference Include="$(DuckovDataPath)\Managed\Unity*" />
         <Reference Include="$(DuckovDataPath)\Managed\UniTask.dll" />
         <Reference Include="$(DuckovDataPath)\Managed\Eflatun.SceneReference.dll" />

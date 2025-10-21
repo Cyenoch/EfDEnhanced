@@ -16,6 +16,7 @@ namespace EfDEnhanced.Utils
         // Settings category localization keys
         private const string CATEGORY_RAID_CHECK = "Settings_Category_PreRaidCheck";
         private const string CATEGORY_QUEST_TRACKER = "Settings_Category_QuestTracker";
+        private const string CATEGORY_MOVEMENT = "Settings_Category_Movement";
 
         // All settings entries
         private static readonly List<object> _allSettings = [];
@@ -134,9 +135,9 @@ namespace EfDEnhanced.Utils
                 PREFIX,
                 "TrackerScale",
                 "Settings_TrackerScale_Name",
-                1.0f,
+                1.2f,
                 0.5f,
-                2.0f,
+                3.0f,
                 CATEGORY_QUEST_TRACKER,
                 "Settings_TrackerScale_Desc"
             )
@@ -161,6 +162,28 @@ namespace EfDEnhanced.Utils
                 true,
                 CATEGORY_QUEST_TRACKER,
                 "Settings_TrackerFilterByMap_Desc"
+            )
+        );
+
+        #endregion
+
+        #region Movement Enhancement Settings
+
+        public static readonly IndexedOptionsSettingsEntry MovementEnhancement = Register(
+            new IndexedOptionsSettingsEntry(
+                PREFIX,
+                "MovementEnhancement",
+                "Settings_MovementEnhancement_Name",
+                0, // Default: Medium optimization
+                new[]
+                {
+                    "Settings_Movement_Disabled",
+                    "Settings_Movement_Light",
+                    "Settings_Movement_Medium",
+                    "Settings_Movement_Heavy"
+                },
+                CATEGORY_MOVEMENT,
+                "Settings_MovementEnhancement_Desc"
             )
         );
 
