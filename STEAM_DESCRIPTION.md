@@ -30,6 +30,8 @@
 - **中度** - 4倍加速/制动，2.5倍转向（推荐）
 - **重度** - 8倍加速/制动，4倍转向
 
+不是增加移动速度，而是调整加速度参数
+
 特性：
 - 仅影响玩家角色，不影响NPC
 - 加速、制动、转向同步优化
@@ -119,6 +121,8 @@ Optimize character movement response, say goodbye to "sticky" feeling.
 - **Light** - 2x accel/brake, 1.5x turning
 - **Medium** - 4x accel/brake, 2.5x turning (Recommended)
 - **Heavy** - 8x accel/brake, 4x turning
+
+Not increase movement speed, but adjust acceleration parameters.
 
 Features:
 - Only affects player character, not NPCs
