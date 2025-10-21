@@ -150,6 +150,16 @@ namespace EfDEnhanced.Utils.Settings
         }
 
         /// <summary>
+        /// Allow derived classes to coerce persisted values into a valid range/shape.
+        /// </summary>
+        /// <param name="value">Loaded value from storage.</param>
+        /// <returns>Coerced value (defaults to the input).</returns>
+        protected virtual T CoerceValue(T value)
+        {
+            return value;
+        }
+
+        /// <summary>
         /// Load value with version migration support
         /// </summary>
         private T LoadValueWithMigration()
@@ -172,7 +182,29 @@ namespace EfDEnhanced.Utils.Settings
                 }
 
                 // Load value with fallback to default on parse failure
-                return LoadValue();
+                T loadedValue = LoadValue();
+
+                // Allow derived classes to coerce the loaded value
+                T coercedValue = CoerceValue(loadedValue);
+
+                if (!Equals(coercedValue, loadedValue))
+                {
+                    Utils.ModLogger.Log("SettingsEntry", $"{Key}: Adjusted persisted value {loadedValue} -> {coercedValue}");
+                    SaveValue(coercedValue);
+                    SaveModifiedFlag();
+                }
+
+                if (!Validate(coercedValue))
+                {
+                    Utils.ModLogger.LogWarning("SettingsEntry", $"{Key}: Loaded invalid value {coercedValue}, resetting to default {DefaultValue}");
+                    _wasModifiedByUser = false;
+                    SaveValue(DefaultValue);
+                    SaveVersion();
+                    SaveModifiedFlag();
+                    return DefaultValue;
+                }
+
+                return coercedValue;
             }
             catch (Exception ex)
             {

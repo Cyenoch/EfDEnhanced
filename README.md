@@ -32,19 +32,19 @@ Quests can be tracked in the quest panel, and will be displayed in the upper rig
 
 ---
 
-### ✅ 传送台进图检查 | Pre-Raid Checks
+### ✅ 传送前装备检查 | Pre-Raid Equipment Check
 
-使用传送台进入地图前检查：
+使用传送台进入地图前自动检查：
 
-Before entering a map using the teleporter, check:
+Automatically checks before entering a map via teleporter:
 
-- **武器检查** | Weapon - 是否携带了武器？| Are you carrying weapons?
-- **弹药检查** | Ammunition - 是否携带了弹药？| Are you carrying ammunition?
-- **药品检查** | Medicine - 是否携带了药品？| Are you carrying medicine?
-- **食物检查** | Food/Drink - 是否携带了食物？| Are you carrying food?
-- **天气检查** | Weather - 是否处于风暴天气？| Are you in a storm?
-- **任务物品检查** | Quest Items - 是否携带了任务所需的物品？| Are you carrying the necessary items for the quest?
-- **风暴预警** | Storm Warning - 是否有即将到来的风暴？| Is a storm approaching within 24 hours?
+- **武器** | Weapon - 是否携带了枪支？| Are you carrying weapons?
+- **弹药** | Ammunition - 是否携带了弹药？| Are you carrying ammunition?
+- **医疗用品** | Medicine - 是否携带了急救包？| Are you carrying medical supplies?
+- **食物饮水** | Food/Drink - 是否携带了食物和水？| Are you carrying food and water?
+- **天气警告** | Weather - 当前是否为风暴天气？| Is it stormy weather?
+- **风暴预警** | Storm Warning - 24小时内是否有风暴？| Is a storm approaching within 24 hours?
+- **任务物品** | Quest Items - 是否携带了当前地图任务所需的物品？| Are you carrying quest items for this map?
 
 **智能警告对话框 | Smart Warning Dialog:**
 
@@ -58,12 +58,26 @@ If any issues are detected, a clear dialog shows you:
 
 ---
 
-### 🔧 无缝集成 | Seamless Integration
+### 🎨 完整的设置面板 | Full Settings Panel
 
-- 适用于所有突袭入口（传送台、楼梯、下水道）| Works with all raid entry points
-- 使用游戏原生物品检测系统以确保准确性 | Uses game's native item detection systems for accuracy
-- 失效保护设计：出错时不会阻止你 | Fail-safe design: won't block you if something goes wrong
-- 完全本地化UI（简体中文、繁体中文、英文、日文）| Fully localized UI in Chinese Simplified, Traditional, English, and Japanese
+在暂停菜单中添加"EfD Enhanced 设置"按钮：
+
+Adds "EfD Enhanced Settings" button to pause menu:
+
+- **传送前检查设置** | Pre-Raid Check Settings - 启用/禁用各项检查
+- **任务追踪器设置** | Quest Tracker Settings - 调整位置、大小、显示选项
+- **一键重置** | Reset to Defaults - 恢复所有设置为默认值
+- **实时生效** | Live Updates - 设置立即生效无需重启
+
+### 🌍 多语言支持 | Multi-Language Support
+
+完整支持以下语言 | Fully supports the following languages:
+- 🇨🇳 简体中文 | Simplified Chinese
+- 🇹🇼 繁体中文 | Traditional Chinese
+- 🇺🇸 English
+- 🇯🇵 日本語 | Japanese
+
+所有UI文本会根据游戏语言自动切换 | All UI text automatically switches based on game language
 
 ---
 
@@ -200,17 +214,27 @@ tail -f ~/Library/Logs/TeamSoda/Duckov/Player.log
 
 ```
 EfDEnhanced/
-├── ModBehaviour.cs           # Mod entry point and initialization
+├── ModBehaviour.cs              # Mod entry point and initialization
 ├── Patches/
-│   └── RaidEntryPatches.cs  # Intercepts raid entry clicks
+│   ├── PauseMenuPatch.cs       # Adds settings button to pause menu
+│   ├── QuestViewDetailsPatch.cs # Adds tracking checkbox to quest details
+│   ├── RaidEntryPatches.cs     # Intercepts raid entry for checks
+│   └── WorkshopUploadPatch.cs  # Prevents workshop description override
 ├── Features/
-│   ├── ActiveQuestTracker.cs # In-raid quest tracker HUD (NEW!)
-│   ├── RaidCheckDialog.cs    # Warning dialog UI
-│   └── RaidPreparationView.cs # Preparation screen view
+│   ├── ActiveQuestTracker.cs   # In-raid quest tracker HUD
+│   ├── ModSettingsPanel.cs     # Settings panel UI
+│   └── RaidPreparationView.cs  # Pre-raid warning dialog
 └── Utils/
-    ├── RaidCheckUtility.cs   # Core check logic
-    ├── LocalizationHelper.cs # Multi-language support
-    └── ModLogger.cs          # Logging utilities
+    ├── LocalizationHelper.cs   # Multi-language support
+    ├── ModLogger.cs            # Logging utilities
+    ├── ModSettings.cs          # Centralized settings manager
+    ├── QuestTrackingManager.cs # Quest tracking persistence
+    ├── RaidCheckUtility.cs     # Pre-raid check logic
+    └── Settings/               # Settings entry classes
+        ├── BoolSettingsEntry.cs
+        ├── FloatSettingsEntry.cs
+        ├── IntSettingsEntry.cs
+        └── SettingsEntry.cs
 ```
 
 ## Development

@@ -49,6 +49,13 @@ namespace EfDEnhanced.Utils.Settings
             return value >= MinValue && value <= MaxValue;
         }
 
+        protected override float CoerceValue(float value)
+        {
+            if (value < MinValue) return MinValue;
+            if (value > MaxValue) return MaxValue;
+            return value;
+        }
+
         /// <summary>
         /// Clamp a value to the valid range
         /// </summary>

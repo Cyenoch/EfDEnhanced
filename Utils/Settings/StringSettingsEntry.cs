@@ -53,6 +53,11 @@ namespace EfDEnhanced.Utils.Settings
             return Options.Contains(value);
         }
 
+        protected override string CoerceValue(string value)
+        {
+            return Options.Contains(value) ? value : DefaultValue;
+        }
+
         /// <summary>
         /// Get the index of the current value in the options array
         /// </summary>

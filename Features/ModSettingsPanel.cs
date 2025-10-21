@@ -15,7 +15,6 @@ namespace EfDEnhanced.Features
     /// Settings panel UI for EfDEnhanced mod
     /// Automatically builds UI from ModSettings entries
     /// Opened from pause menu
-    /// Inherits from UIPanel and manually blocks input when open
     /// </summary>
     public class ModSettingsPanel : UIPanel
     {
@@ -23,7 +22,11 @@ namespace EfDEnhanced.Features
         private CanvasGroup? canvasGroup;
         private GameObject? contentPanel;
         private Coroutine? fadeCoroutine;
-        private const float FadeDuration = 0.2f;
+        private const float FADE_DURATION = 0.2f;
+        private const int CANVAS_SORT_ORDER = 1000;
+        private const int TOGGLE_SIZE = 28;
+        private const int BUTTON_WIDTH = 220;
+        private const int BUTTON_HEIGHT = 46;
 
         private void Awake()
         {
@@ -835,16 +838,13 @@ namespace EfDEnhanced.Features
         {
             if (canvasGroup == null) yield break;
 
-            float duration = 0.2f;
             float elapsed = 0f;
-
-            while (elapsed < duration)
+            while (elapsed < FADE_DURATION)
             {
                 elapsed += Time.unscaledDeltaTime;
-                canvasGroup.alpha = Mathf.Lerp(0f, 1f, elapsed / duration);
+                canvasGroup.alpha = Mathf.Lerp(0f, 1f, elapsed / FADE_DURATION);
                 yield return null;
             }
-
             canvasGroup.alpha = 1f;
         }
 
@@ -852,18 +852,14 @@ namespace EfDEnhanced.Features
         {
             if (canvasGroup == null) yield break;
 
-            float duration = 0.2f;
             float elapsed = 0f;
-
-            while (elapsed < duration)
+            while (elapsed < FADE_DURATION)
             {
                 elapsed += Time.unscaledDeltaTime;
-                canvasGroup.alpha = Mathf.Lerp(1f, 0f, elapsed / duration);
+                canvasGroup.alpha = Mathf.Lerp(1f, 0f, elapsed / FADE_DURATION);
                 yield return null;
             }
-
             canvasGroup.alpha = 0f;
-            // Don't SetActive(false) - keep GameObject active for future opens
         }
 
         /// <summary>

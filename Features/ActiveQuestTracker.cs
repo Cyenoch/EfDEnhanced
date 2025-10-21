@@ -83,8 +83,6 @@ public class ActiveQuestTracker : MonoBehaviour
     {
         try
         {
-            ModLogger.Log("QuestTracker", "Starting BuildUI...");
-            
             // 创建Canvas
             _rootCanvas = new GameObject("QuestTrackerCanvas");
             _rootCanvas.transform.SetParent(transform);
@@ -92,8 +90,6 @@ public class ActiveQuestTracker : MonoBehaviour
             Canvas canvas = _rootCanvas.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 100; // 在HUD之上
-            
-            ModLogger.Log("QuestTracker", $"Canvas created with sortingOrder: {canvas.sortingOrder}");
             
             CanvasScaler scaler = _rootCanvas.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
@@ -103,8 +99,6 @@ public class ActiveQuestTracker : MonoBehaviour
             float screenAspect = (float)Screen.width / Screen.height;
             float refAspect = 1920f / 1080f; // 16:9
             scaler.matchWidthOrHeight = (screenAspect > refAspect) ? 1f : 0f;
-
-            // 不添加GraphicRaycaster，使UI不响应鼠标操作
             
             // 创建主面板（左上角）
             _questPanel = new GameObject("QuestPanel");
@@ -124,13 +118,6 @@ public class ActiveQuestTracker : MonoBehaviour
             
             // 设置位置：左上角向右和向下偏移（负值）
             panelRect.anchoredPosition = new Vector2(-10, -10);
-            
-            ModLogger.Log("QuestTracker", $"Screen: {Screen.width}x{Screen.height}, Panel size: 280x{maxHeight}, Position: {panelRect.anchoredPosition}");
-            
-            // 不添加背景，让panel透明
-            
-            // 创建标题（不再需要，移除以节省空间）
-            // 任务列表直接从顶部开始
             
             // 直接创建任务列表容器（不使用ScrollRect）
             _questListContainer = new GameObject("QuestListContainer");
@@ -156,13 +143,10 @@ public class ActiveQuestTracker : MonoBehaviour
             
             // 默认隐藏
             _rootCanvas.SetActive(false);
-            
-            ModLogger.Log("QuestTracker", $"UI built successfully. RootCanvas active: {_rootCanvas.activeSelf}");
         }
         catch (Exception ex)
         {
             ModLogger.LogError($"QuestTracker.BuildUI failed: {ex}");
-            ModLogger.LogError($"Stack trace: {ex.StackTrace}");
         }
     }
     
@@ -173,27 +157,14 @@ public class ActiveQuestTracker : MonoBehaviour
     {
         try
         {
-            ModLogger.Log("QuestTracker", $"Enable called. _rootCanvas null? {_rootCanvas == null}, _isActive: {_isActive}");
-
             // 检查设置是否启用任务追踪器
-            bool isEnabled = ModSettings.EnableQuestTracker.Value;
-            ModLogger.Log("QuestTracker", $"Quest tracker enabled in settings? {isEnabled}, Key: {ModSettings.EnableQuestTracker.Key}");
-
-            if (!isEnabled)
+            if (!ModSettings.EnableQuestTracker.Value)
             {
-                ModLogger.Log("QuestTracker", "Quest tracker is disabled in settings - not enabling");
                 return;
             }
 
-            if (_isActive)
+            if (_isActive || _rootCanvas == null)
             {
-                ModLogger.LogWarning("QuestTracker", "Already enabled");
-                return;
-            }
-
-            if (_rootCanvas == null)
-            {
-                ModLogger.LogError("QuestTracker.Enable: _rootCanvas is null!");
                 return;
             }
 
@@ -201,13 +172,10 @@ public class ActiveQuestTracker : MonoBehaviour
 
             // 检查初始UI状态 - 如果有菜单打开则隐藏追踪器
             bool anyMenuOpen = View.ActiveView != null;
-            bool shouldShow = !anyMenuOpen;
-            _rootCanvas.SetActive(shouldShow);
+            _rootCanvas.SetActive(!anyMenuOpen);
 
             // 应用设置中的位置和缩放
             ApplySettingsToUI();
-
-            ModLogger.Log("QuestTracker", $"Canvas activated. Menu open: {anyMenuOpen}, Tracker visible: {shouldShow}");
 
             // 订阅所有事件
             RegisterEvents();
@@ -219,13 +187,10 @@ public class ActiveQuestTracker : MonoBehaviour
             ModSettings.TrackerShowDescription.ValueChanged += OnShowDescriptionChanged;
 
             RefreshQuestList();
-
-            ModLogger.Log("QuestTracker", "Tracker enabled");
         }
         catch (Exception ex)
         {
             ModLogger.LogError($"QuestTracker.Enable failed: {ex}");
-            ModLogger.LogError($"Stack trace: {ex.StackTrace}");
         }
     }
     
@@ -253,8 +218,6 @@ public class ActiveQuestTracker : MonoBehaviour
             ModSettings.TrackerPositionY.ValueChanged -= OnTrackerPositionChanged;
             ModSettings.TrackerScale.ValueChanged -= OnTrackerScaleChanged;
             ModSettings.TrackerShowDescription.ValueChanged -= OnShowDescriptionChanged;
-
-            ModLogger.Log("QuestTracker", "Tracker disabled");
         }
         catch (Exception ex)
         {
@@ -286,8 +249,6 @@ public class ActiveQuestTracker : MonoBehaviour
 
             // UI状态变化（菜单打开/关闭时隐藏/显示追踪器）
             View.OnActiveViewChanged += OnUIStateChanged;
-
-            ModLogger.Log("QuestTracker", "Events registered");
         }
         catch (Exception ex)
         {
@@ -308,8 +269,6 @@ public class ActiveQuestTracker : MonoBehaviour
             Quest.onQuestCompleted -= OnQuestCompleted;
             QuestManager.OnTaskFinishedEvent -= OnTaskFinished;
             View.OnActiveViewChanged -= OnUIStateChanged;
-
-            ModLogger.Log("QuestTracker", "Events unregistered");
         }
         catch (Exception ex)
         {
@@ -334,11 +293,9 @@ public class ActiveQuestTracker : MonoBehaviour
 
             // 当有菜单打开时隐藏追踪器，没有菜单时显示追踪器
             bool shouldShow = !anyMenuOpen;
-
             if (_rootCanvas.activeSelf != shouldShow)
             {
                 _rootCanvas.SetActive(shouldShow);
-                ModLogger.Log("QuestTracker", $"UI state changed - Menu open: {anyMenuOpen}, Tracker visible: {shouldShow}");
             }
         }
         catch (Exception ex)
@@ -584,10 +541,8 @@ public class ActiveQuestTracker : MonoBehaviour
             // 初始化显示
             questEntry.UpdateDisplay(quest);
             
-            // 强制刷新布局，然后输出调试信息
+            // 强制刷新布局
             Canvas.ForceUpdateCanvases();
-            ModLogger.Log("QuestTracker", $"Created entry for quest: {quest.DisplayName}");
-            ModLogger.Log("QuestTracker", $"  EntryRect width: {entryRect.rect.width}, TitleRow width: {titleRowRect.rect.width}");
         }
         catch (Exception ex)
         {

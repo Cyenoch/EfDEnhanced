@@ -21,14 +21,24 @@ EfDEnhanced/
 ├── Utils/                       # 工具类
 │   ├── ModLogger.cs             # 统一日志系统
 │   ├── RaidCheckUtility.cs      # Raid检查核心逻辑
-│   └── LocalizationHelper.cs    # 多语言本地化支持
+│   ├── LocalizationHelper.cs    # 多语言本地化支持
+│   ├── ModSettings.cs           # 集中式设置管理器
+│   ├── QuestTrackingManager.cs  # 任务追踪持久化
+│   └── Settings/                # 设置条目类
+│       ├── BoolSettingsEntry.cs
+│       ├── FloatSettingsEntry.cs
+│       ├── IntSettingsEntry.cs
+│       └── SettingsEntry.cs
 ├── Features/                    # 功能模块
-│   ├── ActiveQuestTracker.cs    # Raid中任务追踪HUD (NEW!)
-│   ├── RaidCheckDialog.cs       # 警告对话框UI组件
-│   ├── RaidPreparationView.cs   # 准备界面视图
+│   ├── ActiveQuestTracker.cs    # Raid中任务追踪HUD
+│   ├── ModSettingsPanel.cs      # 设置面板UI
+│   ├── RaidPreparationView.cs   # Raid准备界面视图
 │   └── README.md                # 功能详细说明（中文）
 ├── Patches/                     # Harmony补丁（按游戏系统分类）
-│   └── RaidEntryPatches.cs      # Raid进入拦截补丁
+│   ├── PauseMenuPatch.cs        # 添加设置按钮到暂停菜单
+│   ├── QuestViewDetailsPatch.cs # 添加追踪复选框到任务详情
+│   ├── RaidEntryPatches.cs      # Raid进入拦截补丁
+│   └── WorkshopUploadPatch.cs   # 防止创意工坊描述覆盖
 ├── docs/                        # 文档
 │   ├── api/                     # API文档和反编译代码
 │   │   ├── decompiled/          # 反编译的游戏源码 ⭐
@@ -325,16 +335,127 @@ publishedFileId=3590346461        # Steam创意工坊ID（可选）
 
 ## 已实现功能
 
-### 1. Pre-Raid Check System (Raid前检查系统)
+### 1. 任务追踪系统 (Quest Tracking System)
+
+**功能**: 在Raid中实时追踪活跃任务进度
+
+**核心组件**:
+- `ActiveQuestTracker.cs` - 任务追踪HUD显示
+- `QuestTrackingManager.cs` - 任务追踪状态持久化
+- `QuestViewDetailsPatch.cs` - 任务详情页面追踪复选框
+
+**特性**:
+- 任务详情页面添加"局内追踪"复选框
+- 仅显示被追踪且未完成的任务
+- 实时更新任务进度（任务完成数/总数）
+- 显示每个子任务的完成状态（✓ 完成 / ○ 待完成）
+- 菜单打开时自动隐藏，关闭时恢复显示
+- 追踪选择持久化保存
+- 可配置位置、缩放和是否显示任务描述
+
+**技术实现**:
+- 使用Unity Canvas + VerticalLayoutGroup构建UI
+- 订阅游戏的任务系统事件（QuestManager.onQuestListsChanged等）
+- 使用TrueShadow实现高质量文本阴影
+- ContentSizeFitter自动调整UI高度
+- 使用设置系统实时调整显示参数
+
+---
+
+### 2. Pre-Raid Check System (Raid前检查系统)
 
 **功能**: 在玩家进入Raid地图前自动检查装备和天气条件
 
+**核心组件**:
+- `RaidCheckUtility.cs` - 检查逻辑实现
+- `RaidPreparationView.cs` - 警告对话框UI
+- `RaidEntryPatches.cs` - 拦截Raid进入点
+
 **检查项目**:
-1. 枪支 - 确保携带至少一把武器
-2. 弹药 - 确保背包中有弹药（包括额外弹匣）
-3. 药品 - 确保携带医疗用品
-4. 食物 - 确保携带食物或饮料
-5. 天气 - 警告风暴天气（Stormy_I 和 Stormy_II）
+1. 枪支 - 使用`item.GetBool("IsGun")`检查
+2. 弹药 - 使用`item.GetBool("IsBullet")`检查
+3. 药品 - 检查`UsageUtilities.behaviors`中的`Drug`组件
+4. 食物 - 检查`UsageUtilities.behaviors`中的`FoodDrink`组件
+5. 天气 - 检测当前是否为风暴天气（Stormy_I/Stormy_II）
+6. 风暴预警 - 检测24小时内是否有风暴来临
+7. 任务物品 - 根据目标地图检查活跃任务的`RequiredItemID`
+
+**技术实现**:
+- Patch `MapSelectionView.NotifyEntryClicked`方法
+- 使用UniTask实现异步确认流程
+- 智能场景过滤（只检查目标地图相关的任务）
+- 失效保护设计（错误时不阻止进入）
+
+---
+
+### 3. 设置系统 (Settings System)
+
+**功能**: 完整的游戏内设置界面和持久化
+
+**核心组件**:
+- `ModSettings.cs` - 集中式设置定义和管理
+- `ModSettingsPanel.cs` - 设置面板UI
+- `Settings/` - 类型化设置条目（Bool/Int/Float/String/Ranged/Options）
+- `PauseMenuPatch.cs` - 将设置按钮添加到暂停菜单
+
+**特性**:
+- 自动从设置条目构建UI
+- 分类组织（Raid检查 / 任务追踪）
+- 类型化设置条目（Toggle/Slider/InputField/Dropdown）
+- 实时设置变更事件
+- ES3持久化保存
+- 一键恢复默认设置
+
+**设置项**:
+- **Raid检查**: 启用检查系统、单独开关各项检查
+- **任务追踪**: 启用追踪、调整位置/缩放、显示选项
+
+**技术实现**:
+- 使用泛型`SettingsEntry<T>`基类
+- ValueChanged事件通知系统
+- ES3序列化存储到游戏存档
+- UIPanel继承和输入管理集成
+
+---
+
+### 4. 多语言支持 (Localization System)
+
+**功能**: 完整的多语言本地化支持
+
+**核心组件**:
+- `LocalizationHelper.cs` - 本地化管理器
+
+**支持语言**:
+- 简体中文
+- 繁体中文
+- English
+- 日本語
+
+**技术实现**:
+- 集成游戏的`LocalizationManager`系统
+- 使用`SetOverrideText`覆盖本地化键
+- 订阅`OnSetLanguage`事件自动切换语言
+- 所有UI文本使用本地化键
+
+---
+
+### 5. Steam创意工坊集成 (Steam Workshop Integration)
+
+**功能**: 防止上传时覆盖创意工坊描述
+
+**核心组件**:
+- `WorkshopUploadPatch.cs` - Patch SteamUGC方法
+
+**特性**:
+- 仅对EfDEnhanced生效（通过Workshop ID识别）
+- 其他Mod不受影响
+- 允许在创意工坊页面编写详细Markdown描述
+- info.ini中保留简短描述用于游戏内显示
+
+**技术实现**:
+- Patch `SteamUGC.SetItemDescription`
+- Patch `SteamWorkshopManager.UploadWorkshopItem`
+- 通过publishedFileId识别Mod
 
 ---
 
