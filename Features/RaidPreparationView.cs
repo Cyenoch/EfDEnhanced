@@ -2,6 +2,8 @@ using System;
 using Cysharp.Threading.Tasks;
 using Duckov.UI;
 using EfDEnhanced.Utils;
+using EfDEnhanced.Utils.UI.Components;
+using EfDEnhanced.Utils.UI.Constants;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -60,12 +62,10 @@ public class RaidPreparationView : MonoBehaviour
         _rootCanvas.transform.SetParent(transform);
         
         Canvas canvas = _rootCanvas.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 1000; // 确保在最上层
+        UIStyles.ConfigureCanvas(canvas, UIConstants.RAID_CHECK_SORT_ORDER);
         
         CanvasScaler scaler = _rootCanvas.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
+        UIStyles.ConfigureCanvasScaler(scaler);
         
         _rootCanvas.AddComponent<GraphicRaycaster>();
         
@@ -79,7 +79,7 @@ public class RaidPreparationView : MonoBehaviour
         bgRect.sizeDelta = Vector2.zero;
         
         Image bgImage = background.AddComponent<Image>();
-        bgImage.color = new Color(0, 0, 0, 0.7f);
+        bgImage.color = UIConstants.BACKGROUND_DARK;
         
         // 创建主面板
         _panel = new GameObject("Panel");
@@ -88,11 +88,11 @@ public class RaidPreparationView : MonoBehaviour
         RectTransform panelRect = _panel.AddComponent<RectTransform>();
         panelRect.anchorMin = new Vector2(0.5f, 0.5f);
         panelRect.anchorMax = new Vector2(0.5f, 0.5f);
-        panelRect.sizeDelta = new Vector2(800, 600);
+        panelRect.sizeDelta = new Vector2(UIConstants.RAID_CHECK_PANEL_WIDTH, UIConstants.RAID_CHECK_PANEL_HEIGHT);
         panelRect.anchoredPosition = Vector2.zero;
         
         Image panelImage = _panel.AddComponent<Image>();
-        panelImage.color = new Color(0.1f, 0.1f, 0.1f, 0.95f);
+        panelImage.color = UIConstants.PANEL_BACKGROUND;
         
         // 创建标题
         GameObject titleObj = new GameObject("Title");
@@ -106,7 +106,7 @@ public class RaidPreparationView : MonoBehaviour
         
         _titleText = titleObj.AddComponent<TextMeshProUGUI>();
         _titleText.text = LocalizationHelper.Get("RaidCheck_Title");
-        _titleText.fontSize = 48;
+        _titleText.fontSize = UIConstants.RAID_CHECK_TITLE_FONT_SIZE;
         _titleText.alignment = TextAlignmentOptions.Center;
         _titleText.color = new Color(1f, 0.8f, 0f);
         
@@ -131,7 +131,7 @@ public class RaidPreparationView : MonoBehaviour
         warningRect.offsetMax = new Vector2(-30, -10); // 右上边距
         
         _warningText = warningObj.AddComponent<TextMeshProUGUI>();
-        _warningText.fontSize = 28; // 稍微缩小字体
+        _warningText.fontSize = UIConstants.RAID_CHECK_WARNING_FONT_SIZE;
         _warningText.alignment = TextAlignmentOptions.TopLeft;
         _warningText.color = Color.white;
         _warningText.enableWordWrapping = true; // 启用自动换行
@@ -153,50 +153,25 @@ public class RaidPreparationView : MonoBehaviour
         layout.childControlWidth = false;
         layout.childControlHeight = false;
     
-        // 创建取消按钮
-        _cancelButton = CreateButton(buttonContainer, LocalizationHelper.Get("RaidCheck_Cancel"), new Color(0.5f, 0.2f, 0.2f));
-        _cancelButton.onClick.AddListener(OnCancelClicked);
+        // 使用ModButton创建按钮 - 简洁且统一！
+        var cancelButtonObj = ModButton.Create(buttonContainer.transform, "CancelButton")
+            .SetText("RaidCheck_Cancel")
+            .SetStyle(UIStyles.ButtonStyle.Danger)
+            .SetSize(UIConstants.RAID_CHECK_BUTTON_WIDTH, UIConstants.RAID_CHECK_BUTTON_HEIGHT)
+            .OnClick(OnCancelClicked)
+            .Build();
+        _cancelButton = cancelButtonObj.GetComponent<Button>();
         
-        // 创建确认按钮
-        _confirmButton = CreateButton(buttonContainer, LocalizationHelper.Get("RaidCheck_Confirm"), new Color(0.2f, 0.5f, 0.2f));
-        _confirmButton.onClick.AddListener(OnConfirmClicked);
+        var confirmButtonObj = ModButton.Create(buttonContainer.transform, "ConfirmButton")
+            .SetText("RaidCheck_Confirm")
+            .SetStyle(UIStyles.ButtonStyle.Success)
+            .SetSize(UIConstants.RAID_CHECK_BUTTON_WIDTH, UIConstants.RAID_CHECK_BUTTON_HEIGHT)
+            .OnClick(OnConfirmClicked)
+            .Build();
+        _confirmButton = confirmButtonObj.GetComponent<Button>();
         
         // 默认隐藏
         _rootCanvas.SetActive(false);
-    }
-    
-    /// <summary>
-    /// 创建按钮
-    /// </summary>
-    private Button CreateButton(GameObject parent, string text, Color color)
-    {
-        GameObject btnObj = new GameObject($"Button_{text}");
-        btnObj.transform.SetParent(parent.transform, false);
-        
-        RectTransform btnRect = btnObj.AddComponent<RectTransform>();
-        btnRect.sizeDelta = new Vector2(280, 60);
-        
-        Image btnImage = btnObj.AddComponent<Image>();
-        btnImage.color = color;
-        
-        Button button = btnObj.AddComponent<Button>();
-        
-        // 按钮文本
-        GameObject textObj = new GameObject("Text");
-        textObj.transform.SetParent(btnObj.transform, false);
-        
-        RectTransform textRect = textObj.AddComponent<RectTransform>();
-        textRect.anchorMin = Vector2.zero;
-        textRect.anchorMax = Vector2.one;
-        textRect.sizeDelta = Vector2.zero;
-        
-        TextMeshProUGUI buttonText = textObj.AddComponent<TextMeshProUGUI>();
-        buttonText.text = text;
-        buttonText.fontSize = 32;
-        buttonText.alignment = TextAlignmentOptions.Center;
-        buttonText.color = Color.white;
-        
-        return button;
     }
     
     /// <summary>

@@ -5,6 +5,7 @@ using Duckov.Quests;
 using Duckov.UI;
 using EfDEnhanced.Utils;
 using EfDEnhanced.Utils.Settings;
+using EfDEnhanced.Utils.UI.Constants;
 using LeTai.TrueShadow;
 using TMPro;
 using UnityEngine;
@@ -88,17 +89,10 @@ public class ActiveQuestTracker : MonoBehaviour
             _rootCanvas.transform.SetParent(transform);
             
             Canvas canvas = _rootCanvas.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 100; // 在HUD之上
+            UIStyles.ConfigureCanvas(canvas, UIConstants.QUEST_TRACKER_SORT_ORDER);
             
             CanvasScaler scaler = _rootCanvas.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920, 1080);
-            
-            // 使用游戏本体的自适应逻辑
-            float screenAspect = (float)Screen.width / Screen.height;
-            float refAspect = 1920f / 1080f; // 16:9
-            scaler.matchWidthOrHeight = (screenAspect > refAspect) ? 1f : 0f;
+            UIStyles.ConfigureCanvasScaler(scaler);
             
             // 创建主面板（左上角）
             _questPanel = new GameObject("QuestPanel");
@@ -109,12 +103,11 @@ public class ActiveQuestTracker : MonoBehaviour
             panelRect.anchorMax = new Vector2(0, 1); // 左上角锚点
             panelRect.pivot = new Vector2(0, 1); // 轴心点在左上角
             
-            // 计算高度：屏幕高度的 40%
-            float screenHeight = Screen.height;
-            float maxHeight = screenHeight * 0.4f;
+            // 计算高度：屏幕高度的指定比例
+            float maxHeight = Screen.height * UIConstants.QUEST_PANEL_SCREEN_HEIGHT_RATIO;
             
             // 设置尺寸
-            panelRect.sizeDelta = new Vector2(280, maxHeight);
+            panelRect.sizeDelta = new Vector2(UIConstants.QUEST_PANEL_WIDTH, maxHeight);
             
             // 设置位置：左上角向右和向下偏移（负值）
             panelRect.anchoredPosition = new Vector2(-10, -10);
@@ -131,12 +124,8 @@ public class ActiveQuestTracker : MonoBehaviour
             contentRect.sizeDelta = new Vector2(-10, 0); // 左右各留5px边距
             
             VerticalLayoutGroup layoutGroup = _questListContainer.AddComponent<VerticalLayoutGroup>();
-            layoutGroup.childForceExpandWidth = true;
-            layoutGroup.childForceExpandHeight = false;
-            layoutGroup.childControlWidth = true;
-            layoutGroup.childControlHeight = true;
-            layoutGroup.spacing = 4; // 任务间距
-            layoutGroup.padding = new RectOffset(0, 0, 0, 0);
+            UIStyles.ConfigureVerticalLayout(layoutGroup, UIConstants.QUEST_ENTRY_SPACING, 
+                new RectOffset(0, 0, 0, 0));
             
             ContentSizeFitter sizeFitter = _questListContainer.AddComponent<ContentSizeFitter>();
             sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
@@ -441,19 +430,14 @@ public class ActiveQuestTracker : MonoBehaviour
             
             TextMeshProUGUI titleText = titleObj.AddComponent<TextMeshProUGUI>();
             titleText.text = quest.DisplayName;
-            titleText.fontSize = 16; // 适中的大小
+            titleText.fontSize = UIConstants.QUEST_TITLE_FONT_SIZE;
             titleText.fontStyle = FontStyles.Bold;
-            titleText.color = new Color(1f, 0.9f, 0.4f, 1f);
+            titleText.color = UIConstants.QUEST_TITLE_COLOR;
             titleText.enableWordWrapping = false;
             titleText.overflowMode = TextOverflowModes.Ellipsis;
             
             // 使用TrueShadow获得更好的阴影效果
-            TrueShadow titleShadow = titleObj.AddComponent<TrueShadow>();
-            titleShadow.Size = 20f;
-            titleShadow.Spread = 0.5f;
-            titleShadow.OffsetAngle = -90f;
-            titleShadow.OffsetDistance = 3f;
-            titleShadow.Color = new Color(0, 0, 0, 0.8f);
+            UIStyles.ApplyStandardTextShadow(titleObj, isTitle: true);
             
             LayoutElement titleLayout = titleObj.AddComponent<LayoutElement>();
             titleLayout.flexibleWidth = 1; // 占据剩余空间
@@ -468,18 +452,13 @@ public class ActiveQuestTracker : MonoBehaviour
             int finishedTaskCount = quest.Tasks?.Count(t => t != null && t.IsFinished()) ?? 0;
             int totalTaskCount = quest.Tasks?.Count ?? 0;
             progressBadgeText.text = $"{finishedTaskCount}/{totalTaskCount}";
-            progressBadgeText.fontSize = 15;
+            progressBadgeText.fontSize = UIConstants.QUEST_PROGRESS_FONT_SIZE;
             progressBadgeText.fontStyle = FontStyles.Bold;
-            progressBadgeText.color = new Color(0.9f, 0.9f, 0.9f, 1f);
+            progressBadgeText.color = UIConstants.QUEST_PROGRESS_COLOR;
             progressBadgeText.alignment = TextAlignmentOptions.MidlineRight;
             
             // 使用TrueShadow
-            TrueShadow progressShadow = progressBadgeObj.AddComponent<TrueShadow>();
-            progressShadow.Size = 18f;
-            progressShadow.Spread = 0.5f;
-            progressShadow.OffsetAngle = -90f;
-            progressShadow.OffsetDistance = 3f;
-            progressShadow.Color = new Color(0, 0, 0, 0.8f);
+            UIStyles.ApplyStandardTextShadow(progressBadgeObj, isTitle: false);
             
             LayoutElement progressBadgeLayout = progressBadgeObj.AddComponent<LayoutElement>();
             progressBadgeLayout.minWidth = 40;
@@ -493,19 +472,14 @@ public class ActiveQuestTracker : MonoBehaviour
 
                 TextMeshProUGUI descText = descObj.AddComponent<TextMeshProUGUI>();
                 descText.text = quest.Description;
-                descText.fontSize = 12;
+                descText.fontSize = UIConstants.QUEST_DESC_FONT_SIZE;
                 descText.fontStyle = FontStyles.Italic;
-                descText.color = new Color(0.85f, 0.85f, 0.85f, 1f);
+                descText.color = UIConstants.QUEST_DESC_COLOR;
                 descText.enableWordWrapping = true;
                 descText.overflowMode = TextOverflowModes.Truncate;
 
                 // 使用TrueShadow
-                TrueShadow descShadow = descObj.AddComponent<TrueShadow>();
-                descShadow.Size = 16f;
-                descShadow.Spread = 0.4f;
-                descShadow.OffsetAngle = -90f;
-                descShadow.OffsetDistance = 2f;
-                descShadow.Color = new Color(0, 0, 0, 0.7f);
+                UIStyles.ApplyStandardTextShadow(descObj, isTitle: false);
 
                 LayoutElement descLayout = descObj.AddComponent<LayoutElement>();
                 descLayout.preferredHeight = -1;
@@ -517,11 +491,7 @@ public class ActiveQuestTracker : MonoBehaviour
             progressContainer.transform.SetParent(entryObj.transform, false);
             
             VerticalLayoutGroup taskListLayout = progressContainer.AddComponent<VerticalLayoutGroup>();
-            taskListLayout.childForceExpandWidth = true;
-            taskListLayout.childForceExpandHeight = false;
-            taskListLayout.childControlWidth = true;
-            taskListLayout.childControlHeight = true;
-            taskListLayout.spacing = 2; // 子任务之间稍微增加间距
+            UIStyles.ConfigureVerticalLayout(taskListLayout, UIConstants.QUEST_TASK_SPACING);
             
             ContentSizeFitter progressFitter = progressContainer.AddComponent<ContentSizeFitter>();
             progressFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
@@ -831,7 +801,7 @@ public class QuestEntryUI
                     }
                     
                     string fullText = $"  {statusIcon} {taskDesc}";
-                    Color taskColor = isFinished ? new Color(0.6f, 1f, 0.6f, 1f) : new Color(1f, 1f, 1f, 1f);
+                    Color taskColor = isFinished ? UIConstants.QUEST_COMPLETE_COLOR : UIConstants.QUEST_INCOMPLETE_COLOR;
                     
                     // 复用或创建UI元素
                     if (taskIndex < _taskElements.Count)
@@ -861,18 +831,13 @@ public class QuestEntryUI
                         
                         TextMeshProUGUI taskText = taskObj.AddComponent<TextMeshProUGUI>();
                         taskText.text = fullText;
-                        taskText.fontSize = 13;
+                        taskText.fontSize = UIConstants.QUEST_TASK_FONT_SIZE;
                         taskText.color = taskColor;
                         taskText.enableWordWrapping = true;
                         taskText.overflowMode = TextOverflowModes.Truncate; // 防止超出边界
                         
                         // 使用TrueShadow
-                        TrueShadow taskShadow = taskObj.AddComponent<TrueShadow>();
-                        taskShadow.Size = 16f;
-                        taskShadow.Spread = 0.4f;
-                        taskShadow.OffsetAngle = -90f;
-                        taskShadow.OffsetDistance = 2f;
-                        taskShadow.Color = new Color(0, 0, 0, 0.8f);
+                        UIStyles.ApplyStandardTextShadow(taskObj, isTitle: false);
                         
                         LayoutElement taskLayout = taskObj.AddComponent<LayoutElement>();
                         taskLayout.preferredHeight = -1;

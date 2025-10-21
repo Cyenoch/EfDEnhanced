@@ -15,6 +15,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour
     private static Harmony? _harmonyInstance;
     
     private ActiveQuestTracker? _questTracker;
+    private ModDebugPanel? _debugPanel;
     private bool _wasInRaid;
 
     public static ModBehaviour? Instance { get; private set; }
@@ -55,6 +56,9 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour
         
         // Initialize quest tracker
         InitializeQuestTracker();
+        
+        // Initialize debug panel (F8 to toggle)
+        _debugPanel = ModDebugPanel.Create();
     }
     
     void Update()

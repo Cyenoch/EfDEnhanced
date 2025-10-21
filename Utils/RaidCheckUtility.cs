@@ -119,74 +119,97 @@ public static class RaidCheckUtility
     /// 检查玩家是否准备好进入Raid
     /// </summary>
     /// <param name="targetSceneID">目标场景ID（可选，如果提供则只检查该场景相关的任务）</param>
-    public static RaidCheckResult CheckPlayerReadiness(string targetSceneID = null)
+    public static RaidCheckResult CheckPlayerReadiness(string? targetSceneID = null)
     {
-        try
+        return ExceptionHelper.SafeExecute(() =>
         {
             // 如果Raid检查功能被禁用，直接返回全部通过
             if (!ModSettings.EnableRaidCheck.Value)
             {
                 ModLogger.Log("RaidCheck", "Raid check is disabled in settings");
-                return new RaidCheckResult
-                {
-                    HasWeapon = true,
-                    HasAmmo = true,
-                    HasMedicine = true,
-                    HasFood = true,
-                    IsWeatherSafe = true
-                };
+                return CreatePassedResult();
             }
 
-            // 获取玩家角色背包和装备
-            var mainCharacter = LevelManager.Instance?.MainCharacter;
-            var characterItem = mainCharacter?.CharacterItem;
-            var inventory = characterItem?.Inventory;
-
+            // 获取玩家数据
+            var (inventory, characterItem) = GetPlayerInventoryAndCharacter();
             if (inventory == null || characterItem == null)
             {
-                ModLogger.LogWarning("RaidCheck", "Player character inventory or item is null, skipping check");
-                return new RaidCheckResult
-                {
-                    HasWeapon = true,
-                    HasAmmo = true,
-                    HasMedicine = true,
-                    HasFood = true,
-                    IsWeatherSafe = true
-                };
+                ModLogger.LogWarning("RaidCheck", "Player character data unavailable, skipping check");
+                return CreatePassedResult();
             }
 
             // 收集所有物品：背包 + 装备栏
             var allItems = GetAllPlayerItems(inventory, characterItem);
 
-            // 根据设置执行检查项
-            var result = new RaidCheckResult
-            {
-                HasWeapon = !ModSettings.CheckWeapon.Value || HasWeapon(allItems),
-                HasAmmo = !ModSettings.CheckAmmo.Value || HasAmmo(allItems),
-                HasMedicine = !ModSettings.CheckMeds.Value || HasMedicalItems(allItems),
-                HasFood = !ModSettings.CheckFood.Value || HasFoodItems(allItems),
-                IsWeatherSafe = !ModSettings.CheckWeather.Value || IsWeatherSafe(),
-                IsStormComing = ModSettings.CheckWeather.Value && IsStormComingSoon(),
-                QuestItems = CheckQuestItems(targetSceneID)
-            };
+            // 执行所有检查项
+            var result = PerformAllChecks(allItems, targetSceneID);
 
-            ModLogger.Log("RaidCheck", $"Check result for scene '{targetSceneID ?? "any"}' - Weapon: {result.HasWeapon}, Ammo: {result.HasAmmo}, Medicine: {result.HasMedicine}, Food: {result.HasFood}, Weather: {result.IsWeatherSafe}, StormComing: {result.IsStormComing}, QuestItems: {result.QuestItems.Count}");
+            LogCheckResult(result, targetSceneID);
 
             return result;
-        }
-        catch (Exception ex)
+        }, "CheckPlayerReadiness", CreatePassedResult());
+    }
+
+    /// <summary>
+    /// 创建全部通过的结果（用于禁用检查或错误时）
+    /// </summary>
+    private static RaidCheckResult CreatePassedResult()
+    {
+        return new RaidCheckResult
         {
-            ModLogger.LogError($"RaidCheck failed: {ex}");
-            // 出错时返回全部通过，避免阻止游戏
-            return new RaidCheckResult
-            {
-                HasWeapon = true,
-                HasAmmo = true,
-                HasMedicine = true,
-                HasFood = true,
-                IsWeatherSafe = true
-            };
-        }
+            HasWeapon = true,
+            HasAmmo = true,
+            HasMedicine = true,
+            HasFood = true,
+            IsWeatherSafe = true,
+            IsStormComing = false,
+            QuestItems = new List<QuestItemRequirement>()
+        };
+    }
+
+    /// <summary>
+    /// 获取玩家背包和角色物品
+    /// </summary>
+    private static (Inventory? inventory, Item? characterItem) GetPlayerInventoryAndCharacter()
+    {
+        var mainCharacter = LevelManager.Instance?.MainCharacter;
+        var characterItem = mainCharacter?.CharacterItem;
+        var inventory = characterItem?.Inventory;
+        
+        return (inventory, characterItem);
+    }
+
+    /// <summary>
+    /// 执行所有检查项
+    /// </summary>
+    private static RaidCheckResult PerformAllChecks(List<Item> allItems, string? targetSceneID)
+    {
+        return new RaidCheckResult
+        {
+            HasWeapon = !ModSettings.CheckWeapon.Value || HasWeapon(allItems),
+            HasAmmo = !ModSettings.CheckAmmo.Value || HasAmmo(allItems),
+            HasMedicine = !ModSettings.CheckMeds.Value || HasMedicalItems(allItems),
+            HasFood = !ModSettings.CheckFood.Value || HasFoodItems(allItems),
+            IsWeatherSafe = !ModSettings.CheckWeather.Value || IsWeatherSafe(),
+            IsStormComing = ModSettings.CheckWeather.Value && IsStormComingSoon(),
+            QuestItems = CheckQuestItems(targetSceneID)
+        };
+    }
+
+    /// <summary>
+    /// 记录检查结果
+    /// </summary>
+    private static void LogCheckResult(RaidCheckResult result, string? targetSceneID)
+    {
+        ModLogger.Log("RaidCheck", 
+            $"Check result for scene '{targetSceneID ?? "any"}' - " +
+            $"Weapon: {result.HasWeapon}, " +
+            $"Ammo: {result.HasAmmo}, " +
+            $"Medicine: {result.HasMedicine}, " +
+            $"Food: {result.HasFood}, " +
+            $"Weather: {result.IsWeatherSafe}, " +
+            $"StormComing: {result.IsStormComing}, " +
+            $"QuestItems: {result.QuestItems.Count}");
     }
     
     /// <summary>
@@ -196,7 +219,14 @@ public static class RaidCheckUtility
     {
         var allItems = new List<Item>();
         
-        try
+        // 防御性检查
+        if (!ExceptionHelper.CheckNotNull(inventory, nameof(inventory), "GetAllPlayerItems") ||
+            !ExceptionHelper.CheckNotNull(characterItem, nameof(characterItem), "GetAllPlayerItems"))
+        {
+            return allItems;
+        }
+
+        ExceptionHelper.SafeExecute(() =>
         {
             // 添加背包中的物品
             foreach (var item in inventory)
@@ -223,7 +253,7 @@ public static class RaidCheckUtility
             
             foreach (var slotHash in equipmentSlotHashes)
             {
-                try
+                ExceptionHelper.SafeExecute(() =>
                 {
                     var slot = characterItem.Slots?.GetSlot(slotHash);
                     if (slot?.Content != null)
@@ -231,19 +261,11 @@ public static class RaidCheckUtility
                         allItems.Add(slot.Content);
                         ModLogger.Log("RaidCheck", $"Found equipped item: {slot.Content.DisplayName}");
                     }
-                }
-                catch (Exception ex)
-                {
-                    ModLogger.LogWarning($"Failed to check equipment slot {slotHash}: {ex.Message}");
-                }
+                }, $"CheckEquipmentSlot_{slotHash}");
             }
             
             ModLogger.Log("RaidCheck", $"Total items checked: {allItems.Count} (inventory + equipment)");
-        }
-        catch (Exception ex)
-        {
-            ModLogger.LogError($"GetAllPlayerItems failed: {ex}");
-        }
+        }, "GetAllPlayerItems");
         
         return allItems;
     }
@@ -254,7 +276,7 @@ public static class RaidCheckUtility
     /// </summary>
     private static bool HasWeapon(List<Item> allItems)
     {
-        try
+        return ExceptionHelper.SafeExecute(() =>
         {
             foreach (var item in allItems)
             {
@@ -269,12 +291,7 @@ public static class RaidCheckUtility
             }
             
             return false;
-        }
-        catch (Exception ex)
-        {
-            ModLogger.LogError($"HasWeapon check failed: {ex}");
-            return true; // 出错时假设有武器
-        }
+        }, "HasWeapon", true); // 出错时假设有武器
     }
     
     /// <summary>
@@ -283,7 +300,7 @@ public static class RaidCheckUtility
     /// </summary>
     private static bool HasAmmo(List<Item> allItems)
     {
-        try
+        return ExceptionHelper.SafeExecute(() =>
         {
             foreach (var item in allItems)
             {
@@ -298,12 +315,7 @@ public static class RaidCheckUtility
             }
             
             return false;
-        }
-        catch (Exception ex)
-        {
-            ModLogger.LogError($"HasAmmo check failed: {ex}");
-            return true; // 出错时假设有弹药
-        }
+        }, "HasAmmo", true); // 出错时假设有弹药
     }
     
     /// <summary>
