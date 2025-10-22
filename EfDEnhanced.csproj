@@ -43,6 +43,7 @@
         <Reference Include="$(DuckovDataPath)\Managed\com.rlabrecque.steamworks.net.dll" />
         <Reference Include="$(DuckovDataPath)\Managed\DOTween.dll" />
         <Reference Include="$(DuckovDataPath)\Managed\DOTween.Modules.dll" />
+        <Reference Include="$(DuckovDataPath)\Managed\Unity.InputSystem.dll" />
         <PackageReference Include="Lib.Harmony" Version="2.4.1">
             <PrivateAssets>none</PrivateAssets>
             <ExcludeAssets>none</ExcludeAssets>

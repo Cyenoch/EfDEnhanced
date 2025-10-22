@@ -136,7 +136,7 @@ namespace EfDEnhanced.Patches
                 }
                 else
                 {
-                    ModLogger.LogError("PauseMenuPatch: Could not find OptionsPanel instance");
+                    ModLogger.Log("PauseMenuPatch: Could not find OptionsPanel instance");
                 }
             }
             catch (Exception ex)

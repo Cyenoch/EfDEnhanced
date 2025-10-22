@@ -202,6 +202,19 @@ namespace EfDEnhanced.Utils
             )
         );
 
+        public static readonly RangedFloatSettingsEntry ItemWheelScale = Register(
+            new RangedFloatSettingsEntry(
+                PREFIX,
+                "ItemWheelScale",
+                "Settings_ItemWheelScale_Name",
+                1.0f,
+                0.5f,
+                3.0f,
+                CATEGORY_UI,
+                "Settings_ItemWheelScale_Desc"
+            )
+        );
+
         #endregion
 
         /// <summary>

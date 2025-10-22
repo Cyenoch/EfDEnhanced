@@ -170,6 +170,8 @@ public static class LocalizationHelper
             // UI Enhancement Settings
             { "Settings_EnableWeaponComparison_Name", "启用武器对比" },
             { "Settings_EnableWeaponComparison_Desc", "在鼠标悬停时对比选中武器和悬停武器的属性，显示差异并用颜色标识优劣" },
+            { "Settings_ItemWheelScale_Name", "物品轮盘缩放" },
+            { "Settings_ItemWheelScale_Desc", "调整物品轮盘菜单的显示大小" },
         };
 
         // 繁体中文
@@ -250,6 +252,8 @@ public static class LocalizationHelper
             // UI Enhancement Settings
             { "Settings_EnableWeaponComparison_Name", "啟用武器對比" },
             { "Settings_EnableWeaponComparison_Desc", "在鼠標懸停時對比選中武器和懸停武器的屬性，顯示差異並用顏色標識優劣" },
+            { "Settings_ItemWheelScale_Name", "物品輪盤縮放" },
+            { "Settings_ItemWheelScale_Desc", "調整物品輪盤選單的顯示大小" },
         };
 
         // 英语
@@ -330,6 +334,8 @@ public static class LocalizationHelper
             // UI Enhancement Settings
             { "Settings_EnableWeaponComparison_Name", "Enable Weapon Comparison" },
             { "Settings_EnableWeaponComparison_Desc", "Compare selected weapon with hovered weapon in inventory, showing differences with color-coded indicators" },
+            { "Settings_ItemWheelScale_Name", "Item Wheel Scale" },
+            { "Settings_ItemWheelScale_Desc", "Adjust the display size of the item wheel menu" },
         };
 
         // 日语
@@ -410,6 +416,8 @@ public static class LocalizationHelper
             // UI Enhancement Settings
             { "Settings_EnableWeaponComparison_Name", "武器比較を有効化" },
             { "Settings_EnableWeaponComparison_Desc", "インベントリで選択した武器とホバーした武器を比較し、差異を色付きインジケーターで表示" },
+            { "Settings_ItemWheelScale_Name", "アイテムホイールスケール" },
+            { "Settings_ItemWheelScale_Desc", "アイテムホイールメニューの表示サイズを調整" },
         };
 
         ModLogger.Log("Localization", $"Loaded translations for {LocalizationData.Count} languages");
