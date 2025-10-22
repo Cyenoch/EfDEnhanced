@@ -1,0 +1,123 @@
+---
+description: Guidelines for working with extracted game assets
+---
+# 游戏资产使用指南
+
+## 资产位置
+
+提取的游戏资产位于 [extracted_assets/](mdc:extracted_assets) 目录。
+
+## 资产类型
+
+### 场景
+- 位置: [extracted_assets/Assets/Scenes/](mdc:extracted_assets/Assets/Scenes)
+- 包含游戏关卡数据和光照设置
+- 主要场景: MainMenu, Prologue, Level_GroundZero, Level_StormZone 等
+
+### 网格 (Mesh)
+- 位置: [extracted_assets/Assets/Mesh/](mdc:extracted_assets/Assets/Mesh)
+- 2762 个 GLB 文件
+- 3D 模型资产
+
+### 纹理 (Texture2D)
+- 位置: [extracted_assets/Assets/Texture2D/](mdc:extracted_assets/Assets/Texture2D)
+- 3096 个 PNG 文件
+- 游戏纹理资产
+
+### 精灵 (Sprite)
+- 位置: [extracted_assets/Assets/Sprite/](mdc:extracted_assets/Assets/Sprite)
+- 1028 个 JSON 文件
+- UI 和 2D 图形
+
+### 预制体 (Prefab)
+- 位置: [extracted_assets/Assets/PrefabHierarchyObject/](mdc:extracted_assets/Assets/PrefabHierarchyObject)
+- 2195 个 GLB 文件
+- 预制体定义
+
+### 地形
+- TerrainData: [extracted_assets/Assets/TerrainData/](mdc:extracted_assets/Assets/TerrainData)
+- TerrainLayer: [extracted_assets/Assets/TerrainLayer/](mdc:extracted_assets/Assets/TerrainLayer)
+
+### Resources
+- 位置: [extracted_assets/Assets/Resources/](mdc:extracted_assets/Assets/Resources)
+- Unity Resources 文件夹资产
+
+## 使用资产的最佳实践
+
+### 1. 搜索而非直接读取
+**永远不要**尝试读取整个资产目录。资产文件数量庞大（7000+ 文件）。
+
+**正确做法**: 使用 `grep` 或更好的方式搜索特定资产名称
+
+```bash
+# 搜索特定资产
+grep pattern:"AssetName" path:"extracted_assets"
+
+# 搜索特定类型
+grep pattern:"\.png$" path:"extracted_assets/Assets/Texture2D"
+```
+
+### 2. 查找场景引用
+要了解游戏如何使用某个资产：
+
+```bash
+# 在场景文件中搜索引用
+grep pattern:"AssetName" path:"extracted_assets/Assets/Scenes"
+```
+
+### 3. 查找 GameObject 结构
+场景层次结构保存在 SceneHierarchyObject 中：
+
+```bash
+grep pattern:"GameObjectName" path:"extracted_assets/Assets/SceneHierarchyObject"
+```
+
+或使用 TransformTreeLogger 在运行时打印结构
+
+### 4. 运行时资产加载
+游戏通过 `Resources.Load()` 加载的资产位于:
+[extracted_assets/Assets/Resources/](mdc:extracted_assets/Assets/Resources)
+
+## 游戏关卡结构
+
+主要关卡及其场景文件：
+
+1. **主菜单**: MainMenu
+2. **序章**: Prologue
+3. **新手引导**: Level_Guide (Guide_1, Guide_2)
+4. **地面零点**: Level_GroundZero (GroundZero_1, GroundZero_Cave)
+5. **风暴区**: Level_StormZone (StormZone_1, B0-B4)
+6. **实验室**: Level_JLab (JLab_Main, JLab_2)
+7. **农场**: Level_OpenWorldTest (Farm_Main, Farm_JLab_Facility)
+8. **隐藏仓库**: Level_HiddenWarehouse
+
+## 在模组开发中引用资产
+
+### 通过名称加载
+```csharp
+// 从 Resources 加载
+var asset = Resources.Load<Texture2D>("AssetName");
+
+// 使用 AssetBundle
+var bundle = AssetBundle.LoadFromFile(path);
+var asset = bundle.LoadAsset<GameObject>("AssetName");
+```
+
+### 查找场景对象
+```csharp
+// 按名称查找
+var obj = GameObject.Find("ObjectName");
+
+// 按标签查找
+var objs = GameObject.FindGameObjectsWithTag("TagName");
+
+// 按类型查找
+var component = Object.FindObjectOfType<ComponentType>();
+```
+
+## 相关文档
+
+详细资产文档请参考：
+- [docs/assets/assets-guide.md](mdc:docs/assets/assets-guide.md)
+- [docs/assets/mod-development-guide.md](mdc:docs/assets/mod-development-guide.md)
+- [docs/scenes/scenes-guide.md](mdc:docs/scenes/scenes-guide.md)

@@ -1,0 +1,92 @@
+---
+globs: Patches/*.cs
+description: Guidelines for creating and modifying Harmony patches
+---
+# Harmony 补丁开发指南
+
+## 补丁结构
+所有补丁文件应放在 [Patches/](mdc:Patches) 目录中。
+
+## 基本补丁模板
+
+```csharp
+using HarmonyLib;
+using TeamSoda.Duckov.Core; // 根据需要引入游戏命名空间
+
+namespace EfDEnhanced.Patches
+{
+    [HarmonyPatch(typeof(TargetClass), "MethodName")]
+    public class ExamplePatch
+    {
+        public static bool Prefix(/* 原方法参数 */)
+        {
+            try
+            {
+                // 补丁逻辑
+                return true; // true = 继续执行原方法, false = 跳过原方法
+            }
+            catch (System.Exception ex)
+            {
+                ExceptionHelper.HandleException(ex, "ExamplePatch.Prefix");
+                return true; // 发生错误时继续执行原方法
+            }
+        }
+    }
+}
+```
+
+## 补丁类型
+
+### Prefix (前置补丁)
+- 在原方法执行**之前**运行
+- 返回 `false` 可以跳过原方法执行
+- 可以修改参数值（使用 `ref` 或 `out`）
+- 可以通过 `__result` 参数设置返回值
+
+### Postfix (后置补丁)
+- 在原方法执行**之后**运行
+- 可以访问 `__result` 参数获取/修改返回值
+- 可以访问原方法的所有参数
+- 无法阻止原方法执行
+
+### Transpiler (转译器)
+- 修改 IL 代码
+- 复杂且容易出错，仅在必要时使用
+- 需要深入了解 IL 指令
+
+## 访问私有成员
+
+使用 Harmony 的 `AccessTools`:
+
+```csharp
+// 访问私有字段
+var fieldInfo = AccessTools.Field(typeof(TargetClass), "privateField");
+var value = fieldInfo.GetValue(instance);
+
+// 调用私有方法
+var methodInfo = AccessTools.Method(typeof(TargetClass), "PrivateMethod");
+methodInfo.Invoke(instance, new object[] { arg1, arg2 });
+```
+
+## 特殊参数
+
+- `__instance` - 当前实例对象（非静态方法）
+- `__result` - 方法返回值（需要使用 `ref` 修饰符）
+- `__state` - 在 Prefix 和 Postfix 之间传递数据
+- `__originalMethod` - 原始方法信息
+
+## 最佳实践
+
+1. **始终添加异常处理** - 使用 [Utils/ExceptionHelper.cs](mdc:Utils/ExceptionHelper.cs)
+2. **最小化修改** - 只修改必要的部分
+3. **避免性能问题** - 补丁会在高频方法中执行
+4. **测试兼容性** - 考虑与其他模组的兼容性
+5. **添加日志** - 使用 [Utils/ModLogger.cs](mdc:Utils/ModLogger.cs) 记录关键操作
+6. **注释说明** - 解释补丁的目的和工作原理
+
+## 现有补丁参考
+
+- [Patches/QuestViewDetailsPatch.cs](mdc:Patches/QuestViewDetailsPatch.cs) - UI 修改示例
+- [Patches/ItemHoveringComparisonPatch.cs](mdc:Patches/ItemHoveringComparisonPatch.cs) - 游戏逻辑增强
+- [Patches/MovementEnhancementPatch.cs](mdc:Patches/MovementEnhancementPatch.cs) - 游戏机制修改
+- [Patches/OptionsPanelPatch.cs](mdc:Patches/OptionsPanelPatch.cs) - UI 注入示例

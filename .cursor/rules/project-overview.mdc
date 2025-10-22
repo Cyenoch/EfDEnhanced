@@ -1,0 +1,38 @@
+---
+alwaysApply: true
+---
+# EfDEnhanced 项目概览
+
+这是一个为"Escape from Duckov"游戏开发的增强模组项目。
+
+## 项目技术栈
+- **语言**: C# (.NET Standard 2.1) (C# LangVer: latest)
+- **游戏引擎**: Unity
+- **补丁框架**: Harmony (用于运行时代码注入)
+- **模组框架**: `Duckov.Modding.ModBehaviour`
+
+## 核心文件结构
+
+### 入口点
+- [ModBehaviour.cs](mdc:ModBehaviour.cs) - 模组主入口，继承自 `Duckov.Modding.ModBehaviour`
+- [info.ini](mdc:info.ini) - 模组元数据配置
+
+### 功能模块
+- [Features/](mdc:Features) - 独立功能实现（任务追踪、设置界面等）
+- [Patches/](mdc:Patches) - Harmony 补丁，用于修改游戏行为
+- [Utils/](mdc:Utils) - 工具类和辅助功能
+
+### 重要工具类
+- [Utils/ModLogger.cs](mdc:Utils/ModLogger.cs) - 日志系统
+- [Utils/ModSettings.cs](mdc:Utils/ModSettings.cs) - 设置管理
+- [Utils/LocalizationHelper.cs](mdc:Utils/LocalizationHelper.cs) - 多语言支持
+
+## 开发规范
+1. 所有补丁类应放在 [Patches/](mdc:Patches) 目录
+2. 新功能应创建独立文件在 [Features/](mdc:Features) 目录
+3. 可复用的工具类放在 [Utils/](mdc:Utils) 目录
+4. UI 相关组件使用 [Utils/UI/](mdc:Utils/UI) 下的组件系统
+
+## 构建输出
+- 编译输出到 [output/](mdc:output) 目录
+- 部署脚本: [scripts/deploy.sh](mdc:scripts/deploy.sh)

@@ -1,0 +1,146 @@
+---
+globs: Utils/UI/**/*.cs,Features/*View.cs,Features/*Panel.cs
+description: UI development guidelines using mod UI framework
+---
+# UI 开发指南
+
+## UI 框架结构
+
+使用 [Utils/UI/](mdc:Utils/UI) 提供的组件系统来创建模组界面。
+
+### 核心组件
+
+#### 面板
+- [Utils/UI/Core/ModPanel.cs](mdc:Utils/UI/Core/ModPanel.cs) - 基础面板类
+
+#### 构建器
+- [Utils/UI/Builders/FormBuilder.cs](mdc:Utils/UI/Builders/FormBuilder.cs) - 表单构建器
+
+#### UI 组件
+- [Utils/UI/Components/ModButton.cs](mdc:Utils/UI/Components/ModButton.cs) - 按钮组件
+- [Utils/UI/Components/ModToggle.cs](mdc:Utils/UI/Components/ModToggle.cs) - 开关组件
+- [Utils/UI/Components/ModSlider.cs](mdc:Utils/UI/Components/ModSlider.cs) - 滑块组件
+
+#### 常量和样式
+- [Utils/UI/Constants/UIConstants.cs](mdc:Utils/UI/Constants/UIConstants.cs) - UI 常量
+- [Utils/UI/Constants/UIStyles.cs](mdc:Utils/UI/Constants/UIStyles.cs) - 样式定义
+
+#### 动画
+- [Utils/UI/Animations/ModAnimations.cs](mdc:Utils/UI/Animations/ModAnimations.cs) - UI 动画
+
+## 创建新 UI 面板
+
+### 1. 基本面板结构
+
+```csharp
+using UnityEngine;
+using UnityEngine.UI;
+using EfDEnhanced.Utils.UI.Core;
+using EfDEnhanced.Utils.UI.Components;
+
+public class MyCustomPanel : ModPanel
+{
+    protected override void SetupPanel()
+    {
+        // 设置面板属性
+        PanelWidth = 800f;
+        PanelHeight = 600f;
+        
+        // 创建 UI 元素
+        CreateContent();
+    }
+    
+    private void CreateContent()
+    {
+        // 使用组件创建 UI
+    }
+}
+```
+
+### 2. 使用表单构建器
+
+```csharp
+using EfDEnhanced.Utils.UI.Builders;
+
+var formBuilder = new FormBuilder(parentTransform);
+formBuilder
+    .AddToggle("启用功能", value => OnToggleChanged(value))
+    .AddSlider("强度", 0f, 100f, 50f, value => OnSliderChanged(value))
+    .AddButton("应用", OnButtonClicked)
+    .Build();
+```
+
+### 3. 使用独立组件
+
+```csharp
+// 创建按钮
+var button = ModButton.Create(parentTransform, "按钮文本", () => {
+    // 点击回调
+});
+
+// 创建开关
+var toggle = ModToggle.Create(parentTransform, "开关标签", true, (value) => {
+    // 值变化回调
+});
+
+// 创建滑块
+var slider = ModSlider.Create(parentTransform, "滑块标签", 0f, 100f, 50f, (value) => {
+    // 值变化回调
+});
+```
+
+## UI 样式
+
+使用 [Utils/UI/Constants/UIStyles.cs](mdc:Utils/UI/Constants/UIStyles.cs) 中定义的统一样式：
+
+```csharp
+using EfDEnhanced.Utils.UI.Constants;
+
+// 应用标准按钮样式
+UIStyles.ApplyButtonStyle(buttonComponent);
+
+// 使用标准颜色
+var backgroundColor = UIStyles.BackgroundColor;
+var accentColor = UIStyles.AccentColor;
+```
+
+## UI 动画
+
+使用 [Utils/UI/Animations/ModAnimations.cs](mdc:Utils/UI/Animations/ModAnimations.cs) 添加动画效果：
+
+```csharp
+using EfDEnhanced.Utils.UI.Animations;
+
+// 淡入动画
+ModAnimations.FadeIn(canvasGroup, duration: 0.3f);
+
+// 淡出动画
+ModAnimations.FadeOut(canvasGroup, duration: 0.3f);
+
+// 缩放动画
+ModAnimations.ScalePopIn(transform, duration: 0.2f);
+```
+
+## 布局最佳实践
+
+1. **使用 Unity Layout Components**
+   - `VerticalLayoutGroup` - 垂直布局
+   - `HorizontalLayoutGroup` - 水平布局
+   - `GridLayoutGroup` - 网格布局
+
+2. **响应式设计**
+   - 使用 `ContentSizeFitter` 自适应内容
+   - 使用 `LayoutElement` 控制最小/最大尺寸
+
+3. **锚点设置**
+   - 正确设置 RectTransform 锚点确保适配不同分辨率
+
+## 现有 UI 参考
+
+- [Features/ModSettingsContent.cs](mdc:Features/ModSettingsContent.cs) - 设置面板示例
+- [Features/ActiveQuestTracker.cs](mdc:Features/ActiveQuestTracker.cs) - 游戏内覆盖 UI
+- [Features/RaidPreparationView.cs](mdc:Features/RaidPreparationView.cs) - 复杂表单界面
+
+## 注入现有 UI
+
+查看 [Patches/OptionsPanelPatch.cs](mdc:Patches/OptionsPanelPatch.cs) 了解如何将模组设置注入游戏原有界面。

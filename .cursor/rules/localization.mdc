@@ -1,0 +1,139 @@
+---
+description: Localization and multi-language support guidelines
+---
+# 本地化指南
+
+## 本地化系统
+
+游戏使用 `TeamSoda.MiniLocalizor` 本地化系统。模组提供 [Utils/LocalizationHelper.cs](mdc:Utils/LocalizationHelper.cs) 辅助类。
+
+## 支持的语言
+
+- 简体中文 (ChineseSimplified)
+- 繁体中文 (ChineseTraditional)
+- 英语 (English)
+- 日语 (Japanese)
+
+## 使用本地化
+
+### 获取本地化文本
+
+```csharp
+using EfDEnhanced.Utils;
+
+// 获取已有的游戏本地化文本
+string text = LocalizationHelper.GetLocalizedText("localization_key");
+
+// 检查本地化键是否存在
+bool exists = LocalizationHelper.HasKey("localization_key");
+
+// 获取当前语言
+var currentLanguage = LocalizationHelper.GetCurrentLanguage();
+```
+
+### 添加自定义本地化
+
+如果需要为模组添加新的本地化文本：
+
+```csharp
+// 方法 1: 直接使用字典映射
+private static readonly Dictionary<string, string> LocalizedStrings = new Dictionary<string, string>
+{
+    // 简体中文
+    { "zh_CN_key", "中文文本" },
+    // 英文
+    { "en_US_key", "English Text" },
+    // 日文
+    { "ja_JP_key", "日本語テキスト" }
+};
+
+// 方法 2: 根据当前语言返回对应文本
+private string GetLocalizedString(string key)
+{
+    var lang = LocalizationHelper.GetCurrentLanguage();
+    return lang switch
+    {
+        "ChineseSimplified" => "中文文本",
+        "English" => "English Text",
+        "Japanese" => "日本語テキスト",
+        _ => "Default Text"
+    };
+}
+```
+
+## UI 文本本地化
+
+### UI 组件中使用本地化
+
+```csharp
+using UnityEngine.UI;
+
+// 设置 Text 组件
+var textComponent = GetComponent<Text>();
+textComponent.text = LocalizationHelper.GetLocalizedText("ui_button_confirm");
+
+// 设置 TextMeshProUGUI 组件
+using TMPro;
+var tmpText = GetComponent<TextMeshProUGUI>();
+tmpText.text = LocalizationHelper.GetLocalizedText("ui_title");
+```
+
+### 动态更新语言
+
+监听语言变化并更新 UI：
+
+```csharp
+private void OnEnable()
+{
+    // 订阅语言变化事件（如果游戏提供）
+    UpdateLocalizedTexts();
+}
+
+private void UpdateLocalizedTexts()
+{
+    buttonText.text = LocalizationHelper.GetLocalizedText("button_key");
+    titleText.text = LocalizationHelper.GetLocalizedText("title_key");
+    // ... 更新其他文本
+}
+```
+
+## 查找现有本地化键
+
+要查找游戏中已有的本地化键：
+
+```bash
+# 搜索本地化文件
+grep pattern:"localization_key" path:"extracted_assets"
+
+# 搜索包含特定文本的键
+grep pattern:"某个文本" path:"extracted_assets/Assets/Resources"
+```
+
+## 最佳实践
+
+1. **优先使用游戏现有本地化键**
+   - 保持与游戏风格一致
+   - 避免重复工作
+
+2. **为模组功能创建独立本地化**
+   - 使用带前缀的键名，如 `mod_feature_name`
+   - 支持所有游戏语言
+
+3. **处理缺失翻译**
+   - 始终提供英文作为后备
+   - 记录日志提示缺失的翻译
+
+4. **避免硬编码文本**
+   - 所有用户可见的文本都应本地化
+   - 包括日志消息中面向用户的部分
+
+## 示例代码
+
+参考现有实现：
+- [Features/ActiveQuestTracker.cs](mdc:Features/ActiveQuestTracker.cs) - 显示本地化任务信息
+- [Features/ModSettingsContent.cs](mdc:Features/ModSettingsContent.cs) - 设置界面本地化
+- [Utils/LocalizationHelper.cs](mdc:Utils/LocalizationHelper.cs) - 本地化辅助类
+
+## 相关文档
+
+详细本地化文档: [docs/localization-guide.md](mdc:docs/localization-guide.md)

@@ -24,20 +24,43 @@ EfDEnhanced/
 │   ├── LocalizationHelper.cs    # 多语言本地化支持
 │   ├── ModSettings.cs           # 集中式设置管理器
 │   ├── QuestTrackingManager.cs  # 任务追踪持久化
-│   └── Settings/                # 设置条目类
-│       ├── BoolSettingsEntry.cs
-│       ├── FloatSettingsEntry.cs
-│       ├── IntSettingsEntry.cs
-│       └── SettingsEntry.cs
+│   ├── StatPolarityMap.cs       # 武器属性正负性映射
+│   ├── ExceptionHelper.cs       # 异常处理工具
+│   ├── TransformTreeLogger.cs   # UI调试工具
+│   ├── Settings/                # 设置条目类
+│   │   ├── BoolSettingsEntry.cs
+│   │   ├── FloatSettingsEntry.cs
+│   │   ├── IntSettingsEntry.cs
+│   │   ├── StringSettingsEntry.cs
+│   │   ├── OptionsSettingsEntry.cs
+│   │   └── SettingsEntry.cs
+│   └── UI/                      # UI框架组件
+│       ├── Core/                # 核心UI组件
+│       │   └── ModPanel.cs      # 基础面板类
+│       ├── Components/          # 可重用UI组件
+│       │   ├── ModButton.cs
+│       │   ├── ModSlider.cs
+│       │   └── ModToggle.cs
+│       ├── Constants/           # UI常量和样式
+│       │   ├── UIConstants.cs
+│       │   └── UIStyles.cs
+│       ├── Builders/            # UI构建器
+│       │   └── FormBuilder.cs   # 自动表单生成
+│       └── Animations/          # UI动画
+│           └── ModAnimations.cs
 ├── Features/                    # 功能模块
 │   ├── ActiveQuestTracker.cs    # Raid中任务追踪HUD
-│   ├── ModSettingsPanel.cs      # 设置面板UI
+│   ├── ModSettingsContent.cs    # 设置面板内容
 │   ├── RaidPreparationView.cs   # Raid准备界面视图
 │   └── README.md                # 功能详细说明（中文）
 ├── Patches/                     # Harmony补丁（按游戏系统分类）
-│   ├── PauseMenuPatch.cs        # 添加设置按钮到暂停菜单
+│   ├── OptionsPanelPatch.cs     # 添加设置标签页到游戏设置
+│   ├── MovementEnhancementPatch.cs # 移动响应性增强
+│   ├── ItemHoveringComparisonPatch.cs # 武器属性对比
 │   ├── QuestViewDetailsPatch.cs # 添加追踪复选框到任务详情
 │   ├── RaidEntryPatches.cs      # Raid进入拦截补丁
+│   ├── SceneTransitionPatches.cs # 场景转换处理
+│   ├── InteractionDebugPatches.cs # 交互调试补丁（开发用）
 │   └── WorkshopUploadPatch.cs   # 防止创意工坊描述覆盖
 ├── docs/                        # 文档
 │   ├── api/                     # API文档和反编译代码
@@ -98,11 +121,16 @@ ModLogger.Log("组件名", "消息");          // 带组件标识的日志
 ### 关键依赖
 
 项目引用的程序集来自游戏安装目录（`DuckovDataPath`定义在`.csproj`中）:
-- `TeamSoda.Duckov.Core.dll` - 游戏核心框架
-- `TeamSoda.Duckov.Utilities.dll` - 游戏工具类
-- `TeamSoda.MiniLocalizor.dll` - 本地化系统
+- `TeamSoda.*` - 游戏核心框架（Core、Utilities等）
+- `SodaLocalization.dll` - 本地化系统
 - `ItemStatsSystem.dll` - 物品统计系统
-- `Assembly-CSharp.dll` - 游戏主逻辑
+- `ECM2.dll` - Easy Character Movement 2 (移动系统)
+- `UniTask.dll` - 异步操作库
+- `LeTai.TrueShadow.dll` - 高质量UI阴影
+- `DOTween.dll` + `DOTween.Modules.dll` - 动画补间库
+- `com.rlabrecque.steamworks.net.dll` - Steam API集成
+- `FMODUnity.dll` - 音频系统
+- `Eflatun.SceneReference.dll` - 场景引用工具
 - `UnityEngine.*` - Unity引擎程序集
 - `0Harmony` (NuGet) - 运行时补丁库
 
@@ -335,7 +363,60 @@ publishedFileId=3590346461        # Steam创意工坊ID（可选）
 
 ## 已实现功能
 
-### 1. 任务追踪系统 (Quest Tracking System)
+### 1. 移动增强系统 (Movement Enhancement System)
+
+**功能**: 优化角色移动响应速度，消除"粘滞感"
+
+**核心组件**:
+- `MovementEnhancementPatch.cs` - ECM2移动系统增强补丁
+- `ModSettings.cs` - 移动增强级别设置
+
+**特性**:
+- 4档位可调增强级别（禁用/轻度/中度/重度）
+- 分别优化加速度、制动力和转向响应
+- 仅影响玩家角色，不影响NPC
+- 保持垂直速度（跳跃、下落）不受影响
+- 实时切换无需重启游戏
+
+**技术实现**:
+- Patch ECM2.Movement.UpdateNormalMove方法
+- 使用反射缓存提升性能
+- 预设配置系统支持不同增强级别
+- 智能检测玩家角色避免影响NPC
+- 支持直接线性插值实现瞬时方向切换
+
+---
+
+### 2. 武器对比系统 (Weapon Comparison System)
+
+**功能**: 在库存界面自动显示武器属性对比
+
+**核心组件**:
+- `ItemHoveringComparisonPatch.cs` - 物品悬停对比补丁
+- `StatPolarityMap.cs` - 属性正负性映射表
+
+**特性**:
+- 支持枪支和近战武器对比
+- 智能属性正负性判断（伤害高好，后坐力低好）
+- 颜色编码显示差异（绿色更好，红色更差）
+- 选中+悬停自动触发对比
+- 可在设置中开关功能
+
+**对比显示格式**:
+- `[选中武器值] → [悬停武器值]`
+- 绿色：悬停武器该属性更好
+- 红色：选中武器该属性更好
+- 白色：中性属性或数值相同
+
+**技术实现**:
+- Patch ItemPropertiesDisplay.Setup方法
+- 使用ComparisonData缓存对比信息
+- 动态修改TextMeshProUGUI显示文本和颜色
+- 自动清理避免内存泄漏
+
+---
+
+### 3. 任务追踪系统 (Quest Tracking System)
 
 **功能**: 在Raid中实时追踪活跃任务进度
 
@@ -362,7 +443,7 @@ publishedFileId=3590346461        # Steam创意工坊ID（可选）
 
 ---
 
-### 2. Pre-Raid Check System (Raid前检查系统)
+### 4. Pre-Raid Check System (Raid前检查系统)
 
 **功能**: 在玩家进入Raid地图前自动检查装备和天气条件
 
@@ -388,15 +469,16 @@ publishedFileId=3590346461        # Steam创意工坊ID（可选）
 
 ---
 
-### 3. 设置系统 (Settings System)
+### 5. 设置系统 (Settings System)
 
 **功能**: 完整的游戏内设置界面和持久化
 
 **核心组件**:
 - `ModSettings.cs` - 集中式设置定义和管理
-- `ModSettingsPanel.cs` - 设置面板UI
-- `Settings/` - 类型化设置条目（Bool/Int/Float/String/Ranged/Options）
-- `PauseMenuPatch.cs` - 将设置按钮添加到暂停菜单
+- `ModSettingsContent.cs` - 设置面板内容
+- `Settings/` - 类型化设置条目（Bool/Int/Float/String/Options）
+- `OptionsPanelPatch.cs` - 将设置标签页添加到游戏设置菜单
+- `Utils/UI/` - 完整UI框架支持自动表单生成
 
 **特性**:
 - 自动从设置条目构建UI
@@ -408,6 +490,8 @@ publishedFileId=3590346461        # Steam创意工坊ID（可选）
 
 **设置项**:
 - **Raid检查**: 启用检查系统、单独开关各项检查
+- **移动增强**: 4档位移动响应性调节
+- **界面增强**: 武器对比功能开关
 - **任务追踪**: 启用追踪、调整位置/缩放、显示选项
 
 **技术实现**:
@@ -418,7 +502,7 @@ publishedFileId=3590346461        # Steam创意工坊ID（可选）
 
 ---
 
-### 4. 多语言支持 (Localization System)
+### 6. 多语言支持 (Localization System)
 
 **功能**: 完整的多语言本地化支持
 
@@ -439,7 +523,7 @@ publishedFileId=3590346461        # Steam创意工坊ID（可选）
 
 ---
 
-### 5. Steam创意工坊集成 (Steam Workshop Integration)
+### 7. Steam创意工坊集成 (Steam Workshop Integration)
 
 **功能**: 防止上传时覆盖创意工坊描述
 

@@ -21,6 +21,8 @@ ModLogger.Log("message");
 ModLogger.LogWarning("warning");
 ModLogger.LogError("error");
 ModLogger.Log("ComponentName", "message");
+
+TransformTreeLogger.LogTransformTree(transform);
 ```
 
 ### Harmony Patches
@@ -72,7 +74,7 @@ Game assemblies referenced from [EfDEnhanced.csproj](mdc:EfDEnhanced.csproj):
 
 ## Development Workflow
 
-1. Search decompiled code for target methods
+1. Search decompiled code for target methods / modules
 2. Create patch file in `Patches/`
 3. Implement with try-catch and logging
 4. Build: `dotnet build`
