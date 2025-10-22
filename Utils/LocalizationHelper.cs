@@ -117,7 +117,7 @@ public static class LocalizationHelper
             { "QuestTracker_TaskComplete", "✓" },  // 已完成标记
             { "QuestTracker_TaskPending", "○" },   // 未完成标记
             { "QuestTracker_CheckboxLabel", "局内追踪" },  // 任务详情界面的追踪复选框标签
-            { "QuestTracker_HelpText", "使用 . 快捷键隐藏/显示任务追踪面板" },
+            { "QuestTracker_HelpText", "使用 . 快捷键隐藏/显示任务追踪面板\n游戏设置中的Mod设置可以调整面板位置" },
 
             // 设置界面
             { "Settings_Title", "EfD Enhanced 设置" },
@@ -197,7 +197,7 @@ public static class LocalizationHelper
             { "QuestTracker_TaskComplete", "✓" },
             { "QuestTracker_TaskPending", "○" },
             { "QuestTracker_CheckboxLabel", "局內追蹤" },
-            { "QuestTracker_HelpText", "使用 . 快捷鍵隱藏/顯示任務追蹤面板" },
+            { "QuestTracker_HelpText", "使用 . 快捷鍵隱藏/顯示任務追蹤面板\n遊戲設置中的Mod設置可以調整面板位置" },
 
             // 設置界面
             { "Settings_Title", "EfD Enhanced 設置" },
@@ -277,7 +277,7 @@ public static class LocalizationHelper
             { "QuestTracker_TaskComplete", "✓" },
             { "QuestTracker_TaskPending", "○" },
             { "QuestTracker_CheckboxLabel", "Track in Raid" },
-            { "QuestTracker_HelpText", "Press . to hide/show quest tracker" },
+            { "QuestTracker_HelpText", "Press . to hide/show quest tracker\nMod settings in game settings can adjust panel position" },
 
             // Settings UI
             { "Settings_Title", "EfD Enhanced Settings" },
@@ -357,7 +357,7 @@ public static class LocalizationHelper
             { "QuestTracker_TaskComplete", "✓" },
             { "QuestTracker_TaskPending", "○" },
             { "QuestTracker_CheckboxLabel", "レイド中追跡" },
-            { "QuestTracker_HelpText", "「.」キーで表示切替" },
+            { "QuestTracker_HelpText", "「.」キーで表示切替\nゲーム設定のMod設定でパネル位置を調整できます" },
 
             // 設定UI
             { "Settings_Title", "EfD Enhanced 設定" },

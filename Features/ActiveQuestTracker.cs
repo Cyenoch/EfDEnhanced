@@ -890,13 +890,19 @@ public class ActiveQuestTracker : MonoBehaviour
 
             // 获取变化的物品
             Item? changedItem = inventory?.GetItemAt(index);
-            if (changedItem == null)
+            
+            if (changedItem != null)
             {
-                return;
+                // 物品存在（添加或替换）：只更新该物品相关的任务
+                UpdateQuestsWithItemChanges(changedItem.TypeID);
             }
-
-            // 更新所有包含提交物品类任务的追踪任务
-            UpdateQuestsWithItemChanges(changedItem.TypeID);
+            else
+            {
+                // 物品为null（移除或丢弃）：刷新所有包含SubmitItems任务的追踪任务
+                // 因为我们不知道是哪个物品被移除了
+                ModLogger.Log("QuestTracker", $"Item removed from inventory at index {index}, refreshing all SubmitItems tasks");
+                UpdateAllSubmitItemsTasks();
+            }
         }
         catch (Exception ex)
         {
@@ -918,13 +924,18 @@ public class ActiveQuestTracker : MonoBehaviour
 
             // 获取变化的物品
             Item? changedItem = inventory?.GetItemAt(index);
-            if (changedItem == null)
+            
+            if (changedItem != null)
             {
-                return;
+                // 物品存在（添加或替换）：只更新该物品相关的任务
+                UpdateQuestsWithItemChanges(changedItem.TypeID);
             }
-
-            // 更新所有包含提交物品类任务的追踪任务
-            UpdateQuestsWithItemChanges(changedItem.TypeID);
+            else
+            {
+                // 物品为null（移除）：刷新所有包含SubmitItems任务的追踪任务
+                ModLogger.Log("QuestTracker", $"Item removed from storage at index {index}, refreshing all SubmitItems tasks");
+                UpdateAllSubmitItemsTasks();
+            }
         }
         catch (Exception ex)
         {
@@ -1032,6 +1043,44 @@ public class ActiveQuestTracker : MonoBehaviour
         catch (Exception ex)
         {
             ModLogger.LogError($"QuestTracker.UpdateQuestsWithMoneyChanges failed: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// 更新所有包含SubmitItems任务的追踪任务
+    /// 当无法确定具体是哪个物品变化时使用（例如物品被丢弃）
+    /// </summary>
+    private void UpdateAllSubmitItemsTasks()
+    {
+        try
+        {
+            foreach (var entry in _questEntries)
+            {
+                if (entry.QuestID == 0)
+                {
+                    continue;
+                }
+
+                // 查找任务
+                var quest = QuestManager.Instance?.ActiveQuests?.FirstOrDefault(q => q != null && q.ID == entry.QuestID);
+                if (quest == null || quest.Tasks == null)
+                {
+                    continue;
+                }
+
+                // 检查任务是否包含提交物品的任务
+                bool hasSubmitItemsTask = quest.Tasks.Any(task => task is SubmitItems);
+
+                if (hasSubmitItemsTask)
+                {
+                    ModLogger.Log("QuestTracker", $"Updating quest {quest.ID} display (contains SubmitItems tasks)");
+                    entry.UpdateDisplay(quest);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestTracker.UpdateAllSubmitItemsTasks failed: {ex}");
         }
     }
 

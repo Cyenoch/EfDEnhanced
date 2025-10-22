@@ -138,7 +138,7 @@ namespace EfDEnhanced.Utils
                 string treeMarker = isLastChild ? "└─ " : "├─ ";
                 string indent = GetIndent(currentDepth);
 
-                ModLogger.Log(LOG_COMPONENT, $"{indent}{treeMarker}{child.name}");
+                ModLogger.Log(LOG_COMPONENT, $"{indent}{treeMarker}{child.name} ({child.GetType()})");
 
                 // 递归处理子节点
                 if (child.childCount > 0 && (maxDepth < 0 || currentDepth < maxDepth))

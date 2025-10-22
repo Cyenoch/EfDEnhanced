@@ -17,26 +17,51 @@ namespace EfDEnhanced.Patches
     [HarmonyPatch(typeof(OptionsPanel))]
     public class OptionsPanelPatch
     {
-        private static bool tabAdded = false;
         private static ModSettingsContent? modSettingsContent;
+        
+        /// <summary>
+        /// Flag to indicate if mod settings tab should be selected when panel opens
+        /// Set this to true before opening the panel to auto-select mod settings
+        /// </summary>
+        public static bool ShouldSelectModSettingsTab { get; set; } = false;
 
         /// <summary>
         /// Patch OptionsPanel.Start to add our mod settings tab
+        /// This is called when the panel is first created (e.g., main menu)
         /// </summary>
         [HarmonyPatch("Start")]
         [HarmonyPostfix]
         public static void Start_Postfix(OptionsPanel __instance)
         {
+            AddModSettingsTab(__instance);
+        }
+
+        /// <summary>
+        /// Patch OptionsPanel.OnOpen to add our mod settings tab
+        /// This is called every time the options panel is opened (e.g., pause menu in-game)
+        /// </summary>
+        [HarmonyPatch("OnOpen")]
+        [HarmonyPostfix]
+        public static void OnOpen_Postfix(OptionsPanel __instance)
+        {
+            AddModSettingsTab(__instance);
+            
+            // Check if we should auto-select mod settings tab
+            if (ShouldSelectModSettingsTab)
+            {
+                SelectModSettingsTab(__instance);
+                ShouldSelectModSettingsTab = false; // Reset flag
+            }
+        }
+
+        /// <summary>
+        /// Shared method to add mod settings tab to the options panel
+        /// </summary>
+        private static void AddModSettingsTab(OptionsPanel __instance)
+        {
             try
             {
-                // Only add tab once
-                if (tabAdded)
-                {
-                    ModLogger.Log("OptionsPanelPatch", "Tab already added, skipping");
-                    return;
-                }
-
-                ModLogger.Log("OptionsPanelPatch", "Adding Mod Settings tab to OptionsPanel");
+                ModLogger.Log("OptionsPanelPatch", "Checking if Mod Settings tab needs to be added");
 
                 // Get the tabButtons list using reflection
                 var tabButtonsField = typeof(OptionsPanel).GetField("tabButtons", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -52,6 +77,18 @@ namespace EfDEnhanced.Patches
                     ModLogger.LogError("OptionsPanelPatch: tabButtons is null or empty");
                     return;
                 }
+
+                // Check if our mod settings tab already exists
+                foreach (var btn in tabButtons)
+                {
+                    if (btn != null && btn.gameObject.name == "ModSettingsTabButton")
+                    {
+                        ModLogger.Log("OptionsPanelPatch", "Mod Settings tab already exists, skipping");
+                        return;
+                    }
+                }
+
+                ModLogger.Log("OptionsPanelPatch", "Adding Mod Settings tab to OptionsPanel");
 
                 ModLogger.Log("OptionsPanelPatch", $"Found {tabButtons.Count} existing tabs");
 
@@ -102,12 +139,32 @@ namespace EfDEnhanced.Patches
                     ModLogger.LogWarning("OptionsPanelPatch: Could not find selectedIndicator field");
                 }
 
-                // Update button text
+                // Remove any localization components that might interfere with our text
+                var localizationComponents = modTabButtonObj.GetComponentsInChildren<Component>();
+                foreach (var comp in localizationComponents)
+                {
+                    var typeName = comp.GetType().Name;
+                    if (typeName.Contains("Localized") || typeName.Contains("Localizor"))
+                    {
+                        ModLogger.Log("OptionsPanelPatch", $"Removing localization component: {typeName}");
+                        GameObject.Destroy(comp);
+                    }
+                }
+
+                // Update button text - force update to avoid sharing with template
                 TextMeshProUGUI? buttonText = modTabButtonObj.GetComponentInChildren<TextMeshProUGUI>();
                 if (buttonText != null)
                 {
-                    buttonText.text = LocalizationHelper.Get("Settings_ModSettings_Button");
-                    ModLogger.Log("OptionsPanelPatch", $"Set button text to: {buttonText.text}");
+                    string modSettingsText = LocalizationHelper.Get("Settings_ModSettings_Button");
+                    buttonText.text = modSettingsText;
+                    // Force the text to update and not be linked to the original
+                    buttonText.SetText(modSettingsText);
+                    buttonText.ForceMeshUpdate();
+                    ModLogger.Log("OptionsPanelPatch", $"Set button text to: {modSettingsText}");
+                }
+                else
+                {
+                    ModLogger.LogWarning("OptionsPanelPatch: Could not find TextMeshProUGUI component in mod tab button");
                 }
 
                 // Get the tab content field from template to understand structure
@@ -183,14 +240,69 @@ namespace EfDEnhanced.Patches
                 SetupTabButtonClickEvent(modTabButton, __instance);
 
                 ModLogger.Log("OptionsPanelPatch", $"Successfully added mod settings tab. Total tabs: {tabButtons.Count}");
-
-                tabAdded = true;
-
-                TransformTreeLogger.LogTransformTree(__instance.transform);
             }
             catch (Exception ex)
             {
-                ModLogger.LogError($"OptionsPanelPatch.Start_Postfix failed: {ex}");
+                ModLogger.LogError($"OptionsPanelPatch.AddModSettingsTab failed: {ex}");
+            }
+        }
+
+        /// <summary>
+        /// Select the Mod Settings tab
+        /// </summary>
+        private static void SelectModSettingsTab(OptionsPanel __instance)
+        {
+            try
+            {
+                ModLogger.Log("OptionsPanelPatch", "Attempting to select Mod Settings tab");
+
+                // Get the tabButtons list
+                var tabButtonsField = typeof(OptionsPanel).GetField("tabButtons", BindingFlags.NonPublic | BindingFlags.Instance);
+                if (tabButtonsField == null)
+                {
+                    ModLogger.LogError("OptionsPanelPatch: Could not find tabButtons field for selection");
+                    return;
+                }
+
+                var tabButtons = tabButtonsField.GetValue(__instance) as List<OptionsPanel_TabButton>;
+                if (tabButtons == null || tabButtons.Count == 0)
+                {
+                    ModLogger.LogError("OptionsPanelPatch: tabButtons is null or empty for selection");
+                    return;
+                }
+
+                // Find the Mod Settings tab button
+                OptionsPanel_TabButton? modSettingsButton = null;
+                foreach (var btn in tabButtons)
+                {
+                    if (btn != null && btn.gameObject.name == "ModSettingsTabButton")
+                    {
+                        modSettingsButton = btn;
+                        break;
+                    }
+                }
+
+                if (modSettingsButton == null)
+                {
+                    ModLogger.LogError("OptionsPanelPatch: Could not find ModSettingsTabButton for selection");
+                    return;
+                }
+
+                // Use SetSelection method to select our tab
+                var setSelectionMethod = typeof(OptionsPanel).GetMethod("SetSelection", BindingFlags.Public | BindingFlags.Instance);
+                if (setSelectionMethod != null)
+                {
+                    setSelectionMethod.Invoke(__instance, new object[] { modSettingsButton });
+                    ModLogger.Log("OptionsPanelPatch", "Successfully selected Mod Settings tab");
+                }
+                else
+                {
+                    ModLogger.LogError("OptionsPanelPatch: Could not find SetSelection method");
+                }
+            }
+            catch (Exception ex)
+            {
+                ModLogger.LogError($"OptionsPanelPatch.SelectModSettingsTab failed: {ex}");
             }
         }
 
