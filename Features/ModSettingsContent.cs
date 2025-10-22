@@ -45,7 +45,7 @@ namespace EfDEnhanced.Features
             // Add VerticalLayoutGroup for automatic layout
             var layoutGroup = gameObject.AddComponent<VerticalLayoutGroup>();
             layoutGroup.childControlWidth = true;
-            layoutGroup.childControlHeight = true;
+            layoutGroup.childControlHeight = false; // Let children control their own height
             layoutGroup.childForceExpandWidth = true;
             layoutGroup.childForceExpandHeight = false;
             layoutGroup.spacing = UIConstants.SETTINGS_ENTRY_SPACING;

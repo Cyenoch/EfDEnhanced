@@ -51,12 +51,12 @@ namespace EfDEnhanced.Utils.UI.Components
             containerObj.transform.SetParent(parent, false);
 
             var containerRect = containerObj.AddComponent<RectTransform>();
-            containerRect.sizeDelta = new Vector2(0, 80);
+            containerRect.sizeDelta = new Vector2(0, 60); // Reduced from 80 to 60 for more compact layout
 
             // 添加垂直布局（使用对象初始化器）
             var layout = containerObj.AddComponent<VerticalLayoutGroup>();
-            layout.spacing = 2;
-            layout.padding = new RectOffset(8, 8, 4, 4);
+            layout.spacing = 4;
+            layout.padding = new RectOffset(8, 8, 2, 2); // Reduced top and bottom padding
             layout.childAlignment = TextAnchor.UpperLeft;
             layout.childControlWidth = true;
             layout.childControlHeight = false;
@@ -68,7 +68,7 @@ namespace EfDEnhanced.Utils.UI.Components
             labelContainer.transform.SetParent(containerObj.transform, false);
 
             var labelContainerRect = labelContainer.AddComponent<RectTransform>();
-            labelContainerRect.sizeDelta = new Vector2(0, 24);
+            labelContainerRect.sizeDelta = new Vector2(0, 22); // Reduced from 24 to 22
 
             var labelLayout = labelContainer.AddComponent<HorizontalLayoutGroup>();
             labelLayout.spacing = 16;
@@ -111,7 +111,7 @@ namespace EfDEnhanced.Utils.UI.Components
             sliderContainer.transform.SetParent(containerObj.transform, false);
 
             var sliderContainerRect = sliderContainer.AddComponent<RectTransform>();
-            sliderContainerRect.sizeDelta = new Vector2(0, 24);
+            sliderContainerRect.sizeDelta = new Vector2(0, 22); // Reduced from 24 to 22
 
             var slider = CreateSliderComponent(sliderContainer);
 

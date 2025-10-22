@@ -262,7 +262,7 @@ namespace EfDEnhanced.Utils.UI.Builders
             containerLayout.childControlWidth = true;
             containerLayout.childForceExpandHeight = false;
             containerLayout.childForceExpandWidth = true;
-            containerLayout.spacing = 16;
+            containerLayout.spacing = 4;
             containerLayout.padding = new RectOffset(leftPadding, 0, 0, 0);
 
             // Label
