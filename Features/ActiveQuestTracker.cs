@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Duckov.Economy;
 using Duckov.Quests;
+using Duckov.Quests.Tasks;
 using Duckov.Scenes;
 using Duckov.UI;
 using EfDEnhanced.Utils;
 using EfDEnhanced.Utils.Settings;
 using EfDEnhanced.Utils.UI.Constants;
+using ItemStatsSystem;
 using LeTai.TrueShadow;
 using TMPro;
 using UnityEngine;
@@ -312,6 +315,17 @@ public class ActiveQuestTracker : MonoBehaviour
 
             // UI状态变化（菜单打开/关闭时隐藏/显示追踪器）
             View.OnActiveViewChanged += OnUIStateChanged;
+
+            // 玩家背包物品变化（用于更新提交物品类任务的持有数量）
+            CharacterMainControl.OnMainCharacterInventoryChangedEvent = (Action<CharacterMainControl, Inventory, int>)Delegate.Combine(
+                CharacterMainControl.OnMainCharacterInventoryChangedEvent, 
+                new Action<CharacterMainControl, Inventory, int>(OnInventoryChanged));
+
+            // 仓库物品变化（用于更新提交物品类任务的持有数量）
+            PlayerStorage.OnPlayerStorageChange += OnStorageChanged;
+
+            // 金钱变化（用于更新提交金钱类任务的可交互状态）
+            EconomyManager.OnMoneyChanged += OnMoneyChanged;
         }
         catch (Exception ex)
         {
@@ -332,6 +346,15 @@ public class ActiveQuestTracker : MonoBehaviour
             Quest.onQuestCompleted -= OnQuestCompleted;
             QuestManager.OnTaskFinishedEvent -= OnTaskFinished;
             View.OnActiveViewChanged -= OnUIStateChanged;
+
+            // 取消订阅物品变化事件
+            CharacterMainControl.OnMainCharacterInventoryChangedEvent = (Action<CharacterMainControl, Inventory, int>)Delegate.Remove(
+                CharacterMainControl.OnMainCharacterInventoryChangedEvent, 
+                new Action<CharacterMainControl, Inventory, int>(OnInventoryChanged));
+            PlayerStorage.OnPlayerStorageChange -= OnStorageChanged;
+
+            // 取消订阅金钱变化事件
+            EconomyManager.OnMoneyChanged -= OnMoneyChanged;
         }
         catch (Exception ex)
         {
@@ -834,6 +857,165 @@ public class ActiveQuestTracker : MonoBehaviour
         catch (Exception ex)
         {
             ModLogger.LogError($"QuestTracker.OnTaskFinished failed: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// 背包物品变化回调（用于更新提交物品类任务的持有数量）
+    /// </summary>
+    private void OnInventoryChanged(CharacterMainControl control, Inventory inventory, int index)
+    {
+        try
+        {
+            if (!_isActive)
+            {
+                return;
+            }
+
+            // 获取变化的物品
+            Item? changedItem = inventory?.GetItemAt(index);
+            if (changedItem == null)
+            {
+                return;
+            }
+
+            // 更新所有包含提交物品类任务的追踪任务
+            UpdateQuestsWithItemChanges(changedItem.TypeID);
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestTracker.OnInventoryChanged failed: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// 仓库物品变化回调（用于更新提交物品类任务的持有数量）
+    /// </summary>
+    private void OnStorageChanged(PlayerStorage storage, Inventory inventory, int index)
+    {
+        try
+        {
+            if (!_isActive)
+            {
+                return;
+            }
+
+            // 获取变化的物品
+            Item? changedItem = inventory?.GetItemAt(index);
+            if (changedItem == null)
+            {
+                return;
+            }
+
+            // 更新所有包含提交物品类任务的追踪任务
+            UpdateQuestsWithItemChanges(changedItem.TypeID);
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestTracker.OnStorageChanged failed: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// 金钱变化回调（用于更新提交金钱类任务）
+    /// </summary>
+    private void OnMoneyChanged(long oldValue, long newValue)
+    {
+        try
+        {
+            if (!_isActive)
+            {
+                return;
+            }
+
+            // 更新所有包含提交金钱类任务的追踪任务
+            UpdateQuestsWithMoneyChanges();
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestTracker.OnMoneyChanged failed: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// 当物品数量变化时，更新相关任务的显示
+    /// </summary>
+    private void UpdateQuestsWithItemChanges(int itemTypeID)
+    {
+        try
+        {
+            foreach (var entry in _questEntries)
+            {
+                if (entry.QuestID == 0)
+                {
+                    continue;
+                }
+
+                // 查找任务
+                var quest = QuestManager.Instance?.ActiveQuests?.FirstOrDefault(q => q != null && q.ID == entry.QuestID);
+                if (quest == null || quest.Tasks == null)
+                {
+                    continue;
+                }
+
+                // 检查任务是否包含提交此类物品的任务
+                bool hasMatchingSubmitTask = quest.Tasks.Any(task =>
+                {
+                    if (task is SubmitItems submitTask)
+                    {
+                        // 检查是否是 SubmitItems 类型且物品ID匹配
+                        return submitTask != null && submitTask.ItemTypeID == itemTypeID;
+                    }
+                    return false;
+                });
+
+                if (hasMatchingSubmitTask)
+                {
+                    ModLogger.Log("QuestTracker", $"Item {itemTypeID} changed, updating quest {quest.ID} display");
+                    entry.UpdateDisplay(quest);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestTracker.UpdateQuestsWithItemChanges failed: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// 当金钱数量变化时，更新相关任务的显示
+    /// </summary>
+    private void UpdateQuestsWithMoneyChanges()
+    {
+        try
+        {
+            foreach (var entry in _questEntries)
+            {
+                if (entry.QuestID == 0)
+                {
+                    continue;
+                }
+
+                // 查找任务
+                var quest = QuestManager.Instance?.ActiveQuests?.FirstOrDefault(q => q != null && q.ID == entry.QuestID);
+                if (quest == null || quest.Tasks == null)
+                {
+                    continue;
+                }
+
+                // 检查任务是否包含提交金钱的任务
+                bool hasSubmitMoneyTask = quest.Tasks.Any(task => task is QuestTask_SubmitMoney);
+
+                if (hasSubmitMoneyTask)
+                {
+                    ModLogger.Log("QuestTracker", $"Money changed, updating quest {quest.ID} display");
+                    entry.UpdateDisplay(quest);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestTracker.UpdateQuestsWithMoneyChanges failed: {ex}");
         }
     }
 
