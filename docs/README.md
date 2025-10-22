@@ -28,7 +28,9 @@ docs/
 ├── scenes/
 │   └── scenes-guide.md                 # Game scenes and levels
 ├── item-wheel-menu.md                  # Item wheel menu feature guide
+├── throwable-wheel-menu.md             # Throwable wheel menu feature guide
 ├── keybinding-system.md                # Keybinding system documentation
+├── item-debug-helper.md                # Item selection debug helper guide
 ├── localization-guide.md               # Localization system guide
 ├── quest-tracking-feature.md           # Quest tracking feature guide
 └── weapon-comparison.md                # Weapon comparison feature guide
@@ -100,7 +102,22 @@ Content:
 
 ---
 
-### 5. [Keybinding System](keybinding-system.md)
+### 5. [Throwable Wheel Menu](throwable-wheel-menu.md)
+**投掷物轮盘菜单功能指南**
+
+Content:
+- 快速切换投掷物的径向菜单
+- 使用方法和操作说明
+- 投掷物检测和堆叠逻辑
+- 输入处理和屏蔽机制
+- 技术实现细节
+- 自定义设置
+
+**Who should read**: 用户想了解如何使用投掷物轮盘，开发者想了解实现原理
+
+---
+
+### 6. [Keybinding System](keybinding-system.md)
 **按键绑定系统文档**
 
 Content:
@@ -113,7 +130,19 @@ Content:
 
 ---
 
-### 6. [Quest Tracking Feature](quest-tracking-feature.md)
+### 7. [Item Debug Helper](item-debug-helper.md)
+**物品选择调试辅助工具**
+
+Content:
+- 物品选择调试功能
+- 物品属性查看
+- 开发调试辅助
+
+**Who should read**: 开发者需要调试物品系统
+
+---
+
+### 8. [Quest Tracking Feature](quest-tracking-feature.md)
 **任务追踪功能文档**
 
 Content:
@@ -125,7 +154,7 @@ Content:
 
 ---
 
-### 7. [Weapon Comparison](weapon-comparison.md)
+### 9. [Weapon Comparison](weapon-comparison.md)
 **武器对比功能文档**
 
 Content:
@@ -137,7 +166,7 @@ Content:
 
 ---
 
-### 8. [Localization Guide](localization-guide.md)
+### 10. [Localization Guide](localization-guide.md)
 **多语言支持指南**
 
 Content:

@@ -91,6 +91,39 @@ Quick access radial menu for inventory items, designed for one-handed operation.
 
 ---
 
+### 💣 投掷物轮盘菜单 | Throwable Wheel Menu
+
+专门用于快速切换投掷物（手雷等）的径向菜单。
+
+Dedicated radial menu for quick throwable (grenades, etc.) selection.
+
+**特性 | Features:**
+- **快速装备** | Quick Equip - 按住 G 键（可配置）→ 选择 → 释放装备
+- **自动扫描** | Auto Scan - 自动检测背包中所有投掷物
+- **智能堆叠** | Smart Stacking - 相同类型投掷物自动堆叠显示总数量
+- **输入屏蔽** | Input Blocking - 菜单打开时自动屏蔽射击和视角旋转
+- **可自定义** | Customizable - 支持自定义热键和菜单缩放
+- **自动取消** | Auto Cancel - 打开其他界面或游戏暂停时自动取消
+
+**使用方法 | How to use:**
+1. **按住** G 键（可在设置中修改）打开菜单 | **Hold** G key (customizable) to open menu
+2. **保持按住** 热键，移动鼠标选择投掷物 | **Keep holding** and move mouse to select throwable
+3. **释放** 热键，自动装备选中的投掷物 | **Release** to equip the selected throwable
+
+**支持的投掷物类型 | Supported Throwable Types:**
+- ✅ 手雷（破片、震撼等）| Grenades (frag, stun, etc.)
+- ✅ 闪光弹 | Flashbangs
+- ✅ 烟雾弹 | Smoke grenades
+- ✅ 所有投掷技能物品（Skill_Grenade 类型）| All throwable skill items (Skill_Grenade type)
+
+**设置选项 | Settings:**
+- 在 MOD 设置中可启用/禁用功能 | Enable/disable in MOD Settings
+- 自定义热键（默认 G 键）| Customize hotkey (default G)
+- 调整轮盘菜单的缩放大小（与物品轮盘共用）| Adjust menu scale size (shared with item wheel)
+- 详细文档：[投掷物轮盘菜单指南](docs/throwable-wheel-menu.md) | Detailed docs: [Throwable Wheel Menu Guide](docs/throwable-wheel-menu.md)
+
+---
+
 ### 🔫 武器对比 | Weapon Comparison
 
 在库存中选中武器后，悬停到其他武器会自动显示属性对比。支持枪支和近战武器。
@@ -341,14 +374,17 @@ EfDEnhanced/
 ├── Patches/
 │   ├── ItemHoveringComparisonPatch.cs # Weapon comparison system
 │   ├── ItemWheelMenuPatch.cs   # Item wheel menu input handling
+│   ├── ThrowableWheelMenuPatch.cs # Throwable wheel menu input handling
 │   ├── MovementEnhancementPatch.cs # Movement system optimization
 │   ├── OptionsPanelPatch.cs    # Adds MOD Settings tab to game settings
 │   ├── QuestViewDetailsPatch.cs # Adds tracking checkbox to quest details
 │   ├── RaidEntryPatches.cs     # Intercepts raid entry for checks
+│   ├── ItemSelectionDebugPatch.cs # Item selection debug helper (dev)
 │   └── WorkshopUploadPatch.cs  # Prevents workshop description override
 ├── Features/
 │   ├── ActiveQuestTracker.cs   # In-raid quest tracker HUD
 │   ├── ItemWheelMenu.cs        # Item wheel menu implementation
+│   ├── ThrowableWheelMenu.cs   # Throwable wheel menu implementation
 │   ├── ModSettingsContent.cs   # Settings content for OptionsPanel
 │   └── RaidPreparationView.cs  # Pre-raid warning dialog
 └── Utils/

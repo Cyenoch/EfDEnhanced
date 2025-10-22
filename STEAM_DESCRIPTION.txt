@@ -1,63 +1,56 @@
 [h1]EfD Enhanced - 游戏体验增强模组[/h1]
-
 为 Escape from Duckov 提供局内任务追踪、移动增强、传送前装备检查等功能。
-
 [h2]功能列表[/h2]
-
 [h3]🎯 局内任务追踪[/h3]
 在任务详情页面勾选"局内追踪"，进入突袭后在屏幕左上角显示任务进度。
-
 [list]
 [*]显示任务完成进度（如 2/3）和已完成子任务（✓）
 [*]只显示当前地图的任务
 [*]可调整位置、大小、是否显示描述
 [*]打开菜单时自动隐藏
 [/list]
-
 [h3]🏃 移动增强[/h3]
 调整角色移动响应速度。4档位可调：禁用/轻度/中度/重度。
-
 [i]注：调整的是加速度参数，不是移动速度上限。[/i]
-
 [list]
 [*]仅影响玩家角色
 [*]实时切换，无需重启
 [/list]
-
 [h3]🎡 物品轮盘菜单[/h3]
 快速访问物品栏的径向菜单。
-
 [b]使用方法：[/b]按住热键（默认 ~）→ 鼠标选择 → 释放使用
-
 [list]
 [*]单手操作，无需离开游戏视角
 [*]菜单打开时自动屏蔽射击和视角旋转
 [*]显示当前物品栏绑定的物品图标
 [*]支持自定义热键和缩放（0.5-2.0倍）
 [/list]
-
+[h3]💣 投掷物轮盘菜单[/h3]
+专门用于快速切换投掷物的径向菜单。
+[b]使用方法：[/b]按住 G 键（可配置）→ 鼠标选择 → 释放装备
+[list]
+[*]自动扫描背包中所有投掷物（手雷、闪光弹、烟雾弹等）
+[*]相同类型投掷物自动堆叠显示总数量
+[*]菜单打开时自动屏蔽射击和视角旋转
+[*]支持自定义热键和缩放
+[/list]
 [h3]🔫 武器对比[/h3]
 在库存中选中一个武器后，悬停到其他武器会显示属性对比。
-
 [list]
 [*]支持枪支和近战武器
 [*]绿色/红色标识优劣
 [*]显示格式：[选中武器值] → [悬停武器值]
 [/list]
-
 [h3]✅ 传送前装备检查[/h3]
 进入地图前检查并提醒缺少的装备：
-
 [list]
 [*]武器和弹药（检查每把枪是否有至少一个弹匣的弹药）
 [*]医疗用品、食物、水
 [*]天气状况（风暴警告）
 [*]任务所需物品（按地图过滤）
 [/list]
-
 [h3]⚙️ 设置面板[/h3]
 在游戏设置中添加了 EfD Enhanced 选项卡：
-
 [list]
 [*]传送前检查项目单独开关
 [*]移动增强档位调节
@@ -67,75 +60,64 @@
 [*]按键绑定（支持键盘、鼠标、手柄）
 [*]一键重置
 [/list]
-
 [h2]多语言支持[/h2]
 完整支持：简体中文、繁体中文、English、日本語
-
 [h2]反馈[/h2]
 [url=https://github.com/Cyenoch/EfDEnhanced]GitHub 项目地址[/url]
-
 [hr][/hr]
-
 [h1]EfD Enhanced - Gameplay Enhancement Mod[/h1]
-
 Provides in-raid quest tracking, movement enhancement, pre-raid equipment check, and more for Escape from Duckov.
-
 [h2]Features[/h2]
-
 [h3]🎯 In-Raid Quest Tracking[/h3]
 Check "In-Raid Tracking" on quest details to display progress on screen during raids.
-
 [list]
 [*]Shows completion progress (e.g., 2/3) and completed sub-tasks (✓)
 [*]Only shows quests for current map
 [*]Adjustable position, scale, and description display
 [*]Auto-hides when opening menus
 [/list]
-
 [h3]🏃 Movement Enhancement[/h3]
 Adjusts character movement response. 4 levels: Disabled/Light/Medium/Heavy.
-
 [i]Note: Adjusts acceleration parameters, not max movement speed.[/i]
-
 [list]
 [*]Only affects player character
 [*]Real-time switching, no restart required
 [/list]
-
 [h3]🎡 Item Wheel Menu[/h3]
 Radial menu for quick item bar access.
-
 [b]Usage:[/b] Hold hotkey (default ~) → Move mouse → Release to use
-
 [list]
 [*]One-handed operation without leaving game view
 [*]Auto-blocks shooting and camera rotation while open
 [*]Shows actual item bar icons
 [*]Customizable hotkey and scale (0.5-2.0x)
 [/list]
-
+[h3]💣 Throwable Wheel Menu[/h3]
+Dedicated radial menu for quick throwable selection.
+[b]Usage:[/b] Hold G key (customizable) → Move mouse → Release to equip
+[list]
+[*]Auto-scans all throwables in inventory (grenades, flashbangs, smoke, etc.)
+[*]Same-type throwables auto-stack showing total count
+[*]Auto-blocks shooting and camera rotation while open
+[*]Customizable hotkey and scale
+[/list]
 [h3]🔫 Weapon Comparison[/h3]
 Select a weapon in inventory, then hover over others to see stat comparison.
-
 [list]
 [*]Supports guns and melee weapons
 [*]Green/red indicators for better/worse stats
 [*]Format: [Selected Value] → [Hovered Value]
 [/list]
-
 [h3]✅ Pre-Raid Loadout Check[/h3]
 Checks and reminds before entering map:
-
 [list]
 [*]Weapons and ammo (checks if each gun has at least one magazine worth)
 [*]Medical supplies, food, water
 [*]Weather conditions (storm warning)
 [*]Required quest items (filtered by map)
 [/list]
-
 [h3]⚙️ Settings Panel[/h3]
 Adds EfD Enhanced tab to game settings:
-
 [list]
 [*]Individual toggles for pre-raid checks
 [*]Movement enhancement level adjustment
@@ -145,9 +127,7 @@ Adds EfD Enhanced tab to game settings:
 [*]Keybinding (supports keyboard, mouse, gamepad)
 [*]One-click reset
 [/list]
-
 [h2]Multi-Language Support[/h2]
 Fully supports: Simplified Chinese, Traditional Chinese, English, and Japanese
-
 [h2]Feedback[/h2]
 [url=https://github.com/Cyenoch/EfDEnhanced]GitHub Repository[/url]

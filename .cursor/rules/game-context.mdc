@@ -1,54 +1,19 @@
 ---
 alwaysApply: true
 ---
-# Game Context: Escape from Duckov
+# 游戏上下文
 
-**IMPORTANT**: "Escape from Duckov" is an independent game, NOT "Escape from Tarkov".
+**注意**: "Escape from Duckov" 是独立游戏，不是 "Escape from Tarkov"
 
-## Game Information
+## 核心命名空间
+- `Duckov.Modding` - 模组框架
+- `TeamSoda.Duckov.Core` - 核心系统
+- `TeamSoda.MiniLocalizor` - 本地化
 
-- **Developer**: TeamSoda
-- **Unity-based**: Uses Unity engine with custom framework
-- **Modding Support**: Official mod framework via `Duckov.Modding.ModBehaviour`
-- **Genre**: Appears to be survival/exploration game based on level names
+## 主要关卡
+- Prologue, Guide, Ground Zero, Storm Zone, J-Lab, Farm, Hidden Warehouse
 
-## Technical Architecture
-
-### Core Namespaces
-- `Duckov.Modding` - Official mod framework
-- `TeamSoda.Duckov.Core` - Core game systems
-- `TeamSoda.Duckov.Utilities` - Helper utilities
-- `TeamSoda.MiniLocalizor` - Localization system
-- `ItemStatsSystem` - Item/stat management
-
-### Game Systems
-Based on extracted assets and project structure:
-- Quest/mission system
-- Inventory and item management
-- Multiple interconnected levels
-- Terrain-based outdoor areas
-- Building/structure system
-- Character physics and movement
-- Localization (Chinese Simplified/Traditional, English, Japanese)
-
-## Level Structure
-
-The game contains these major areas:
-1. Prologue (tutorial)
-2. Guide levels (early game)
-3. Ground Zero (main area with cave)
-4. Storm Zone (multi-floor complex: B0-B4)
-5. J-Lab (laboratory facility)
-6. Farm areas (open world)
-7. Hidden Warehouse
-8. Demo Challenge area
-
-## Mod Framework
-
-Mods are loaded by:
-1. Placing in `Duckov_Data/Mods/[ModName]/` directory
-2. Providing `info.ini` with mod metadata
-3. Inheriting from `Duckov.Modding.ModBehaviour`
-4. Implementing Unity lifecycle methods (Awake, Start, etc.)
-
-See [CLAUDE.md](mdc:CLAUDE.md) for complete mod framework documentation.
+## 模组加载
+- 放在 `Duckov_Data/Mods/[ModName]/`
+- 提供 `info.ini`
+- 继承 `Duckov.Modding.ModBehaviour`

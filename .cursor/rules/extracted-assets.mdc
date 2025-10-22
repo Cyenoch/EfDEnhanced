@@ -1,52 +1,16 @@
 ---
 alwaysApply: true
 ---
-# Extracted Assets Guide
+# 游戏资源指引
 
-This project contains extracted Unity assets from "Escape from Duckov" game in the [extracted_assets/](mdc:extracted_assets) directory.
+## 资源结构
+- `extracted_assets/Assets/Scenes/` - 关卡数据
+- `extracted_assets/Assets/Mesh/` - 3D 模型
+- `extracted_assets/Assets/Texture2D/` - 纹理
+- `extracted_assets/Assets/Sprite/` - UI 图形
+- `extracted_assets/Assets/Resources/` - 运行时资源
 
-## Asset Structure
-
-The extracted assets are organized by type:
-
-- **Scenes**: Game level data and lighting settings in [extracted_assets/Assets/Scenes/](mdc:extracted_assets/Assets/Scenes)
-- **Mesh**: 3D models (2762 GLB files) in [extracted_assets/Assets/Mesh/](mdc:extracted_assets/Assets/Mesh)
-- **Texture2D**: Game textures (3096 PNG files) in [extracted_assets/Assets/Texture2D/](mdc:extracted_assets/Assets/Texture2D)
-- **Sprite**: UI and 2D graphics (1028 JSON files) in [extracted_assets/Assets/Sprite/](mdc:extracted_assets/Assets/Sprite)
-- **PrefabHierarchyObject**: Prefab definitions (2195 GLB files) in [extracted_assets/Assets/PrefabHierarchyObject/](mdc:extracted_assets/Assets/PrefabHierarchyObject)
-- **TerrainData**: Terrain meshes (13 GLB files) in [extracted_assets/Assets/TerrainData/](mdc:extracted_assets/Assets/TerrainData)
-- **Resources**: Unity Resources folder assets in [extracted_assets/Assets/Resources/](mdc:extracted_assets/Assets/Resources)
-
-## Game Levels
-
-The game contains multiple levels and scenes:
-
-1. **Prologue**: Tutorial/intro level
-2. **Level_Guide**: Early game levels (Guide_1, Guide_2)
-3. **Level_DemoChallenge**: Demo/challenge area
-4. **Level_JLab**: Laboratory complex (JLab_Main, JLab_2)
-5. **Level_OpenWorldTest**: Farm areas (Farm_Main, Farm_JLab_Facility)
-6. **Level_GroundZero**: Main mission area (GroundZero_1, GroundZero_Cave)
-7. **Level_StormZone**: Storm-themed levels (StormZone_1, B0-B4 variants)
-8. **Level_HiddenWarehouse**: Hidden location
-9. **MainMenu**: Main menu scene
-10. **LevelCutScene**: Cutscene levels (Cutscene_Ending)
-
-## Using Extracted Assets for Mod Development
-
-When modifying game scenes, objects, or resources:
-
-1. **Search before reading**: Use `grep` to search for specific asset names or types
-2. **Reference scene structure**: Check lighting settings and level organization
-3. **Find asset references**: Search for texture/mesh/prefab names used in game
-4. **Understand terrain**: Review TerrainData and TerrainLayer for outdoor areas
-
-## Best Practices
-
-- **Never read entire directories**: Use targeted searches with `grep` tool
-- **Search by asset name**: `grep pattern:"AssetName" path:"extracted_assets"`
-- **Find scene references**: Search for GameObject or component names
-- **Check Resources folder**: Many runtime assets are in Resources directory
-- **Reference terrain layers**: TL_* files define terrain textures and physics
-
-See [docs/assets/](mdc:docs/assets) for detailed asset documentation.
+## 使用规则
+- 用 `grep` 搜索资源，不要直接读取目录
+- 搜索模式: `grep pattern:"AssetName" path:"extracted_assets"`
+- 优先检查 Resources 文件夹
