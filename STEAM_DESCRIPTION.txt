@@ -39,11 +39,12 @@
 [/list]
 
 [h3]🔫 武器对比[/h3]
-在库存中选中武器后，悬停到其他武器会自动显示属性对比。
+在库存中选中武器后，悬停到其他武器会自动显示属性对比。支持枪支和近战武器。
 
 [b]特性：[/b]
 [list]
 [*]选中武器 + 悬停武器 = 自动对比
+[*]支持枪支和近战武器对比
 [*]绿色/红色标识优劣，一目了然
 [*]智能识别属性正向性和负向性
 [*]支持所有武器属性（伤害、射速、后坐力等）
@@ -141,11 +142,12 @@ Optimize character movement response, say goodbye to "sticky" feeling.
 [/list]
 
 [h3]🔫 Weapon Comparison[/h3]
-Automatically shows stat comparison when hovering over weapons while one is selected.
+Automatically shows stat comparison when hovering over weapons while one is selected. Supports both guns and melee weapons.
 
 [b]Features:[/b]
 [list]
 [*]Select weapon + Hover weapon = Auto comparison
+[*]Supports both guns and melee weapons
 [*]Green/red indicators show better/worse stats at a glance
 [*]Smart polarity detection (damage higher = better, recoil lower = better)
 [*]Supports all weapon stats (damage, fire rate, recoil, etc.)

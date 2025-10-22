@@ -62,16 +62,17 @@ Optimize character movement response, say goodbye to "sticky" feeling.
 
 ### 🔫 武器对比 | Weapon Comparison
 
-在库存中选中武器后，悬停到其他武器会自动显示属性对比。
+在库存中选中武器后，悬停到其他武器会自动显示属性对比。支持枪支和近战武器。
 
-When a weapon is selected in inventory, hovering over other weapons shows automatic stat comparison.
+When a weapon is selected in inventory, hovering over other weapons shows automatic stat comparison. Supports both guns and melee weapons.
 
 **特性 | Features:**
 - **自动对比** | Automatic Comparison - 选中 + 悬停 = 自动显示差异
 - **颜色标识** | Color Coded - 绿色表示更好，红色表示更差
 - **智能判断** | Smart Analysis - 自动识别属性的正向性（伤害高好）和负向性（后坐力低好）
 - **可配置** | Configurable - 可在设置中开关，默认启用
-- **全属性支持** | All Stats - 伤害、射速、后坐力、弹匣容量等所有属性
+- **全属性支持** | All Stats - 支持所有武器属性
+- **双武器类型** | Dual Weapon Types - 支持枪支（射速、后坐力等）和近战武器（攻击速度、攻击距离等）
 
 **使用方法 | How to use:**
 1. 左键点击选中一把武器 | Left-click to select a weapon

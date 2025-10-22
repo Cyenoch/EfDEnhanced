@@ -15,7 +15,7 @@ namespace EfDEnhanced.Patches
 {
     /// <summary>
     /// Patch for ItemHoveringUI to show weapon comparison with selected weapon
-    /// Only supports weapons identified by IsGun flag
+    /// Supports both ranged weapons (IsGun) and melee weapons (IsMelee)
     /// </summary>
     [HarmonyPatch]
     public class ItemHoveringComparisonPatch
@@ -144,7 +144,7 @@ namespace EfDEnhanced.Patches
                         continue;
                     }
 
-                    AddComparisonToEntry(entry, selectedProp.Value, hoverProp.Value, key, selectedProp.Polarity, selectedProp.RawValue, hoverProp.RawValue);
+                    AddComparisonToEntry(entry, selectedProp.Value, hoverProp.Value, selectedProp.Key, selectedProp.Polarity, selectedProp.RawValue, hoverProp.RawValue);
                 }
             }
             catch (Exception ex)
@@ -154,13 +154,18 @@ namespace EfDEnhanced.Patches
         }
 
         /// <summary>
-        /// Check if item is a weapon using official game flag
+        /// Check if item is a weapon using official game flags
+        /// Supports both ranged weapons (IsGun) and melee weapons (IsMelee)
         /// </summary>
         private static bool IsWeapon(Item item)
         {
             try
             {
-                return item.GetBool("IsGun", false);
+                if (item.Tags.Any(tag => tag.name == "Weapon" || tag.name == "MeleeWeapon" || tag.name == "Gun"))
+                {
+                    return true;
+                }
+                return false;
             }
             catch (Exception ex)
             {
@@ -342,7 +347,7 @@ namespace EfDEnhanced.Patches
 
             // Detailed logging for color application
             ModLogger.Log("WeaponComparison",
-                $"  {propertyName}: {selectedValue} → {hoverValue} | " +
+                $"  {propertyName} (): {selectedValue} → {hoverValue} | " +
                 $"Polarity: {polarity} | Result: {(hoverIsBetter ? "Better" : "Worse")} ({(hoverIsBetter ? "Green" : "Red")})");
 
             return FormatComparison(selectedValue, hoverValue, selectedColor, hoverColor, arrowColor);

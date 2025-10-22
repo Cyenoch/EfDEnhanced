@@ -4,6 +4,8 @@
 
 **在库存界面中，当选中一把武器后，鼠标悬停在另一把武器上时，会自动显示两把武器的属性对比。**
 
+**支持远程武器（枪支）和近战武器的对比。**
+
 ### 特性
 
 - **自动对比**: 选中武器 + 悬停武器 = 自动显示属性差异
@@ -25,11 +27,21 @@
 
 ### 示例
 
+**枪支对比：**
 ```
 伤害:     45 → 52      (绿色，悬停武器伤害更高)
 射速:     600 → 550    (红色，悬停武器射速更低)
 后坐力V:  8.5 → 6.2    (绿色，悬停武器后坐力更低，更好)
 后坐力H:  4.2 → 4.2    (白色，相同值)
+```
+
+**近战武器对比：**
+```
+伤害:        50 → 65      (绿色，悬停武器伤害更高)
+攻击速度:    1.2 → 1.5    (绿色，悬停武器攻击更快)
+攻击距离:    2.0 → 2.5    (绿色，悬停武器攻击范围更远)
+重量:        3.5 → 2.8    (绿色，悬停武器更轻)
+耐久度:      100 → 80     (红色，悬停武器耐久度更低)
 ```
 
 ## 设置选项
@@ -58,12 +70,29 @@
 
 定义在 `StatPolarityMap.cs` 中：
 
+**远程武器属性：**
 ```csharp
 // 正向属性（越高越好）
-Damage, FireRate, MagazineCapacity, ReloadSpeed, Range, Penetration
+Damage, ShootSpeed, BulletSpeed, BulletDistance, CritRate, 
+ArmorPiercing, Capacity, MoveSpeedMultiplier
 
 // 负向属性（越低越好）  
-RecoilScaleV, RecoilScaleH, Weight, SpreadMultiplier
+DefaultScatter, MaxScatter, ScatterGrow, RecoilVMin, RecoilVMax,
+RecoilHMin, RecoilHMax, ADSTime, ReloadTime, SoundRange
+
+// 中性属性（不影响判断）
+其他所有属性
+```
+
+**近战武器属性：**
+```csharp
+// 正向属性（越高越好）
+Damage, AttackSpeed, AttackRange, SwingSpeed, StabSpeed,
+HeavyAttackDamage, LightAttackDamage, Durability, 
+BlockEfficiency, ParryWindow
+
+// 负向属性（越低越好）
+Weight, StaminaCost, RecoveryTime
 
 // 中性属性（不影响判断）
 其他所有属性
@@ -121,10 +150,11 @@ foreach (var hoverProp in hoverProps)
 
 ## 已知限制
 
-1. **仅支持武器**: 目前只对标记为 `IsGun` 的物品生效
+1. **仅支持武器**: 目前只对标记为 `IsGun` 或 `IsMelee` 的物品生效，不支持护甲等其他装备
 2. **必须选中**: 必须先点击选中一把武器，才能与悬停武器对比
-3. **数值对比**: 仅对数值型属性有效，文本型属性显示为中性色
-4. **UI空间**: 对比文本较长，可能在某些分辨率下显示拥挤
+3. **同类型对比**: 枪支和近战武器各自对比，不能跨类型对比
+4. **数值对比**: 仅对数值型属性有效，文本型属性显示为中性色
+5. **UI空间**: 对比文本较长，可能在某些分辨率下显示拥挤
 
 ## 未来改进
 
