@@ -68,7 +68,7 @@
 检测到缺少装备时会弹出提示，可选择继续或返回准备。
 
 [h3]🎨 完整设置面板[/h3]
-在暂停菜单中可以配置：
+在游戏设置页面中添加了新的 EfD Enhanced 设置入口：
 [list]
 [*]传送前检查项目单独开关
 [*]移动增强4档位调节
@@ -170,7 +170,7 @@ Automatically checks and reminds you before entering the map:
 If missing equipment is detected, a prompt will appear allowing you to continue or go back and prepare.
 
 [h3]🎨 Full Settings Panel[/h3]
-Configurable in the pause menu:
+Adds a new [b]EfD Enhanced[/b] tab directly to the in-game settings panel for easy configuration!
 [list]
 [*]Individual toggles for pre-raid checks
 [*]Movement enhancement 4-level adjustment

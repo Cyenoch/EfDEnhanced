@@ -114,16 +114,21 @@ If any issues are detected, a clear dialog shows you:
 
 ### 🎨 完整的设置面板 | Full Settings Panel
 
-在暂停菜单中添加"EfD Enhanced 设置"按钮：
+**在游戏设置菜单中添加"MOD 设置"标签页：**
 
-Adds "EfD Enhanced Settings" button to pause menu:
+**Adds "MOD Settings" tab to game settings menu:**
 
+- **集成设计** | Integrated Design - 直接嵌入游戏设置界面，与游戏原生设置一致
 - **传送前检查设置** | Pre-Raid Check Settings - 启用/禁用各项检查
 - **移动增强设置** | Movement Enhancement Settings - 4档位调节移动手感
 - **任务追踪器设置** | Quest Tracker Settings - 调整位置、大小、显示选项、地图过滤
 - **界面增强设置** | UI Enhancement Settings - 武器对比等界面功能开关
 - **一键重置** | Reset to Defaults - 恢复所有设置为默认值
 - **实时生效** | Live Updates - 设置立即生效无需重启
+
+**访问方式 | How to Access:**
+- 主菜单 → 设置 → MOD 设置标签页 | Main Menu → Settings → MOD Settings tab
+- 暂停菜单 → 设置 → MOD 设置标签页 | Pause Menu (ESC) → Settings → MOD Settings tab
 
 ### 🌍 多语言支持 | Multi-Language Support
 
@@ -278,13 +283,13 @@ EfDEnhanced/
 ├── ModBehaviour.cs              # Mod entry point and initialization
 ├── Patches/
 │   ├── MovementEnhancementPatch.cs # Movement system optimization
-│   ├── PauseMenuPatch.cs       # Adds settings button to pause menu
+│   ├── OptionsPanelPatch.cs    # Adds MOD Settings tab to game settings
 │   ├── QuestViewDetailsPatch.cs # Adds tracking checkbox to quest details
 │   ├── RaidEntryPatches.cs     # Intercepts raid entry for checks
 │   └── WorkshopUploadPatch.cs  # Prevents workshop description override
 ├── Features/
 │   ├── ActiveQuestTracker.cs   # In-raid quest tracker HUD
-│   ├── ModSettingsPanel.cs     # Settings panel UI
+│   ├── ModSettingsContent.cs   # Settings content for OptionsPanel
 │   └── RaidPreparationView.cs  # Pre-raid warning dialog
 └── Utils/
     ├── LocalizationHelper.cs   # Multi-language support

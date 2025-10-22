@@ -564,6 +564,22 @@ namespace EfDEnhanced.Utils.UI.Builders
         }
 
         /// <summary>
+        /// 添加按钮
+        /// </summary>
+        public FormBuilder AddButton(string textLocalizationKey, System.Action onClick, 
+                                      UIStyles.ButtonStyle style = UIStyles.ButtonStyle.Primary)
+        {
+            var button = ModButton.Create(_parent, "Button")
+                .SetText(textLocalizationKey)
+                .SetStyle(style)
+                .OnClick(() => onClick?.Invoke())
+                .Build();
+
+            _elements.Add(button);
+            return this;
+        }
+
+        /// <summary>
         /// 添加自定义元素
         /// </summary>
         public FormBuilder AddCustomElement(GameObject element)
