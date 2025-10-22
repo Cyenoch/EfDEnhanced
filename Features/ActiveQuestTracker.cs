@@ -511,6 +511,7 @@ public class ActiveQuestTracker : MonoBehaviour
                 var entry = _questEntries[i];
                 if (!quests.Any(q => q.ID == entry.QuestID))
                 {
+                    entry.Cleanup(); // 清理事件订阅
                     Destroy(entry.GameObject);
                     _questEntries.RemoveAt(i);
                 }
@@ -700,6 +701,7 @@ public class ActiveQuestTracker : MonoBehaviour
         {
             foreach (var entry in _questEntries)
             {
+                entry.Cleanup(); // 清理事件订阅
                 if (entry.GameObject != null)
                 {
                     Destroy(entry.GameObject);
@@ -935,6 +937,98 @@ public class QuestEntryUI
 
     private readonly List<TaskUIElement> _taskElements = [];
     private string _lastProgressText = "";
+    private Quest? _currentQuest; // 保存当前任务引用，用于事件订阅
+
+    /// <summary>
+    /// 订阅任务的Task事件
+    /// </summary>
+    private void SubscribeToTaskEvents(Quest quest)
+    {
+        try
+        {
+            // 先取消之前的订阅
+            UnsubscribeFromTaskEvents();
+
+            _currentQuest = quest;
+
+            if (quest.Tasks != null)
+            {
+                foreach (var task in quest.Tasks)
+                {
+                    if (task != null)
+                    {
+                        // 订阅每个Task的状态变化事件
+                        task.onStatusChanged += OnTaskStatusChanged;
+                    }
+                }
+            }
+
+            ModLogger.Log("QuestTracker", $"Subscribed to {quest.Tasks?.Count ?? 0} task events for quest {quest.ID}");
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestEntryUI.SubscribeToTaskEvents failed: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// 取消订阅任务的Task事件
+    /// </summary>
+    private void UnsubscribeFromTaskEvents()
+    {
+        try
+        {
+            if (_currentQuest != null && _currentQuest.Tasks != null)
+            {
+                foreach (var task in _currentQuest.Tasks)
+                {
+                    if (task != null)
+                    {
+                        task.onStatusChanged -= OnTaskStatusChanged;
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestEntryUI.UnsubscribeFromTaskEvents failed: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// Task状态变化回调
+    /// </summary>
+    private void OnTaskStatusChanged(Task task)
+    {
+        try
+        {
+            if (_currentQuest != null)
+            {
+                ModLogger.Log("QuestTracker", $"Task status changed in quest {_currentQuest.ID}, updating display");
+                UpdateDisplay(_currentQuest);
+            }
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestEntryUI.OnTaskStatusChanged failed: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// 清理资源
+    /// </summary>
+    public void Cleanup()
+    {
+        try
+        {
+            UnsubscribeFromTaskEvents();
+            _currentQuest = null;
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestEntryUI.Cleanup failed: {ex}");
+        }
+    }
 
     /// <summary>
     /// 更新显示
@@ -948,10 +1042,28 @@ public class QuestEntryUI
                 return;
             }
 
-            // 更新描述显示/隐藏状态（根据设置）
+            // 如果是新任务或任务变了，重新订阅事件
+            if (_currentQuest == null || _currentQuest.ID != quest.ID)
+            {
+                SubscribeToTaskEvents(quest);
+            }
+
+            // 检查任务是否所有task都完成
+            bool allTasksFinished = quest.AreTasksFinished();
+
+            // 更新标题颜色
+            if (TitleText != null)
+            {
+                TitleText.color = allTasksFinished ? UIConstants.QUEST_COMPLETE_COLOR : UIConstants.QUEST_TITLE_COLOR;
+            }
+
+            // 更新描述显示/隐藏状态
             if (DescriptionObject != null)
             {
-                bool shouldShow = ModSettings.TrackerShowDescription.Value && !string.IsNullOrEmpty(quest.Description);
+                // 如果所有task完成，隐藏描述；否则根据设置决定
+                bool shouldShow = !allTasksFinished 
+                    && ModSettings.TrackerShowDescription.Value 
+                    && !string.IsNullOrEmpty(quest.Description);
                 if (DescriptionObject.activeSelf != shouldShow)
                 {
                     DescriptionObject.SetActive(shouldShow);
@@ -962,18 +1074,47 @@ public class QuestEntryUI
             if (ProgressBadgeText != null && quest.Tasks != null)
             {
                 int finishedCount = quest.Tasks.Count(t => t != null && t.IsFinished());
-                string newProgressText = $"{finishedCount}/{quest.Tasks.Count}";
+                string newProgressText;
+                Color badgeColor;
+
+                if (allTasksFinished)
+                {
+                    // 所有task完成：显示绿色对勾
+                    newProgressText = "✓";
+                    badgeColor = UIConstants.QUEST_COMPLETE_COLOR;
+                }
+                else
+                {
+                    // 未完成：显示进度数字
+                    newProgressText = $"{finishedCount}/{quest.Tasks.Count}";
+                    badgeColor = UIConstants.QUEST_PROGRESS_COLOR;
+                }
 
                 if (_lastProgressText != newProgressText)
                 {
                     ProgressBadgeText.text = newProgressText;
+                    ProgressBadgeText.color = badgeColor;
                     _lastProgressText = newProgressText;
                 }
             }
 
             // 更新任务进度 (复用现有UI元素)
-            if (quest.Tasks != null && quest.Tasks.Count > 0)
+            // 如果所有task都完成，隐藏整个进度容器
+            if (allTasksFinished)
             {
+                if (ProgressContainer.activeSelf)
+                {
+                    ProgressContainer.SetActive(false);
+                }
+            }
+            else if (quest.Tasks != null && quest.Tasks.Count > 0)
+            {
+                // 确保进度容器显示
+                if (!ProgressContainer.activeSelf)
+                {
+                    ProgressContainer.SetActive(true);
+                }
+
                 int taskIndex = 0;
                 foreach (var task in quest.Tasks)
                 {
