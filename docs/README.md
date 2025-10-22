@@ -25,8 +25,13 @@ docs/
 ├── assets/
 │   ├── assets-guide.md                 # Complete asset system documentation
 │   └── mod-development-guide.md        # Mod development best practices
-└── scenes/
-    └── scenes-guide.md                 # Game scenes and levels
+├── scenes/
+│   └── scenes-guide.md                 # Game scenes and levels
+├── item-wheel-menu.md                  # Item wheel menu feature guide
+├── keybinding-system.md                # Keybinding system documentation
+├── localization-guide.md               # Localization system guide
+├── quest-tracking-feature.md           # Quest tracking feature guide
+└── weapon-comparison.md                # Weapon comparison feature guide
 ```
 
 ## Documentation Overview
@@ -78,6 +83,69 @@ Content:
 - Configuration assets
 
 **Who should read**: Anyone working with game assets, textures, models, or resources
+
+---
+
+### 4. [Item Wheel Menu](item-wheel-menu.md)
+**物品轮盘菜单功能指南**
+
+Content:
+- 快速访问物品栏的径向菜单
+- 使用方法和操作说明
+- 输入处理和屏蔽机制
+- 技术实现细节
+- 自定义设置
+
+**Who should read**: 用户想了解如何使用物品轮盘，开发者想了解实现原理
+
+---
+
+### 5. [Keybinding System](keybinding-system.md)
+**按键绑定系统文档**
+
+Content:
+- 自定义按键绑定系统
+- KeyCode 设置条目
+- UI 组件实现
+- 事件系统
+
+**Who should read**: 开发者需要实现可自定义热键功能
+
+---
+
+### 6. [Quest Tracking Feature](quest-tracking-feature.md)
+**任务追踪功能文档**
+
+Content:
+- 游戏内任务追踪显示
+- 实时任务状态更新
+- UI 集成方式
+
+**Who should read**: 开发者需要了解任务系统集成
+
+---
+
+### 7. [Weapon Comparison](weapon-comparison.md)
+**武器对比功能文档**
+
+Content:
+- 物品对比显示
+- 属性极性映射
+- UI 实现
+
+**Who should read**: 开发者需要实现物品对比功能
+
+---
+
+### 8. [Localization Guide](localization-guide.md)
+**多语言支持指南**
+
+Content:
+- 本地化系统使用
+- 多语言文本管理
+- LocalizationHelper 工具
+
+**Who should read**: 开发者需要添加多语言支持
 
 ---
 

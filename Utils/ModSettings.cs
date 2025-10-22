@@ -226,6 +226,28 @@ namespace EfDEnhanced.Utils
             )
         );
 
+        public static readonly BoolSettingsEntry ThrowableWheelEnabled = Register(
+            new BoolSettingsEntry(
+                PREFIX,
+                "ThrowableWheelEnabled",
+                "Settings_ThrowableWheelEnabled_Name",
+                true,
+                CATEGORY_UI,
+                "Settings_ThrowableWheelEnabled_Desc"
+            )
+        );
+
+        public static readonly KeyCodeSettingsEntry ThrowableWheelHotkey = Register(
+            new KeyCodeSettingsEntry(
+                PREFIX,
+                "ThrowableWheelHotkey",
+                "Settings_ThrowableWheelHotkey_Name",
+                UnityEngine.KeyCode.G, // Default: G key
+                CATEGORY_UI,
+                "Settings_ThrowableWheelHotkey_Desc"
+            )
+        );
+
         #endregion
 
         /// <summary>

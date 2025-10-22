@@ -91,6 +91,10 @@ namespace EfDEnhanced.Utils.UI.Components
                     {
                         Destroy(segment.segmentObject);
                     }
+                    if (segment.iconHolder != null)
+                    {
+                        Destroy(segment.iconHolder);
+                    }
                 }
                 _segments.Clear();
                 
@@ -379,7 +383,8 @@ namespace EfDEnhanced.Utils.UI.Components
                 segmentImage.type = Image.Type.Filled;
                 segmentImage.fillMethod = Image.FillMethod.Radial360;
                 segmentImage.fillOrigin = (int)Image.Origin360.Top;
-                segmentImage.fillAmount = _segmentGapRatio / _items.Count;
+                // When there's only one item, fill the whole circle; otherwise use gap ratio
+                segmentImage.fillAmount = _items.Count == 1 ? 1.0f : (_segmentGapRatio / _items.Count);
                 segmentImage.fillClockwise = true;
                 
                 Texture2D ringTexture = CreateRingTexture();
@@ -421,13 +426,39 @@ namespace EfDEnhanced.Utils.UI.Components
                 iconImage.raycastTarget = false;
                 iconImage.enabled = false;
                 
+                // Create count text (bottom right corner)
+                GameObject countTextObj = new GameObject("CountText");
+                countTextObj.transform.SetParent(iconHolder.transform, false);
+                
+                RectTransform countTextRect = countTextObj.AddComponent<RectTransform>();
+                countTextRect.anchorMin = new Vector2(1f, 0f); // Bottom right
+                countTextRect.anchorMax = new Vector2(1f, 0f);
+                countTextRect.pivot = new Vector2(1f, 0f);
+                countTextRect.anchoredPosition = new Vector2(-2f, 2f); // Small offset from corner
+                countTextRect.sizeDelta = new Vector2(30f, 20f);
+                
+                Text countText = countTextObj.AddComponent<Text>();
+                countText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+                countText.fontSize = 14;
+                countText.fontStyle = FontStyle.Bold;
+                countText.color = Color.white;
+                countText.alignment = TextAnchor.LowerRight;
+                countText.raycastTarget = false;
+                countText.enabled = false;
+                
+                // Add outline for better visibility
+                Outline outline = countTextObj.AddComponent<Outline>();
+                outline.effectColor = Color.black;
+                outline.effectDistance = new Vector2(1f, -1f);
+                
                 PieSegment segment = new PieSegment
                 {
                     index = i,
                     segmentObject = segmentObj,
                     image = segmentImage,
                     iconImage = iconImage,
-                    iconHolder = iconHolder
+                    iconHolder = iconHolder,
+                    countText = countText
                 };
                 
                 _segments.Add(segment);
@@ -529,6 +560,10 @@ namespace EfDEnhanced.Utils.UI.Components
         
         private void CreateVirtualCursorIndicator()
         {
+            // Disable for now, use it when debugging
+            return;
+            
+            /* Disabled - enable when debugging
             if (_wheelContainer == null) return;
             
             _virtualCursorIndicator = new GameObject("VirtualCursor");
@@ -584,6 +619,7 @@ namespace EfDEnhanced.Utils.UI.Components
             
             cursorImage.sprite = cursorSprite;
             cursorImage.raycastTarget = false;
+            */
         }
         
         private void RefreshItems()
@@ -599,6 +635,20 @@ namespace EfDEnhanced.Utils.UI.Components
                     segment.iconImage.color = Color.white;
                     segment.iconImage.enabled = true;
                     segment.iconHolder.SetActive(true);
+                    
+                    // Update count text
+                    if (segment.countText != null)
+                    {
+                        if (item.Count > 1)
+                        {
+                            segment.countText.text = item.Count.ToString();
+                            segment.countText.enabled = true;
+                        }
+                        else
+                        {
+                            segment.countText.enabled = false;
+                        }
+                    }
                 }
                 else
                 {
@@ -635,6 +685,7 @@ namespace EfDEnhanced.Utils.UI.Components
             public Image image = null!;
             public Image iconImage = null!;
             public GameObject iconHolder = null!;
+            public Text? countText = null;
         }
     }
     
@@ -673,11 +724,13 @@ namespace EfDEnhanced.Utils.UI.Components
     {
         public string Id { get; set; } = "";
         public Sprite? Icon { get; set; }
+        public int Count { get; set; } = 1;
         
-        public PieMenuItem(string id, Sprite? icon = null)
+        public PieMenuItem(string id, Sprite? icon = null, int count = 1)
         {
             Id = id;
             Icon = icon;
+            Count = count;
         }
     }
 }

@@ -19,6 +19,7 @@ description: Mod settings system usage guide
 3. **浮点数** - [Utils/Settings/FloatSettingsEntry.cs](mdc:Utils/Settings/FloatSettingsEntry.cs)
 4. **字符串** - [Utils/Settings/StringSettingsEntry.cs](mdc:Utils/Settings/StringSettingsEntry.cs)
 5. **选项列表** - [Utils/Settings/OptionsSettingsEntry.cs](mdc:Utils/Settings/OptionsSettingsEntry.cs)
+6. **按键绑定** - [Utils/Settings/KeyCodeSettingsEntry.cs](mdc:Utils/Settings/KeyCodeSettingsEntry.cs)
 
 所有设置类型都继承自 [Utils/Settings/SettingsEntry.cs](mdc:Utils/Settings/SettingsEntry.cs)。
 
@@ -74,6 +75,16 @@ public static class ModSettings
         description: "输入自定义文本",
         defaultValue: "默认文本"
     );
+    
+    // 按键绑定设置
+    public static KeyCodeSettingsEntry OpenMenuHotkey = new KeyCodeSettingsEntry(
+        prefix: "EfDEnhanced",
+        key: "OpenMenuHotkey",
+        name: "Settings_OpenMenuHotkey",  // 本地化键
+        defaultValue: KeyCode.H,
+        category: "Keybindings",
+        description: "设置打开菜单的快捷键"
+    );
 }
 ```
 
@@ -88,10 +99,18 @@ int maxItems = ModSettings.MaxItems.Value;
 float speed = ModSettings.SpeedMultiplier.Value;
 string mode = ModSettings.DisplayMode.Value;
 string text = ModSettings.CustomText.Value;
+KeyCode hotkey = ModSettings.OpenMenuHotkey.Value;
 
 // 修改设置值
 ModSettings.EnableFeature.Value = false;
 ModSettings.MaxItems.Value = 20;
+ModSettings.OpenMenuHotkey.Value = KeyCode.F1;
+
+// 检查按键绑定
+if (Input.GetKeyDown(ModSettings.OpenMenuHotkey.Value))
+{
+    // 触发快捷键操作
+}
 ```
 
 ### 3. 监听设置变化
@@ -170,8 +189,42 @@ formBuilder.AddDropdown(
     index => ModSettings.DisplayMode.SelectedIndex = index
 );
 
+// 添加按键绑定设置（KeybindingButton）
+formBuilder.AddKeybinding(
+    ModSettings.OpenMenuHotkey
+);
+
 formBuilder.Build();
 ```
+
+## 按键绑定 UI 组件
+
+使用 [Utils/UI/Components/ModKeybindingButton.cs](mdc:Utils/UI/Components/ModKeybindingButton.cs) 创建按键绑定UI：
+
+```csharp
+using EfDEnhanced.Utils.UI.Components;
+
+// 创建按键绑定按钮
+ModKeybindingButton keybindingButton = ModKeybindingButton.Create(
+    parentTransform,
+    ModSettings.OpenMenuHotkey
+);
+```
+
+**按键绑定按钮特性**:
+- 点击按钮后进入监听模式，显示 "Press Any Key..."
+- 按下任意键即可绑定（排除保留按键）
+- 按 ESC 取消绑定操作
+- 自动显示友好的按键名称（如 "Space"、"F1"、"Num 5"）
+- 自动订阅设置变更事件，实时更新显示
+- 支持本地化文本
+
+**按键验证**:
+KeyCodeSettingsEntry 内置验证系统，自动拒绝无效按键：
+- ✅ 允许: A-Z、0-9、F1-F15、方向键、小键盘、修饰键、控制键
+- ✅ 允许: 鼠标中键/侧键（Mouse2-Mouse6）
+- ✅ 允许: **手柄按键**（JoystickButton0-19，Xbox/PlayStation 手柄）
+- ❌ 禁止: 鼠标左右键（Mouse0/Mouse1）、None
 
 ## 设置注入游戏选项面板
 

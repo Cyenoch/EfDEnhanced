@@ -31,6 +31,7 @@ EfDEnhanced/
 │   │   ├── BoolSettingsEntry.cs
 │   │   ├── FloatSettingsEntry.cs
 │   │   ├── IntSettingsEntry.cs
+│   │   ├── KeyCodeSettingsEntry.cs  # 按键绑定设置
 │   │   ├── StringSettingsEntry.cs
 │   │   ├── OptionsSettingsEntry.cs
 │   │   └── SettingsEntry.cs
@@ -40,7 +41,8 @@ EfDEnhanced/
 │       ├── Components/          # 可重用UI组件
 │       │   ├── ModButton.cs
 │       │   ├── ModSlider.cs
-│       │   └── ModToggle.cs
+│       │   ├── ModToggle.cs
+│       │   └── ModKeybindingButton.cs  # 按键绑定UI组件
 │       ├── Constants/           # UI常量和样式
 │       │   ├── UIConstants.cs
 │       │   └── UIStyles.cs
@@ -509,14 +511,14 @@ CheckWeaponAmmoSufficiency() {
 **核心组件**:
 - `ModSettings.cs` - 集中式设置定义和管理
 - `ModSettingsContent.cs` - 设置面板内容
-- `Settings/` - 类型化设置条目（Bool/Int/Float/String/Options）
+- `Settings/` - 类型化设置条目（Bool/Int/Float/String/Options/KeyCode）
 - `OptionsPanelPatch.cs` - 将设置标签页添加到游戏设置菜单
 - `Utils/UI/` - 完整UI框架支持自动表单生成
 
 **特性**:
 - 自动从设置条目构建UI
-- 分类组织（Raid检查 / 任务追踪）
-- 类型化设置条目（Toggle/Slider/InputField/Dropdown）
+- 分类组织（Raid检查 / 任务追踪 / 按键绑定）
+- 类型化设置条目（Toggle/Slider/InputField/Dropdown/Keybinding）
 - 实时设置变更事件
 - ES3持久化保存
 - 一键恢复默认设置
@@ -526,6 +528,7 @@ CheckWeaponAmmoSufficiency() {
 - **移动增强**: 4档位移动响应性调节
 - **界面增强**: 武器对比功能开关
 - **任务追踪**: 启用追踪、调整位置/缩放、显示选项
+- **按键绑定**: 自定义模组功能快捷键
 
 **技术实现**:
 - 使用泛型`SettingsEntry<T>`基类
@@ -535,7 +538,65 @@ CheckWeaponAmmoSufficiency() {
 
 ---
 
-### 6. 多语言支持 (Localization System)
+### 6. 按键绑定系统 (Keybinding System)
+
+**功能**: 可自定义的模组功能快捷键绑定
+
+**核心组件**:
+- `KeyCodeSettingsEntry.cs` - KeyCode类型设置条目
+- `ModKeybindingButton.cs` - 可视化按键绑定UI组件
+
+**特性**:
+- 点击按钮后按下任意键即可绑定
+- 友好的按键显示名称（Space、F1、A (Gamepad) 等）
+- **支持手柄按键** - Xbox/PlayStation 手柄（A/B/X/Y、LB/RB、Start/Back 等）
+- 自动排除游戏保留按键（仅鼠标左右键）
+- 按ESC取消绑定操作
+- 支持所有键盘按键、鼠标中键/侧键和手柄按键
+- 按键验证系统防止绑定无效按键
+- 实时更新显示
+
+**技术实现**:
+```csharp
+// KeyCodeSettingsEntry
+- 继承自 SettingsEntry<KeyCode>
+- GetKeyDisplayName() - 转换KeyCode为友好名称
+- Validate() - 验证按键是否可用于绑定
+- CoerceValue() - 强制转换为有效值
+
+// ModKeybindingButton
+- 可视化绑定按钮组件
+- ListenForKeyCoroutine() - 协程监听按键输入
+- 排除保留按键（Mouse0/1、ESC、None）
+- 本地化文本显示
+- 自动订阅设置变更事件
+```
+
+**按键验证规则**:
+- ✅ 允许: 字母A-Z、数字0-9、功能键F1-F15
+- ✅ 允许: 标点符号键、方向键、小键盘
+- ✅ 允许: 修饰键（Shift/Ctrl/Alt）、控制键（Space/Enter/Tab等）
+- ✅ 允许: 鼠标中键/侧键（Mouse2-Mouse6）
+- ✅ 允许: **手柄按键**（JoystickButton0-19，对应 Xbox/PlayStation 等手柄）
+- ❌ 禁止: 鼠标左右键（Mouse0/Mouse1）
+- ❌ 禁止: None、未知按键
+
+**手柄按键映射**（Xbox 控制器标准）:
+- JoystickButton0 = A 按钮
+- JoystickButton1 = B 按钮
+- JoystickButton2 = X 按钮
+- JoystickButton3 = Y 按钮
+- JoystickButton4 = LB（左肩键）
+- JoystickButton5 = RB（右肩键）
+- JoystickButton6 = Back/View 按钮
+- JoystickButton7 = Start/Menu 按钮
+- JoystickButton8 = LS（左摇杆按下）
+- JoystickButton9 = RS（右摇杆按下）
+- JoystickButton10-19 = 其他手柄按键
+
+---
+
+### 7. 多语言支持 (Localization System)
 
 **功能**: 完整的多语言本地化支持
 
@@ -556,7 +617,7 @@ CheckWeaponAmmoSufficiency() {
 
 ---
 
-### 7. Steam创意工坊集成 (Steam Workshop Integration)
+### 8. Steam创意工坊集成 (Steam Workshop Integration)
 
 **功能**: 防止上传时覆盖创意工坊描述
 

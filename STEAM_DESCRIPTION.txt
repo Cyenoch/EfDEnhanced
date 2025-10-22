@@ -1,223 +1,153 @@
 [h1]EfD Enhanced - 游戏体验增强模组[/h1]
 
-为 Escape from Duckov 提供局内任务追踪、移动增强和传送前装备检查等功能。
+为 Escape from Duckov 提供局内任务追踪、移动增强、传送前装备检查等功能。
 
-[h2]核心功能[/h2]
+[h2]功能列表[/h2]
 
 [h3]🎯 局内任务追踪[/h3]
-在任务详情页面勾选"局内追踪"，进入突袭后在左上角实时显示任务进度。
+在任务详情页面勾选"局内追踪"，进入突袭后在屏幕左上角显示任务进度。
 
-[b]功能特点：[/b]
 [list]
-[*]显示任务完成进度（如 2/3）
-[*]标记已完成的子任务（✓）
-[*]智能地图过滤（只显示当前地图的任务）
-[*]可调整显示位置、缩放、是否显示描述
+[*]显示任务完成进度（如 2/3）和已完成子任务（✓）
+[*]只显示当前地图的任务
+[*]可调整位置、大小、是否显示描述
 [*]打开菜单时自动隐藏
-[*]追踪选择持久化保存
 [/list]
 
 [h3]🏃 移动增强[/h3]
-优化角色移动响应速度，告别"粘滞感"。
+调整角色移动响应速度。4档位可调：禁用/轻度/中度/重度。
 
-[b]4档位可调：[/b]
+[i]注：调整的是加速度参数，不是移动速度上限。[/i]
+
 [list]
-[*][b]禁用[/b] - 保持原版手感
-[*][b]轻度[/b] - 2倍加速/制动，1.5倍转向
-[*][b]中度[/b] - 4倍加速/制动，2.5倍转向（推荐）
-[*][b]重度[/b] - 8倍加速/制动，4倍转向
+[*]仅影响玩家角色
+[*]实时切换，无需重启
 [/list]
 
-[i]不是增加移动速度，而是调整加速度参数[/i]
+[h3]🎡 物品轮盘菜单[/h3]
+快速访问物品栏的径向菜单。
 
-[b]特性：[/b]
+[b]使用方法：[/b]按住热键（默认 ~）→ 鼠标选择 → 释放使用
+
 [list]
-[*]仅影响玩家角色，不影响NPC
-[*]加速、制动、转向同步优化
-[*]支持瞬时方向切换
-[*]实时切换无需重启
+[*]单手操作，无需离开游戏视角
+[*]菜单打开时自动屏蔽射击和视角旋转
+[*]显示当前物品栏绑定的物品图标
+[*]支持自定义热键和缩放（0.5-2.0倍）
 [/list]
 
 [h3]🔫 武器对比[/h3]
-在库存中选中武器后，悬停到其他武器会自动显示属性对比。支持枪支和近战武器。
+在库存中选中一个武器后，悬停到其他武器会显示属性对比。
 
-[b]特性：[/b]
 [list]
-[*]选中武器 + 悬停武器 = 自动对比
-[*]支持枪支和近战武器对比
-[*]绿色/红色标识优劣，一目了然
-[*]智能识别属性正向性和负向性
-[*]支持所有武器属性（伤害、射速、后坐力等）
-[*]可在设置中开关，默认启用
+[*]支持枪支和近战武器
+[*]绿色/红色标识优劣
+[*]显示格式：[选中武器值] → [悬停武器值]
 [/list]
 
-[b]显示格式：[/b] [选中武器值] → [悬停武器值]
-- 绿色：悬停武器更好
-- 红色：选中武器更好  
-- 白色：中性或相同
-
 [h3]✅ 传送前装备检查[/h3]
-进入地图前自动检查并提醒：
+进入地图前检查并提醒缺少的装备：
+
 [list]
-[*]武器和弹药
-[*][b]弹药充足性[/b] - 检查每把枪是否有足够一个弹匣的弹药
-[*]医疗用品
-[*]食物和水
+[*]武器和弹药（检查每把枪是否有至少一个弹匣的弹药）
+[*]医疗用品、食物、水
 [*]天气状况（风暴警告）
 [*]任务所需物品（按地图过滤）
 [/list]
 
-检测到缺少装备时会弹出提示，可选择继续或返回准备。
+[h3]⚙️ 设置面板[/h3]
+在游戏设置中添加了 EfD Enhanced 选项卡：
 
-[b]弹药检查详情：[/b]
-[list]
-[*]自动检测所有携带的枪支（背包、装备栏、宠物）
-[*]按口径统计对应弹药总数（包括装载在武器中的）
-[*]如果某把枪的弹药总数 < 弹匣容量，则发出警告
-[*]显示具体的武器名称、口径、当前弹药数量和弹匣容量
-[*]仅对枪支生效，不影响近战武器
-[/list]
-
-[h3]🎨 完整设置面板[/h3]
-在游戏设置页面中添加了新的 EfD Enhanced 设置入口：
 [list]
 [*]传送前检查项目单独开关
-[*]移动增强4档位调节
+[*]移动增强档位调节
 [*]任务追踪器位置、大小、显示选项
-[*]界面增强功能开关（武器对比等）
-[*]一键重置所有设置
+[*]界面增强功能开关
+[*]物品轮盘热键和缩放
+[*]按键绑定（支持键盘、鼠标、手柄）
+[*]一键重置
 [/list]
 
 [h2]多语言支持[/h2]
 完整支持：简体中文、繁体中文、English、日本語
 
-[h2]已知限制[/h2]
-[b]传送前检查：[/b]
-[list]
-[*]不检查弹药类型匹配
-[*]不验证最小携带数量
-[/list]
-
-[b]移动增强：[/b]
-[list]
-[*]较高档位可能过于灵敏
-[*]精确瞄准场景建议使用低档位
-[/list]
-
 [h2]反馈[/h2]
-遇到问题或建议请在创意工坊页面留言或访问 GitHub。
-
 [url=https://github.com/Cyenoch/EfDEnhanced]GitHub 项目地址[/url]
 
 [hr][/hr]
 
 [h1]EfD Enhanced - Gameplay Enhancement Mod[/h1]
 
-Provides in-raid quest tracking, movement enhancement, and pre-raid equipment check features for Escape from Duckov.
+Provides in-raid quest tracking, movement enhancement, pre-raid equipment check, and more for Escape from Duckov.
 
-[h2]Core Features[/h2]
+[h2]Features[/h2]
 
 [h3]🎯 In-Raid Quest Tracking[/h3]
-Check "In-Raid Tracking" on the quest details page to display quest progress in the upper left during raids.
+Check "In-Raid Tracking" on quest details to display progress on screen during raids.
 
-[b]Features:[/b]
 [list]
-[*]Shows quest completion progress (e.g., 2/3)
-[*]Marks completed sub-tasks (✓)
-[*]Smart map filtering (only shows quests for current map)
+[*]Shows completion progress (e.g., 2/3) and completed sub-tasks (✓)
+[*]Only shows quests for current map
 [*]Adjustable position, scale, and description display
-[*]Automatically hides when opening the menu
-[*]Tracking selections are persistently saved
+[*]Auto-hides when opening menus
 [/list]
 
 [h3]🏃 Movement Enhancement[/h3]
-Optimize character movement response, say goodbye to "sticky" feeling.
+Adjusts character movement response. 4 levels: Disabled/Light/Medium/Heavy.
 
-[b]4 Adjustment Levels:[/b]
+[i]Note: Adjusts acceleration parameters, not max movement speed.[/i]
+
 [list]
-[*][b]Disabled[/b] - Keep vanilla feel
-[*][b]Light[/b] - 2x accel/brake, 1.5x turning
-[*][b]Medium[/b] - 4x accel/brake, 2.5x turning (Recommended)
-[*][b]Heavy[/b] - 8x accel/brake, 4x turning
+[*]Only affects player character
+[*]Real-time switching, no restart required
 [/list]
 
-[i]Not increase movement speed, but adjust acceleration parameters.[/i]
+[h3]🎡 Item Wheel Menu[/h3]
+Radial menu for quick item bar access.
 
-[b]Features:[/b]
+[b]Usage:[/b] Hold hotkey (default ~) → Move mouse → Release to use
+
 [list]
-[*]Only affects player character, not NPCs
-[*]Synchronized acceleration, braking, and turning optimization
-[*]Supports instant direction changes
-[*]Real-time switching without restart
+[*]One-handed operation without leaving game view
+[*]Auto-blocks shooting and camera rotation while open
+[*]Shows actual item bar icons
+[*]Customizable hotkey and scale (0.5-2.0x)
 [/list]
 
 [h3]🔫 Weapon Comparison[/h3]
-Automatically shows stat comparison when hovering over weapons while one is selected. Supports both guns and melee weapons.
+Select a weapon in inventory, then hover over others to see stat comparison.
 
-[b]Features:[/b]
 [list]
-[*]Select weapon + Hover weapon = Auto comparison
-[*]Supports both guns and melee weapons
-[*]Green/red indicators show better/worse stats at a glance
-[*]Smart polarity detection (damage higher = better, recoil lower = better)
-[*]Supports all weapon stats (damage, fire rate, recoil, etc.)
-[*]Toggleable in settings, enabled by default
+[*]Supports guns and melee weapons
+[*]Green/red indicators for better/worse stats
+[*]Format: [Selected Value] → [Hovered Value]
 [/list]
 
-[b]Display Format:[/b] [Selected Value] → [Hovered Value]
-- Green: Hovered weapon is better
-- Red: Selected weapon is better
-- White: Neutral or equal
-
 [h3]✅ Pre-Raid Loadout Check[/h3]
-Automatically checks and reminds you before entering the map:
+Checks and reminds before entering map:
+
 [list]
-[*]Weapons and ammunition
-[*][b]Ammo Sufficiency[/b] - Checks if you have at least one magazine worth of ammo for each gun
-[*]Medical supplies
-[*]Food and water
+[*]Weapons and ammo (checks if each gun has at least one magazine worth)
+[*]Medical supplies, food, water
 [*]Weather conditions (storm warning)
 [*]Required quest items (filtered by map)
 [/list]
 
-If missing equipment is detected, a prompt will appear allowing you to continue or go back and prepare.
+[h3]⚙️ Settings Panel[/h3]
+Adds EfD Enhanced tab to game settings:
 
-[b]Ammo Check Details:[/b]
-[list]
-[*]Automatically detects all carried guns (inventory, equipment, pet)
-[*]Counts total ammo by caliber (including ammo loaded in weapons)
-[*]Warns if total ammo for a gun < magazine capacity
-[*]Shows specific weapon name, caliber, current ammo count, and magazine capacity
-[*]Only applies to guns, not melee weapons
-[/list]
-
-[h3]🎨 Full Settings Panel[/h3]
-Adds a new [b]EfD Enhanced[/b] tab directly to the in-game settings panel for easy configuration!
 [list]
 [*]Individual toggles for pre-raid checks
-[*]Movement enhancement 4-level adjustment
+[*]Movement enhancement level adjustment
 [*]Quest tracker position, size, display options
-[*]UI enhancement toggles (weapon comparison, etc.)
-[*]One-click reset all settings
+[*]UI enhancement toggles
+[*]Item wheel hotkey and scale
+[*]Keybinding (supports keyboard, mouse, gamepad)
+[*]One-click reset
 [/list]
 
 [h2]Multi-Language Support[/h2]
 Fully supports: Simplified Chinese, Traditional Chinese, English, and Japanese
 
-[h2]Known Limitations[/h2]
-[b]Pre-Raid Check:[/b]
-[list]
-[*]Ammo sufficiency check warns only if total ammo < one magazine capacity (not multiple magazines)
-[*]Does not check if the right ammo type is loaded in the gun (only checks total matching caliber)
-[/list]
-
-[b]Movement Enhancement:[/b]
-[list]
-[*]Higher levels may feel too sensitive
-[*]Lower levels recommended for precise aiming
-[/list]
-
 [h2]Feedback[/h2]
-For issues or suggestions, please leave a comment on the Workshop page or visit GitHub.
-
 [url=https://github.com/Cyenoch/EfDEnhanced]GitHub Repository[/url]

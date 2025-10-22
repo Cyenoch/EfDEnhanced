@@ -21,15 +21,14 @@ namespace EfDEnhanced.Utils.UI.Components
         private bool _isListening = false;
 
         /// <summary>
-        /// Keys that are not allowed to be bound (reserved for game)
+        /// Keys that are not allowed to be bound (reserved for game or special use)
         /// </summary>
         private static readonly KeyCode[] ExcludedKeys = new[]
         {
-            KeyCode.Mouse0,
-            KeyCode.Mouse1,
-            KeyCode.Mouse2,
-            KeyCode.Escape, // Reserved for canceling rebind
-            KeyCode.None
+            KeyCode.Mouse0,      // Left mouse button - reserved for UI clicks
+            KeyCode.Mouse1,      // Right mouse button - reserved for game actions
+            KeyCode.Escape,      // Reserved for canceling rebind
+            KeyCode.None         // Invalid key
         };
 
         /// <summary>

@@ -60,6 +60,37 @@ Optimize character movement response, say goodbye to "sticky" feeling.
 
 ---
 
+### 🎡 物品轮盘菜单 | Item Wheel Menu
+
+快速访问物品栏的径向菜单，单手即可完成选择和使用操作。
+
+Quick access radial menu for inventory items, designed for one-handed operation.
+
+**特性 | Features:**
+- **单手操作** | One-Handed - 按住热键 → 移动鼠标选择 → 释放热键使用
+- **快速切换** | Fast Switching - 无需离开游戏视角即可使用物品
+- **智能屏蔽** | Smart Blocking - 菜单打开时自动屏蔽射击和视角旋转，防止误操作
+- **实时同步** | Real-time Sync - 显示当前物品栏实际绑定的物品图标
+- **可自定义** | Customizable - 支持自定义热键和菜单缩放（0.5-2.0倍）
+- **自动取消** | Auto Cancel - 打开其他界面或游戏暂停时自动取消
+
+**使用方法 | How to use:**
+1. **按住** 配置的热键（默认 `~` 键）打开菜单 | **Hold** the configured hotkey (default `~`) to open menu
+2. **保持按住** 热键，移动鼠标选择物品 | **Keep holding** and move mouse to select item
+3. **释放** 热键，自动使用或装备选中的物品 | **Release** to use or equip the selected item
+
+**支持的物品类型 | Supported Item Types:**
+- ✅ 消耗品（药品、食物等）| Consumables (medicine, food, etc.)
+- ✅ 技能物品 | Skill items
+- ✅ 可手持的物品和武器 | Hand-held items and weapons
+
+**设置选项 | Settings:**
+- 在 MOD 设置中可自定义热键 | Customize hotkey in MOD Settings
+- 调整轮盘菜单的缩放大小 | Adjust menu scale size
+- 详细文档：[物品轮盘菜单指南](docs/item-wheel-menu.md) | Detailed docs: [Item Wheel Menu Guide](docs/item-wheel-menu.md)
+
+---
+
 ### 🔫 武器对比 | Weapon Comparison
 
 在库存中选中武器后，悬停到其他武器会自动显示属性对比。支持枪支和近战武器。
@@ -133,8 +164,17 @@ If any issues are detected, a clear dialog shows you:
 - **移动增强设置** | Movement Enhancement Settings - 4档位调节移动手感
 - **任务追踪器设置** | Quest Tracker Settings - 调整位置、大小、显示选项、地图过滤
 - **界面增强设置** | UI Enhancement Settings - 武器对比等界面功能开关
+- **按键绑定设置** | Keybinding Settings - 自定义模组功能的快捷键
 - **一键重置** | Reset to Defaults - 恢复所有设置为默认值
 - **实时生效** | Live Updates - 设置立即生效无需重启
+
+**按键绑定特性 | Keybinding Features:**
+- **可视化绑定** | Visual Binding - 点击按钮后按下任意键即可绑定
+- **按键显示名** | Key Display Names - 友好的按键名称显示（如 "Space"、"F1"、"A (Gamepad)"）
+- **手柄支持** | Gamepad Support - 支持 Xbox/PlayStation 等手柄按键（A/B/X/Y、LB/RB、Start/Back 等）
+- **冲突避免** | Conflict Avoidance - 自动排除游戏保留按键（鼠标左右键）
+- **验证系统** | Validation System - 允许绑定键盘、鼠标和手柄按键
+- **ESC 取消** | ESC to Cancel - 按 ESC 键取消绑定操作
 
 **访问方式 | How to Access:**
 - 主菜单 → 设置 → MOD 设置标签页 | Main Menu → Settings → MOD Settings tab
@@ -299,6 +339,8 @@ tail -f ~/Library/Logs/TeamSoda/Duckov/Player.log
 EfDEnhanced/
 ├── ModBehaviour.cs              # Mod entry point and initialization
 ├── Patches/
+│   ├── ItemHoveringComparisonPatch.cs # Weapon comparison system
+│   ├── ItemWheelMenuPatch.cs   # Item wheel menu input handling
 │   ├── MovementEnhancementPatch.cs # Movement system optimization
 │   ├── OptionsPanelPatch.cs    # Adds MOD Settings tab to game settings
 │   ├── QuestViewDetailsPatch.cs # Adds tracking checkbox to quest details
@@ -306,6 +348,7 @@ EfDEnhanced/
 │   └── WorkshopUploadPatch.cs  # Prevents workshop description override
 ├── Features/
 │   ├── ActiveQuestTracker.cs   # In-raid quest tracker HUD
+│   ├── ItemWheelMenu.cs        # Item wheel menu implementation
 │   ├── ModSettingsContent.cs   # Settings content for OptionsPanel
 │   └── RaidPreparationView.cs  # Pre-raid warning dialog
 └── Utils/
@@ -314,21 +357,31 @@ EfDEnhanced/
     ├── ModSettings.cs          # Centralized settings manager
     ├── QuestTrackingManager.cs # Quest tracking persistence
     ├── RaidCheckUtility.cs     # Pre-raid check logic (weapon, ammo, meds, food, weather, quests)
+    ├── StatPolarityMap.cs      # Stat polarity for weapon comparison
     ├── Settings/               # Settings entry classes
     │   ├── BoolSettingsEntry.cs
     │   ├── FloatSettingsEntry.cs
     │   ├── IntSettingsEntry.cs
+    │   ├── KeyCodeSettingsEntry.cs  # Keybinding settings
     │   ├── OptionsSettingsEntry.cs
+    │   ├── StringSettingsEntry.cs
     │   └── SettingsEntry.cs
     └── UI/                     # Reusable UI components
+        ├── Animations/
+        │   └── UIAnimations.cs # UI animation utilities
         ├── Builders/
         │   └── FormBuilder.cs  # Automatic form generation
         ├── Components/
         │   ├── ModButton.cs
+        │   ├── ModKeybindingButton.cs  # Keybinding UI component
         │   ├── ModSlider.cs
-        │   └── ModToggle.cs
-        └── Constants/
-            └── UIConstants.cs
+        │   ├── ModToggle.cs
+        │   └── PieMenuComponent.cs # Reusable pie/radial menu component
+        ├── Constants/
+        │   ├── ColorPalette.cs
+        │   └── UIConstants.cs
+        └── Core/
+            └── UIHelpers.cs    # UI utility functions
 ```
 
 ## Development

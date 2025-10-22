@@ -105,13 +105,34 @@ namespace EfDEnhanced.Utils.Settings
                 KeyCode.F10 => "F10",
                 KeyCode.F11 => "F11",
                 KeyCode.F12 => "F12",
+                // Joystick/Gamepad buttons (common names)
+                KeyCode.JoystickButton0 => "A (Gamepad)",
+                KeyCode.JoystickButton1 => "B (Gamepad)",
+                KeyCode.JoystickButton2 => "X (Gamepad)",
+                KeyCode.JoystickButton3 => "Y (Gamepad)",
+                KeyCode.JoystickButton4 => "LB (Gamepad)",
+                KeyCode.JoystickButton5 => "RB (Gamepad)",
+                KeyCode.JoystickButton6 => "Back (Gamepad)",
+                KeyCode.JoystickButton7 => "Start (Gamepad)",
+                KeyCode.JoystickButton8 => "LS Click (Gamepad)",
+                KeyCode.JoystickButton9 => "RS Click (Gamepad)",
+                KeyCode.JoystickButton10 => "Gamepad 10",
+                KeyCode.JoystickButton11 => "Gamepad 11",
+                KeyCode.JoystickButton12 => "Gamepad 12",
+                KeyCode.JoystickButton13 => "Gamepad 13",
+                KeyCode.JoystickButton14 => "Gamepad 14",
+                KeyCode.JoystickButton15 => "Gamepad 15",
+                KeyCode.JoystickButton16 => "Gamepad 16",
+                KeyCode.JoystickButton17 => "Gamepad 17",
+                KeyCode.JoystickButton18 => "Gamepad 18",
+                KeyCode.JoystickButton19 => "Gamepad 19",
                 _ when keyCode >= KeyCode.A && keyCode <= KeyCode.Z => keyCode.ToString(),
                 _ => keyCode.ToString()
             };
         }
 
         /// <summary>
-        /// 验证此KeyCode是否可以用于热键绑定。允许绝大多数常用键与功能键，排除None、Joystick及Mouse0/1（左/右键）。
+        /// 验证此KeyCode是否可以用于热键绑定。允许绝大多数常用键与功能键（包括手柄按键），排除None及Mouse0/1（左/右键）。
         /// </summary>
         protected override bool Validate(KeyCode value)
         {
@@ -120,8 +141,8 @@ namespace EfDEnhanced.Utils.Settings
                 // 不允许空、未知或无效键
                 KeyCode.None => false,
                 
-                // 禁用所有 Joystick 按钮
-                >= KeyCode.JoystickButton0 and <= KeyCode.Joystick8Button19 => false,
+                // 允许常见手柄按钮（JoystickButton0-19，对应Xbox/PlayStation等手柄）
+                >= KeyCode.JoystickButton0 and <= KeyCode.Joystick8Button19 => true,
 
                 // 禁用鼠标左/右键，允许其它按钮（Mouse2 ~ Mouse6 中键、侧键等）
                 KeyCode.Mouse0 => false,

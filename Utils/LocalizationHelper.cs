@@ -170,10 +170,14 @@ public static class LocalizationHelper
             // UI Enhancement Settings
             { "Settings_EnableWeaponComparison_Name", "启用武器对比" },
             { "Settings_EnableWeaponComparison_Desc", "在鼠标悬停时对比选中武器和悬停武器的属性，显示差异并用颜色标识优劣" },
-            { "Settings_ItemWheelScale_Name", "物品轮盘缩放" },
-            { "Settings_ItemWheelScale_Desc", "调整物品轮盘菜单的显示大小" },
+            { "Settings_ItemWheelScale_Name", "轮盘菜单缩放" },
+            { "Settings_ItemWheelScale_Desc", "调整所有轮盘菜单的显示大小（物品轮盘和投掷物轮盘）" },
             { "Settings_ItemWheelMenuHotkey_Name", "物品轮盘快捷键" },
             { "Settings_ItemWheelMenuHotkey_Desc", "按下并松开此键来打开物品轮盘菜单" },
+            { "Settings_ThrowableWheelEnabled_Name", "启用投掷物轮盘" },
+            { "Settings_ThrowableWheelEnabled_Desc", "启用投掷物轮盘菜单功能" },
+            { "Settings_ThrowableWheelHotkey_Name", "投掷物轮盘快捷键" },
+            { "Settings_ThrowableWheelHotkey_Desc", "按下并松开此键来打开投掷物轮盘菜单（默认G键）" },
             { "Settings_PressAnyKey", "按任意键..." },
         };
 
@@ -255,10 +259,14 @@ public static class LocalizationHelper
             // UI Enhancement Settings
             { "Settings_EnableWeaponComparison_Name", "啟用武器對比" },
             { "Settings_EnableWeaponComparison_Desc", "在鼠標懸停時對比選中武器和懸停武器的屬性，顯示差異並用顏色標識優劣" },
-            { "Settings_ItemWheelScale_Name", "物品輪盤縮放" },
-            { "Settings_ItemWheelScale_Desc", "調整物品輪盤選單的顯示大小" },
+            { "Settings_ItemWheelScale_Name", "輪盤選單縮放" },
+            { "Settings_ItemWheelScale_Desc", "調整所有輪盤選單的顯示大小（物品輪盤和投擲物輪盤）" },
             { "Settings_ItemWheelMenuHotkey_Name", "物品輪盤快捷鍵" },
             { "Settings_ItemWheelMenuHotkey_Desc", "按下並鬆開此鍵來打開物品輪盤選單" },
+            { "Settings_ThrowableWheelEnabled_Name", "啟用投擲物輪盤" },
+            { "Settings_ThrowableWheelEnabled_Desc", "啟用投擲物輪盤選單功能" },
+            { "Settings_ThrowableWheelHotkey_Name", "投擲物輪盤快捷鍵" },
+            { "Settings_ThrowableWheelHotkey_Desc", "按下並鬆開此鍵來打開投擲物輪盤選單（預設G鍵）" },
             { "Settings_PressAnyKey", "按任意鍵..." },
         };
 
@@ -340,10 +348,14 @@ public static class LocalizationHelper
             // UI Enhancement Settings
             { "Settings_EnableWeaponComparison_Name", "Enable Weapon Comparison" },
             { "Settings_EnableWeaponComparison_Desc", "Compare selected weapon with hovered weapon in inventory, showing differences with color-coded indicators" },
-            { "Settings_ItemWheelScale_Name", "Item Wheel Scale" },
-            { "Settings_ItemWheelScale_Desc", "Adjust the display size of the item wheel menu" },
+            { "Settings_ItemWheelScale_Name", "Wheel Menu Scale" },
+            { "Settings_ItemWheelScale_Desc", "Adjust the display size of all wheel menus (item wheel and throwable wheel)" },
             { "Settings_ItemWheelMenuHotkey_Name", "Item Wheel Hotkey" },
             { "Settings_ItemWheelMenuHotkey_Desc", "Press and release this key to open the item wheel menu" },
+            { "Settings_ThrowableWheelEnabled_Name", "Enable Throwable Wheel" },
+            { "Settings_ThrowableWheelEnabled_Desc", "Enable the throwable wheel menu feature" },
+            { "Settings_ThrowableWheelHotkey_Name", "Throwable Wheel Hotkey" },
+            { "Settings_ThrowableWheelHotkey_Desc", "Press and release this key to open the throwable wheel menu (default G key)" },
             { "Settings_PressAnyKey", "Press any key..." },
         };
 
@@ -425,10 +437,14 @@ public static class LocalizationHelper
             // UI Enhancement Settings
             { "Settings_EnableWeaponComparison_Name", "武器比較を有効化" },
             { "Settings_EnableWeaponComparison_Desc", "インベントリで選択した武器とホバーした武器を比較し、差異を色付きインジケーターで表示" },
-            { "Settings_ItemWheelScale_Name", "アイテムホイールスケール" },
-            { "Settings_ItemWheelScale_Desc", "アイテムホイールメニューの表示サイズを調整" },
+            { "Settings_ItemWheelScale_Name", "ホイールメニュースケール" },
+            { "Settings_ItemWheelScale_Desc", "すべてのホイールメニューの表示サイズを調整（アイテムホイールと投擲物ホイール）" },
             { "Settings_ItemWheelMenuHotkey_Name", "アイテムホイールホットキー" },
             { "Settings_ItemWheelMenuHotkey_Desc", "このキーを押して離すとアイテムホイールメニューが開きます" },
+            { "Settings_ThrowableWheelEnabled_Name", "投擲物ホイールを有効化" },
+            { "Settings_ThrowableWheelEnabled_Desc", "投擲物ホイールメニュー機能を有効化" },
+            { "Settings_ThrowableWheelHotkey_Name", "投擲物ホイールホットキー" },
+            { "Settings_ThrowableWheelHotkey_Desc", "このキーを押して離すと投擲物ホイールメニューが開きます（デフォルトGキー）" },
             { "Settings_PressAnyKey", "任意のキーを押してください..." },
         };
 

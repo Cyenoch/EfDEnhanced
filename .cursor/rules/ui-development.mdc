@@ -20,6 +20,7 @@ description: UI development guidelines using mod UI framework
 - [Utils/UI/Components/ModButton.cs](mdc:Utils/UI/Components/ModButton.cs) - 按钮组件
 - [Utils/UI/Components/ModToggle.cs](mdc:Utils/UI/Components/ModToggle.cs) - 开关组件
 - [Utils/UI/Components/ModSlider.cs](mdc:Utils/UI/Components/ModSlider.cs) - 滑块组件
+- [Utils/UI/Components/ModKeybindingButton.cs](mdc:Utils/UI/Components/ModKeybindingButton.cs) - 按键绑定组件
 
 #### 常量和样式
 - [Utils/UI/Constants/UIConstants.cs](mdc:Utils/UI/Constants/UIConstants.cs) - UI 常量
@@ -87,6 +88,44 @@ var toggle = ModToggle.Create(parentTransform, "开关标签", true, (value) => 
 var slider = ModSlider.Create(parentTransform, "滑块标签", 0f, 100f, 50f, (value) => {
     // 值变化回调
 });
+
+// 创建按键绑定按钮
+var keybinding = ModKeybindingButton.Create(parentTransform, ModSettings.OpenMenuHotkey);
+```
+
+### 4. 按键绑定组件
+
+```csharp
+using EfDEnhanced.Utils.UI.Components;
+using EfDEnhanced.Utils.Settings;
+
+// 创建按键绑定按钮
+ModKeybindingButton keybindingButton = ModKeybindingButton.Create(
+    parentTransform,
+    settingsEntry  // KeyCodeSettingsEntry
+);
+```
+
+**按键绑定按钮特性**:
+- 点击按钮后进入监听模式，显示本地化的 "Press Any Key..." 提示
+- 按下任意键即可绑定（自动验证并排除保留按键）
+- 按 ESC 取消绑定操作，恢复原值
+- 自动显示友好的按键名称（如 "Space"、"F1"、"Num 5"、"↑" 等）
+- 监听设置变更事件，实时更新显示
+- 与游戏原生按键绑定UI风格一致
+
+**按键显示名称映射**:
+- 数字键: `Alpha0` → "0", `Keypad5` → "Num 5"
+- 方向键: `UpArrow` → "↑", `DownArrow` → "↓"
+- 功能键: `F1` → "F1", `Space` → "Space"
+- 修饰键: `LeftShift` → "L-Shift", `LeftControl` → "L-Ctrl"
+- 手柄按键: `JoystickButton0` → "A (Gamepad)", `JoystickButton4` → "LB (Gamepad)"
+
+**验证与排除**:
+- 自动排除鼠标左右键（Mouse0/Mouse1）
+- 自动排除 None 和无效按键
+- 允许鼠标中键/侧键（Mouse2-Mouse6）
+- **允许手柄按键**（JoystickButton0-19，Xbox/PlayStation 等手柄）
 ```
 
 ## UI 样式
