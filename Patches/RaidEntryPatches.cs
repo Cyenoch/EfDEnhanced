@@ -20,7 +20,6 @@ namespace EfDEnhanced.Patches;
 public class RaidEntryPatches
 {
     private static bool _isWaitingForConfirmation = false;
-    private static bool _bypassCheck = false;
 
     /// <summary>
     /// 在NotifyEntryClicked之前执行检查
@@ -48,14 +47,6 @@ public class RaidEntryPatches
             {
                 ModLogger.Log("RaidCheck", "Already waiting for confirmation, blocking duplicate call");
                 return false;
-            }
-
-            // 如果是用户确认后的调用，放行并重置标志
-            if (_bypassCheck)
-            {
-                ModLogger.Log("RaidCheck", "Bypassing check (user confirmed)");
-                _bypassCheck = false;
-                return true;
             }
 
             // 获取目标场景ID
@@ -135,7 +126,7 @@ public class RaidEntryPatches
                 ModLogger.Log("RaidCheck", "User chose to continue despite warnings");
 
                 // 设置绕过标志并调用原始方法
-                _bypassCheck = true;
+                _isWaitingForConfirmation = false;
 
                 // 调用原始的 NotifyEntryClicked 逻辑
                 // 这次 Prefix 会因为 _bypassCheck = true 而放行
@@ -218,13 +209,11 @@ public class RaidEntryPatches
             else
             {
                 ModLogger.LogError("Could not find LoadTask method");
-                _bypassCheck = false;
             }
         }
         catch (Exception ex)
         {
             ModLogger.LogError($"InvokeOriginalMethod failed: {ex}");
-            _bypassCheck = false;
         }
     }
 }

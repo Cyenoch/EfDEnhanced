@@ -251,12 +251,28 @@ public class ActiveQuestTracker : MonoBehaviour
             ModSettings.TrackerShowDescription.ValueChanged += OnShowDescriptionChanged;
             ModSettings.TrackerFilterByMap.ValueChanged += OnFilterByMapChanged;
 
-            RefreshQuestList();
+            // 延迟刷新任务列表，等待玩家背包/装备完全加载
+            // 这样 SubmitItems 任务的持有数量才能正确显示
+            StartCoroutine(DelayedRefreshQuestList());
         }
         catch (Exception ex)
         {
             ModLogger.LogError($"QuestTracker.Enable failed: {ex}");
         }
+    }
+
+    /// <summary>
+    /// 延迟刷新任务列表（用于进图后等待物品加载）
+    /// </summary>
+    private System.Collections.IEnumerator DelayedRefreshQuestList()
+    {
+        ModLogger.Log("QuestTracker", "Waiting for inventory to load before refreshing quest list...");
+        
+        // 等待 0.5 秒让背包和装备完全加载
+        yield return new WaitForSeconds(0.5f);
+        
+        ModLogger.Log("QuestTracker", "Inventory should be loaded, refreshing quest list now");
+        RefreshQuestList();
     }
 
     /// <summary>
