@@ -25,10 +25,12 @@ public class ActiveQuestTracker : MonoBehaviour
     private GameObject? _rootCanvas;
     private GameObject? _questPanel;
     private GameObject? _questListContainer;
+    private GameObject? _helpTextObject;
     private readonly List<QuestEntryUI> _questEntries = [];
 
     // 配置
     private bool _isActive;
+    private bool _isCollapsed = false; // 局部折叠状态，不影响设置
 
     public static ActiveQuestTracker? Instance => _instance;
 
@@ -68,6 +70,21 @@ public class ActiveQuestTracker : MonoBehaviour
         else if (_instance != this)
         {
             Destroy(gameObject);
+        }
+    }
+
+    private void Update()
+    {
+        // 只在激活状态下监听快捷键
+        if (!_isActive)
+        {
+            return;
+        }
+
+        // 监听"."键（句号键）来折叠/展开追踪器
+        if (Input.GetKeyDown(KeyCode.Period))
+        {
+            ToggleCollapse();
         }
     }
 
@@ -120,6 +137,31 @@ public class ActiveQuestTracker : MonoBehaviour
             // 设置位置：左上角向右和向下偏移（负值）
             panelRect.anchoredPosition = new Vector2(-10, -10);
 
+            // 创建帮助文本（始终显示在顶部）
+            _helpTextObject = new GameObject("HelpText");
+            _helpTextObject.transform.SetParent(_questPanel.transform, false);
+
+            RectTransform helpTextRect = _helpTextObject.AddComponent<RectTransform>();
+            helpTextRect.anchorMin = new Vector2(0, 1);
+            helpTextRect.anchorMax = new Vector2(1, 1);
+            helpTextRect.pivot = new Vector2(0.5f, 1);
+            helpTextRect.anchoredPosition = new Vector2(0, -5); // 距离顶部5px
+            helpTextRect.sizeDelta = new Vector2(-10, 0); // 左右各留5px边距
+
+            TextMeshProUGUI helpText = _helpTextObject.AddComponent<TextMeshProUGUI>();
+            helpText.text = LocalizationHelper.Get("QuestTracker_HelpText");
+            helpText.fontSize = UIConstants.QUEST_DESC_FONT_SIZE;
+            helpText.fontStyle = FontStyles.Italic;
+            helpText.color = new Color(0.7f, 0.7f, 0.7f, 0.8f); // 灰色半透明
+            helpText.alignment = TextAlignmentOptions.Center;
+            helpText.enableWordWrapping = true;
+
+            // 使用TrueShadow
+            UIStyles.ApplyStandardTextShadow(_helpTextObject, isTitle: false);
+
+            LayoutElement helpTextLayout = _helpTextObject.AddComponent<LayoutElement>();
+            helpTextLayout.preferredHeight = -1;
+
             // 直接创建任务列表容器（不使用ScrollRect）
             _questListContainer = new GameObject("QuestListContainer");
             _questListContainer.transform.SetParent(_questPanel.transform, false);
@@ -128,7 +170,7 @@ public class ActiveQuestTracker : MonoBehaviour
             contentRect.anchorMin = new Vector2(0, 1);
             contentRect.anchorMax = new Vector2(1, 1);
             contentRect.pivot = new Vector2(0.5f, 1);
-            contentRect.anchoredPosition = new Vector2(0, -5); // 距离顶部5px
+            contentRect.anchoredPosition = new Vector2(0, -20); // 距离顶部30px，留出帮助文本空间
             contentRect.sizeDelta = new Vector2(-10, 0); // 左右各留5px边距
 
             VerticalLayoutGroup layoutGroup = _questListContainer.AddComponent<VerticalLayoutGroup>();
@@ -144,6 +186,28 @@ public class ActiveQuestTracker : MonoBehaviour
         catch (Exception ex)
         {
             ModLogger.LogError($"QuestTracker.BuildUI failed: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// 切换折叠/展开状态
+    /// </summary>
+    private void ToggleCollapse()
+    {
+        try
+        {
+            _isCollapsed = !_isCollapsed;
+            
+            if (_questListContainer != null)
+            {
+                _questListContainer.SetActive(!_isCollapsed);
+            }
+            
+            ModLogger.Log("QuestTracker", $"Tracker {(_isCollapsed ? "collapsed" : "expanded")}");
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestTracker.ToggleCollapse failed: {ex}");
         }
     }
 
@@ -205,6 +269,7 @@ public class ActiveQuestTracker : MonoBehaviour
             }
 
             _isActive = false;
+            _isCollapsed = false; // 重置折叠状态
             _rootCanvas?.SetActive(false);
             ClearQuestList();
 
