@@ -84,8 +84,8 @@ public class ActiveQuestTracker : MonoBehaviour
             return;
         }
 
-        // 监听"."键（句号键）来折叠/展开追踪器
-        if (Input.GetKeyDown(KeyCode.Period))
+        // 支持主键盘和小键盘上的"."键以及部分输入法下的句号（兼容更多布局）
+        if (Input.GetKeyDown(KeyCode.Period) || Input.GetKeyDown(KeyCode.KeypadPeriod))
         {
             ToggleCollapse();
         }
