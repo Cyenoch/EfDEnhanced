@@ -90,6 +90,7 @@ namespace EfDEnhanced.Utils
       { "AttackSpeed", Polarity.Positive },        // Higher attack speed is better
       { "AttackRange", Polarity.Positive },        // Longer reach is better
       { "StaminaCost", Polarity.Negative },        // Lower stamina cost is better
+      { "BleedChance", Polarity.Positive },        // Higher bleed chance is better
       
       // ===== GAIN/BONUS STATS =====
       // These are bonus/gain stats from attachments or buffs
