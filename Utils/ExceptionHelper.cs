@@ -111,13 +111,13 @@ namespace EfDEnhanced.Utils
                 ModLogger.LogError($"{contextName}: {collectionName} is null");
                 return false;
             }
-            
+
             if (collection.Count == 0)
             {
                 ModLogger.LogWarning($"{contextName}: {collectionName} is empty");
                 return false;
             }
-            
+
             return true;
         }
 
@@ -150,7 +150,7 @@ namespace EfDEnhanced.Utils
             ModLogger.LogError($"Type: {ex.GetType().FullName}");
             ModLogger.LogError($"Message: {ex.Message}");
             ModLogger.LogError($"Stack Trace:\n{ex.StackTrace}");
-            
+
             if (ex.InnerException != null)
             {
                 ModLogger.LogError($"Inner Exception: {ex.InnerException.GetType().Name}");

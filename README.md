@@ -60,6 +60,32 @@ Optimize character movement response, say goodbye to "sticky" feeling.
 
 ---
 
+### 🔫 武器对比 | Weapon Comparison
+
+在库存中选中武器后，悬停到其他武器会自动显示属性对比。
+
+When a weapon is selected in inventory, hovering over other weapons shows automatic stat comparison.
+
+**特性 | Features:**
+- **自动对比** | Automatic Comparison - 选中 + 悬停 = 自动显示差异
+- **颜色标识** | Color Coded - 绿色表示更好，红色表示更差
+- **智能判断** | Smart Analysis - 自动识别属性的正向性（伤害高好）和负向性（后坐力低好）
+- **可配置** | Configurable - 可在设置中开关，默认启用
+- **全属性支持** | All Stats - 伤害、射速、后坐力、弹匣容量等所有属性
+
+**使用方法 | How to use:**
+1. 左键点击选中一把武器 | Left-click to select a weapon
+2. 鼠标悬停到另一把武器 | Hover over another weapon
+3. 查看属性面板中的对比信息！| View comparison in the stats panel!
+
+**显示格式 | Display Format:**
+- `[选中武器值] → [悬停武器值]` | `[Selected Value] → [Hovered Value]`
+- 绿色 Green: 悬停武器更好 | Hovered weapon is better
+- 红色 Red: 选中武器更好 | Selected weapon is better
+- 白色 White: 中性属性或相同值 | Neutral stat or equal values
+
+---
+
 ### ✅ 传送前装备检查 | Pre-Raid Equipment Check
 
 使用传送台进入地图前自动检查：
@@ -95,6 +121,7 @@ Adds "EfD Enhanced Settings" button to pause menu:
 - **传送前检查设置** | Pre-Raid Check Settings - 启用/禁用各项检查
 - **移动增强设置** | Movement Enhancement Settings - 4档位调节移动手感
 - **任务追踪器设置** | Quest Tracker Settings - 调整位置、大小、显示选项、地图过滤
+- **界面增强设置** | UI Enhancement Settings - 武器对比等界面功能开关
 - **一键重置** | Reset to Defaults - 恢复所有设置为默认值
 - **实时生效** | Live Updates - 设置立即生效无需重启
 

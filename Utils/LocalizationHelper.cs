@@ -12,10 +12,10 @@ public static class LocalizationHelper
 {
     // 本地化键名前缀，避免与游戏原有键冲突
     private const string KeyPrefix = "EfDEnhanced_";
-    
+
     // 本地化文本数据
-    private static readonly Dictionary<SystemLanguage, Dictionary<string, string>> LocalizationData = new();
-    
+    private static readonly Dictionary<SystemLanguage, Dictionary<string, string>> LocalizationData = [];
+
     /// <summary>
     /// 初始化本地化系统
     /// </summary>
@@ -24,16 +24,16 @@ public static class LocalizationHelper
         try
         {
             ModLogger.Log("Localization", "Initializing localization system...");
-            
+
             // 注册语言切换事件
             LocalizationManager.OnSetLanguage += OnLanguageChanged;
-            
+
             // 加载所有语言的翻译
             LoadTranslations();
-            
+
             // 应用当前语言的翻译
             ApplyTranslations(LocalizationManager.CurrentLanguage);
-            
+
             ModLogger.Log("Localization", $"Localization initialized for language: {LocalizationManager.CurrentLanguage}");
         }
         catch (System.Exception ex)
@@ -41,7 +41,7 @@ public static class LocalizationHelper
             ModLogger.LogError($"Failed to initialize localization: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 清理本地化系统
     /// </summary>
@@ -50,7 +50,7 @@ public static class LocalizationHelper
         try
         {
             LocalizationManager.OnSetLanguage -= OnLanguageChanged;
-            
+
             // 移除所有覆盖的文本
             foreach (var langData in LocalizationData.Values)
             {
@@ -59,7 +59,7 @@ public static class LocalizationHelper
                     LocalizationManager.RemoveOverrideText(GetFullKey(key));
                 }
             }
-            
+
             ModLogger.Log("Localization", "Localization system cleaned up");
         }
         catch (System.Exception ex)
@@ -67,7 +67,7 @@ public static class LocalizationHelper
             ModLogger.LogError($"Failed to cleanup localization: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 语言切换事件处理
     /// </summary>
@@ -83,7 +83,7 @@ public static class LocalizationHelper
             ModLogger.LogError($"Failed to handle language change: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 加载所有语言的翻译数据
     /// </summary>
@@ -126,6 +126,7 @@ public static class LocalizationHelper
             { "Settings_Category_PreRaidCheck", "Raid前检查" },
             { "Settings_Category_QuestTracker", "任务追踪器" },
             { "Settings_Category_Movement", "移动优化" },
+            { "Settings_Category_UI", "界面增强" },
 
             // Pre-Raid Check 设置
             { "Settings_EnableRaidCheck_Name", "启用Raid前检查" },
@@ -162,8 +163,12 @@ public static class LocalizationHelper
             { "Settings_Movement_Light", "轻度优化" },
             { "Settings_Movement_Medium", "中度优化" },
             { "Settings_Movement_Heavy", "重度优化" },
+
+            // UI Enhancement Settings
+            { "Settings_EnableWeaponComparison_Name", "启用武器对比" },
+            { "Settings_EnableWeaponComparison_Desc", "在鼠标悬停时对比选中武器和悬停武器的属性，显示差异并用颜色标识优劣" },
         };
-        
+
         // 繁体中文
         LocalizationData[SystemLanguage.ChineseTraditional] = new Dictionary<string, string>
         {
@@ -172,7 +177,7 @@ public static class LocalizationHelper
             { "RaidCheck_HasIssues", "檢測到以下問題：\n" },
             { "RaidCheck_Confirm", "繼續進入" },
             { "RaidCheck_Cancel", "返回準備" },
-            
+
             { "Warning_NoWeapon", "<color=#FF6B6B>⚠ 未攜帶槍支</color>" },
             { "Warning_NoAmmo", "<color=#FF6B6B>⚠ 未攜帶彈藥</color>" },
             { "Warning_NoMedicine", "<color=#FF6B6B>⚠ 未攜帶藥品</color>" },
@@ -180,7 +185,7 @@ public static class LocalizationHelper
             { "Warning_StormyWeather", "<color=#FF4444>⚠ 當前為風暴天氣</color>" },
             { "Warning_StormComing", "<color=#FFA500>⚠ 風暴即將來臨（24小時內）</color>" },
             { "Warning_QuestItem", "<color=#FFD700>⚠ 任務物品不足: {0} ({1}/{2}) - {3}</color>" },
-            
+
             { "QuestTracker_Title", "活躍任務" },
             { "QuestTracker_Progress", "進度: {0}/{1}" },
             { "QuestTracker_NoQuests", "無進行中的任務" },
@@ -198,6 +203,7 @@ public static class LocalizationHelper
             { "Settings_Category_PreRaidCheck", "Raid前檢查" },
             { "Settings_Category_QuestTracker", "任務追蹤器" },
             { "Settings_Category_Movement", "移動優化" },
+            { "Settings_Category_UI", "界面增強" },
 
             // Pre-Raid Check 設置
             { "Settings_EnableRaidCheck_Name", "啟用Raid前檢查" },
@@ -234,8 +240,12 @@ public static class LocalizationHelper
             { "Settings_Movement_Light", "輕度優化" },
             { "Settings_Movement_Medium", "中度優化" },
             { "Settings_Movement_Heavy", "重度優化" },
+
+            // UI Enhancement Settings
+            { "Settings_EnableWeaponComparison_Name", "啟用武器對比" },
+            { "Settings_EnableWeaponComparison_Desc", "在鼠標懸停時對比選中武器和懸停武器的屬性，顯示差異並用顏色標識優劣" },
         };
-        
+
         // 英语
         LocalizationData[SystemLanguage.English] = new Dictionary<string, string>
         {
@@ -244,7 +254,7 @@ public static class LocalizationHelper
             { "RaidCheck_HasIssues", "The following issues detected:\n" },
             { "RaidCheck_Confirm", "Continue Anyway" },
             { "RaidCheck_Cancel", "Go Back" },
-            
+
             { "Warning_NoWeapon", "<color=#FF6B6B>⚠ No weapon equipped</color>" },
             { "Warning_NoAmmo", "<color=#FF6B6B>⚠ No ammunition</color>" },
             { "Warning_NoMedicine", "<color=#FF6B6B>⚠ No medical supplies</color>" },
@@ -252,7 +262,7 @@ public static class LocalizationHelper
             { "Warning_StormyWeather", "<color=#FF4444>⚠ Stormy weather conditions</color>" },
             { "Warning_StormComing", "<color=#FFA500>⚠ Storm approaching (within 24 hours)</color>" },
             { "Warning_QuestItem", "<color=#FFD700>⚠ Quest item insufficient: {0} ({1}/{2}) - {3}</color>" },
-            
+
             { "QuestTracker_Title", "Active Quests" },
             { "QuestTracker_Progress", "Progress: {0}/{1}" },
             { "QuestTracker_NoQuests", "No active quests" },
@@ -270,6 +280,7 @@ public static class LocalizationHelper
             { "Settings_Category_PreRaidCheck", "Pre-Raid Check" },
             { "Settings_Category_QuestTracker", "Quest Tracker" },
             { "Settings_Category_Movement", "Movement Enhancement" },
+            { "Settings_Category_UI", "UI Enhancement" },
 
             // Pre-Raid Check Settings
             { "Settings_EnableRaidCheck_Name", "Enable Pre-Raid Check" },
@@ -306,8 +317,12 @@ public static class LocalizationHelper
             { "Settings_Movement_Light", "Light Optimization" },
             { "Settings_Movement_Medium", "Medium Optimization" },
             { "Settings_Movement_Heavy", "Heavy Optimization" },
+
+            // UI Enhancement Settings
+            { "Settings_EnableWeaponComparison_Name", "Enable Weapon Comparison" },
+            { "Settings_EnableWeaponComparison_Desc", "Compare selected weapon with hovered weapon in inventory, showing differences with color-coded indicators" },
         };
-        
+
         // 日语
         LocalizationData[SystemLanguage.Japanese] = new Dictionary<string, string>
         {
@@ -316,7 +331,7 @@ public static class LocalizationHelper
             { "RaidCheck_HasIssues", "次の問題が検出されました：\n" },
             { "RaidCheck_Confirm", "続行する" },
             { "RaidCheck_Cancel", "戻る" },
-            
+
             { "Warning_NoWeapon", "<color=#FF6B6B>⚠ 武器を装備していません</color>" },
             { "Warning_NoAmmo", "<color=#FF6B6B>⚠ 弾薬がありません</color>" },
             { "Warning_NoMedicine", "<color=#FF6B6B>⚠ 医療品がありません</color>" },
@@ -324,7 +339,7 @@ public static class LocalizationHelper
             { "Warning_StormyWeather", "<color=#FF4444>⚠ 嵐の天候</color>" },
             { "Warning_StormComing", "<color=#FFA500>⚠ 嵐が接近中（24時間以内）</color>" },
             { "Warning_QuestItem", "<color=#FFD700>⚠ クエストアイテム不足: {0} ({1}/{2}) - {3}</color>" },
-            
+
             { "QuestTracker_Title", "アクティブクエスト" },
             { "QuestTracker_Progress", "進行状況: {0}/{1}" },
             { "QuestTracker_NoQuests", "進行中のクエストなし" },
@@ -342,6 +357,7 @@ public static class LocalizationHelper
             { "Settings_Category_PreRaidCheck", "レイド前チェック" },
             { "Settings_Category_QuestTracker", "クエストトラッカー" },
             { "Settings_Category_Movement", "移動最適化" },
+            { "Settings_Category_UI", "UI強化" },
 
             // Pre-Raid Check 設定
             { "Settings_EnableRaidCheck_Name", "レイド前チェックを有効化" },
@@ -378,11 +394,15 @@ public static class LocalizationHelper
             { "Settings_Movement_Light", "軽量最適化" },
             { "Settings_Movement_Medium", "中程度最適化" },
             { "Settings_Movement_Heavy", "重量最適化" },
+
+            // UI Enhancement Settings
+            { "Settings_EnableWeaponComparison_Name", "武器比較を有効化" },
+            { "Settings_EnableWeaponComparison_Desc", "インベントリで選択した武器とホバーした武器を比較し、差異を色付きインジケーターで表示" },
         };
-        
+
         ModLogger.Log("Localization", $"Loaded translations for {LocalizationData.Count} languages");
     }
-    
+
     /// <summary>
     /// 应用指定语言的翻译
     /// </summary>
@@ -394,17 +414,17 @@ public static class LocalizationHelper
             ModLogger.LogWarning($"No translations found for {language}, falling back to English");
             language = SystemLanguage.English;
         }
-        
+
         var translations = LocalizationData[language];
         foreach (var kvp in translations)
         {
             string fullKey = GetFullKey(kvp.Key);
             LocalizationManager.SetOverrideText(fullKey, kvp.Value);
         }
-        
+
         ModLogger.Log("Localization", $"Applied {translations.Count} translations for {language}");
     }
-    
+
     /// <summary>
     /// 获取完整的本地化键名
     /// </summary>
@@ -412,7 +432,7 @@ public static class LocalizationHelper
     {
         return KeyPrefix + shortKey;
     }
-    
+
     /// <summary>
     /// 获取本地化文本（便捷方法）
     /// </summary>
@@ -420,7 +440,7 @@ public static class LocalizationHelper
     {
         return LocalizationManager.GetPlainText(GetFullKey(key));
     }
-    
+
     /// <summary>
     /// 获取格式化的本地化文本
     /// </summary>

@@ -3,44 +3,33 @@ namespace EfDEnhanced.Utils.Settings
     /// <summary>
     /// Integer settings entry
     /// </summary>
-    public class IntSettingsEntry : SettingsEntry<int>
+    public class IntSettingsEntry(
+        string prefix,
+        string key,
+        string name,
+        int defaultValue,
+        string category = "General",
+        string? description = null,
+        int version = 1) : SettingsEntry<int>(prefix, key, name, defaultValue, category, description, version)
     {
-        public IntSettingsEntry(
-            string prefix,
-            string key,
-            string name,
-            int defaultValue,
-            string category = "General",
-            string? description = null,
-            int version = 1)
-            : base(prefix, key, name, defaultValue, category, description, version)
-        {
-        }
     }
 
     /// <summary>
     /// Integer settings entry with range constraints
     /// </summary>
-    public class RangedIntSettingsEntry : IntSettingsEntry
+    public class RangedIntSettingsEntry(
+        string prefix,
+        string key,
+        string name,
+        int defaultValue,
+        int minValue,
+        int maxValue,
+        string category = "General",
+        string? description = null,
+        int version = 1) : IntSettingsEntry(prefix, key, name, defaultValue, category, description, version)
     {
-        public int MinValue { get; }
-        public int MaxValue { get; }
-
-        public RangedIntSettingsEntry(
-            string prefix,
-            string key,
-            string name,
-            int defaultValue,
-            int minValue,
-            int maxValue,
-            string category = "General",
-            string? description = null,
-            int version = 1)
-            : base(prefix, key, name, defaultValue, category, description, version)
-        {
-            MinValue = minValue;
-            MaxValue = maxValue;
-        }
+        public int MinValue { get; } = minValue;
+        public int MaxValue { get; } = maxValue;
 
         protected override bool Validate(int value)
         {

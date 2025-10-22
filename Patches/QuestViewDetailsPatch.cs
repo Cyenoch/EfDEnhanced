@@ -17,19 +17,19 @@ namespace EfDEnhanced.Patches;
 public class QuestViewDetailsPatch
 {
     // 为每个 QuestViewDetails 实例维护独立的按钮
-    private static Dictionary<QuestViewDetails, ButtonData> _trackButtons = new Dictionary<QuestViewDetails, ButtonData>();
+    private static readonly Dictionary<QuestViewDetails, ButtonData> _trackButtons = [];
     private static Quest? _currentQuest;
-    
+
     private class ButtonData
     {
-        public GameObject ButtonObject;
-        public Image StatusImage;
-        public Sprite UncheckedSprite;
-        public Sprite CheckedSprite;
+        public GameObject ButtonObject = null!;
+        public Image StatusImage = null!;
+        public Sprite UncheckedSprite = null!;
+        public Sprite CheckedSprite = null!;
         public bool UsingNativeSprites;
-        public GameObject IconContainer;
+        public GameObject IconContainer = null!;
     }
-    
+
     /// <summary>
     /// Patch Setup 方法来注入追踪按钮
     /// </summary>
@@ -78,7 +78,7 @@ public class QuestViewDetailsPatch
             ModLogger.LogError($"QuestViewDetailsPatch.Setup_Postfix failed: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 创建追踪按钮
     /// </summary>
@@ -100,48 +100,48 @@ public class QuestViewDetailsPatch
             }
 
             ModLogger.Log("QuestTracker", $"Creating track button for quest {quest.ID}");
-            
+
             // 尝试获取游戏原生的任务图标
-            Sprite uncheckedSprite = null;
-            Sprite checkedSprite = null;
-            
-            var taskEntryPrefabField = typeof(QuestViewDetails).GetField("taskEntryPrefab", 
+            Sprite? uncheckedSprite = null;
+            Sprite? checkedSprite = null;
+
+            var taskEntryPrefabField = typeof(QuestViewDetails).GetField("taskEntryPrefab",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            
+
             if (taskEntryPrefabField != null)
             {
                 var taskEntryPrefab = taskEntryPrefabField.GetValue(questViewDetails) as TaskEntry;
                 if (taskEntryPrefab != null)
                 {
-                    var unsatisfiedField = typeof(TaskEntry).GetField("unsatisfiedIcon", 
+                    var unsatisfiedField = typeof(TaskEntry).GetField("unsatisfiedIcon",
                         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                    var satisfiedField = typeof(TaskEntry).GetField("satisfiedIcon", 
+                    var satisfiedField = typeof(TaskEntry).GetField("satisfiedIcon",
                         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                    
+
                     if (unsatisfiedField != null) uncheckedSprite = unsatisfiedField.GetValue(taskEntryPrefab) as Sprite;
                     if (satisfiedField != null) checkedSprite = satisfiedField.GetValue(taskEntryPrefab) as Sprite;
-                    
+
                     ModLogger.Log("QuestTracker", $"Got task sprites: unchecked={uncheckedSprite != null}, checked={checkedSprite != null}");
                 }
             }
-            
+
             // 使用反射获取 displayName 字段
-            var displayNameField = typeof(QuestViewDetails).GetField("displayName", 
+            var displayNameField = typeof(QuestViewDetails).GetField("displayName",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            
+
             if (displayNameField == null)
             {
                 ModLogger.LogError("QuestTracker: Failed to find displayName field");
                 return;
             }
-            
+
             var displayNameText = displayNameField.GetValue(questViewDetails) as TextMeshProUGUI;
             if (displayNameText == null)
             {
                 ModLogger.LogError("QuestTracker: displayName is null");
                 return;
             }
-            
+
             // 获取 displayName 的父级
             Transform displayNameParent = displayNameText.transform.parent;
             if (displayNameParent == null)
@@ -149,24 +149,24 @@ public class QuestViewDetailsPatch
                 ModLogger.LogError("QuestTracker: displayName parent is null");
                 return;
             }
-            
+
             ModLogger.Log("QuestTracker", $"Creating button below: {displayNameText.transform.name}");
-            
+
             // 创建按钮容器（作为 displayName 的兄弟，显示在下方）
-            GameObject buttonContainer = new GameObject("TrackQuestButton");
+            GameObject buttonContainer = new("TrackQuestButton");
             buttonContainer.transform.SetParent(displayNameParent, false);
-            
+
             // 设置为 displayName 的下一个兄弟（显示在下方）
             int displayNameIndex = displayNameText.transform.GetSiblingIndex();
             buttonContainer.transform.SetSiblingIndex(displayNameIndex + 1);
-            
+
             RectTransform containerRect = buttonContainer.AddComponent<RectTransform>();
             containerRect.anchorMin = new Vector2(0, 1);
             containerRect.anchorMax = new Vector2(1, 1);
             containerRect.pivot = new Vector2(0, 1);
             containerRect.anchoredPosition = Vector2.zero;
             containerRect.sizeDelta = new Vector2(0, 40); // 增加高度到40
-            
+
             // 添加水平布局
             HorizontalLayoutGroup layoutGroup = buttonContainer.AddComponent<HorizontalLayoutGroup>();
             layoutGroup.childForceExpandWidth = false;
@@ -175,9 +175,9 @@ public class QuestViewDetailsPatch
             layoutGroup.childAlignment = TextAnchor.MiddleLeft;
             layoutGroup.spacing = 12; // 增大图标和文字之间的间距
             layoutGroup.padding = new RectOffset(10, 10, 8, 8); // 增加内边距
-            
+
             // 创建复选框容器
-            GameObject iconObj = new GameObject("StatusIcon");
+            GameObject iconObj = new("StatusIcon");
             iconObj.transform.SetParent(buttonContainer.transform, false);
 
             RectTransform iconRect = iconObj.AddComponent<RectTransform>();
@@ -202,7 +202,7 @@ public class QuestViewDetailsPatch
             borderOutline.effectDistance = new Vector2(2, -2);
 
             // 状态图标（内部的勾选标记）
-            GameObject checkmarkObj = new GameObject("Checkmark");
+            GameObject checkmarkObj = new("Checkmark");
             checkmarkObj.transform.SetParent(iconObj.transform, false);
 
             RectTransform checkmarkRect = checkmarkObj.AddComponent<RectTransform>();
@@ -215,8 +215,8 @@ public class QuestViewDetailsPatch
 
             // 确定是否使用原生图标
             bool usingNativeSprites = uncheckedSprite != null && checkedSprite != null;
-            Sprite finalUncheckedSprite = usingNativeSprites ? uncheckedSprite : CreateWhiteSquareSprite();
-            Sprite finalCheckedSprite = usingNativeSprites ? checkedSprite : CreateWhiteSquareSprite();
+            Sprite finalUncheckedSprite = usingNativeSprites ? uncheckedSprite! : CreateWhiteSquareSprite();
+            Sprite finalCheckedSprite = usingNativeSprites ? checkedSprite! : CreateWhiteSquareSprite();
 
             // 根据当前追踪状态设置初始图标和颜色
             bool isTracked = QuestTrackingManager.IsQuestTracked(quest.ID);
@@ -230,18 +230,18 @@ public class QuestViewDetailsPatch
             borderOutline.effectColor = borderColor;
 
             // 创建文本标签
-            GameObject labelObj = new GameObject("Label");
+            GameObject labelObj = new("Label");
             labelObj.transform.SetParent(buttonContainer.transform, false);
-            
+
             TextMeshProUGUI labelText = labelObj.AddComponent<TextMeshProUGUI>();
             labelText.text = LocalizationHelper.Get("QuestTracker_CheckboxLabel");
             labelText.fontSize = 28;
             labelText.color = new Color(1f, 1f, 1f, 1f);
             labelText.alignment = TextAlignmentOptions.MidlineLeft;
-            
+
             LayoutElement labelLayout = labelObj.AddComponent<LayoutElement>();
             labelLayout.flexibleWidth = 1;
-            
+
             // 添加Button组件（整个容器可点击）
             Button button = buttonContainer.AddComponent<Button>();
             button.targetGraphic = statusImage;
@@ -265,15 +265,15 @@ public class QuestViewDetailsPatch
             ModLogger.LogError($"QuestViewDetailsPatch.CreateTrackButton failed: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 创建白色方形 Sprite
     /// </summary>
     private static Sprite CreateWhiteSquareSprite()
     {
-        Texture2D texture = new Texture2D(4, 4);
-        Color32 white = new Color32(255, 255, 255, 255);
-        
+        Texture2D texture = new(4, 4);
+        Color32 white = new(255, 255, 255, 255);
+
         for (int y = 0; y < 4; y++)
         {
             for (int x = 0; x < 4; x++)
@@ -281,11 +281,11 @@ public class QuestViewDetailsPatch
                 texture.SetPixel(x, y, white);
             }
         }
-        
+
         texture.Apply();
         return Sprite.Create(texture, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f));
     }
-    
+
     /// <summary>
     /// 按钮点击事件
     /// </summary>

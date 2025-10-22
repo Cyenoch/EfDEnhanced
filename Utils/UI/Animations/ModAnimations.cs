@@ -12,7 +12,7 @@ namespace EfDEnhanced.Utils.UI.Animations
     public static class ModAnimations
     {
         #region Button Animations
-        
+
         /// <summary>
         /// 按钮点击缩放动画
         /// </summary>
@@ -46,14 +46,14 @@ namespace EfDEnhanced.Utils.UI.Animations
         #endregion
 
         #region Fade Animations
-        
+
         /// <summary>
         /// 淡入动画（CanvasGroup）
         /// </summary>
         public static Tween FadeIn(CanvasGroup canvasGroup, float duration = -1f)
         {
             if (duration < 0) duration = UIConstants.FADE_DURATION;
-            
+
             return canvasGroup.DOFade(1f, duration)
                 .SetEase(Ease.OutQuad)
                 .SetUpdate(true);
@@ -65,7 +65,7 @@ namespace EfDEnhanced.Utils.UI.Animations
         public static Tween FadeOut(CanvasGroup canvasGroup, float duration = -1f)
         {
             if (duration < 0) duration = UIConstants.FADE_DURATION;
-            
+
             return canvasGroup.DOFade(0f, duration)
                 .SetEase(Ease.OutQuad)
                 .SetUpdate(true);
@@ -77,7 +77,7 @@ namespace EfDEnhanced.Utils.UI.Animations
         public static Tween FadeIn(Image image, float duration = -1f)
         {
             if (duration < 0) duration = UIConstants.FADE_DURATION;
-            
+
             return image.DOFade(1f, duration)
                 .SetEase(Ease.OutQuad)
                 .SetUpdate(true);
@@ -89,7 +89,7 @@ namespace EfDEnhanced.Utils.UI.Animations
         public static Tween FadeOut(Image image, float duration = -1f)
         {
             if (duration < 0) duration = UIConstants.FADE_DURATION;
-            
+
             return image.DOFade(0f, duration)
                 .SetEase(Ease.OutQuad)
                 .SetUpdate(true);
@@ -98,7 +98,7 @@ namespace EfDEnhanced.Utils.UI.Animations
         #endregion
 
         #region Scale Animations
-        
+
         /// <summary>
         /// 弹性放大出现动画
         /// </summary>
@@ -134,7 +134,7 @@ namespace EfDEnhanced.Utils.UI.Animations
         #endregion
 
         #region Slide Animations
-        
+
         /// <summary>
         /// 从右侧滑入
         /// </summary>
@@ -142,7 +142,7 @@ namespace EfDEnhanced.Utils.UI.Animations
         {
             Vector2 originalPos = rectTransform.anchoredPosition;
             rectTransform.anchoredPosition = new Vector2(Screen.width, originalPos.y);
-            
+
             return rectTransform.DOAnchorPos(originalPos, duration)
                 .SetEase(Ease.OutQuad)
                 .SetUpdate(true);
@@ -165,7 +165,7 @@ namespace EfDEnhanced.Utils.UI.Animations
         {
             Vector2 originalPos = rectTransform.anchoredPosition;
             rectTransform.anchoredPosition = new Vector2(-Screen.width, originalPos.y);
-            
+
             return rectTransform.DOAnchorPos(originalPos, duration)
                 .SetEase(Ease.OutQuad)
                 .SetUpdate(true);
@@ -184,7 +184,7 @@ namespace EfDEnhanced.Utils.UI.Animations
         #endregion
 
         #region Color Animations
-        
+
         /// <summary>
         /// 颜色渐变动画（Image）
         /// </summary>
@@ -221,7 +221,7 @@ namespace EfDEnhanced.Utils.UI.Animations
         #endregion
 
         #region Rotation Animations
-        
+
         /// <summary>
         /// 旋转动画
         /// </summary>
@@ -246,7 +246,7 @@ namespace EfDEnhanced.Utils.UI.Animations
         #endregion
 
         #region Sequence Animations
-        
+
         /// <summary>
         /// 弹出窗口动画组合（缩放+淡入）
         /// </summary>
@@ -254,12 +254,12 @@ namespace EfDEnhanced.Utils.UI.Animations
         {
             transform.localScale = Vector3.zero;
             canvasGroup.alpha = 0f;
-            
+
             Sequence sequence = DOTween.Sequence();
             sequence.Append(transform.DOScale(1f, 0.3f).SetEase(Ease.OutBack));
             sequence.Join(canvasGroup.DOFade(1f, 0.2f));
             sequence.SetUpdate(true);
-            
+
             return sequence;
         }
 
@@ -272,7 +272,7 @@ namespace EfDEnhanced.Utils.UI.Animations
             sequence.Append(canvasGroup.DOFade(0f, 0.15f));
             sequence.Join(transform.DOScale(0.8f, 0.15f).SetEase(Ease.InQuad));
             sequence.SetUpdate(true);
-            
+
             return sequence;
         }
 
@@ -288,7 +288,7 @@ namespace EfDEnhanced.Utils.UI.Animations
         #endregion
 
         #region Utility Methods
-        
+
         /// <summary>
         /// 停止并清理指定对象上的所有DOTween动画
         /// </summary>

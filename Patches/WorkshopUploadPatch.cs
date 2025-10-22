@@ -16,9 +16,9 @@ public class SteamUGCSetDescriptionPatch
 {
     // EfDEnhanced's Steam Workshop ID
     public const ulong EFDENHANCED_WORKSHOP_ID = 3590346461;
-    
+
     private static bool _isUploadingEfDEnhanced = false;
-    
+
     /// <summary>
     /// Enable skipping description updates for EfDEnhanced only.
     /// </summary>
@@ -27,7 +27,7 @@ public class SteamUGCSetDescriptionPatch
         _isUploadingEfDEnhanced = true;
         ModLogger.Log("WorkshopUpload", "EfDEnhanced upload detected - description will be preserved");
     }
-    
+
     /// <summary>
     /// Disable skipping description updates after upload completes.
     /// </summary>
@@ -35,7 +35,7 @@ public class SteamUGCSetDescriptionPatch
     {
         _isUploadingEfDEnhanced = false;
     }
-    
+
     /// <summary>
     /// Prefix patch to skip SetItemDescription calls only for EfDEnhanced.
     /// Returns false to prevent the original method from executing.
@@ -94,7 +94,7 @@ public class WorkshopUploadTrackerPatch
             ModLogger.LogError($"WorkshopUploadTrackerPatch.Prefix failed: {ex}");
         }
     }
-    
+
     /// <summary>
     /// Re-enable description updates after upload completes.
     /// </summary>

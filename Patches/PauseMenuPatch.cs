@@ -133,7 +133,7 @@ namespace EfDEnhanced.Patches
         private static Transform? FindButtonContainer(Transform root)
         {
             // Try common names for button containers
-            string[] possibleNames = { "Buttons", "ButtonContainer", "Content", "Panel", "Body", "Layout" };
+            string[] possibleNames = ["Buttons", "ButtonContainer", "Content", "Panel", "Body", "Layout"];
 
             foreach (string name in possibleNames)
             {

@@ -13,7 +13,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour
 {
     private const string HARMONY_ID = "com.efdenhanced.mod";
     private static Harmony? _harmonyInstance;
-    
+
     private ActiveQuestTracker? _questTracker;
     private bool _wasInRaid;
 
@@ -52,11 +52,11 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour
         {
             ModLogger.Log("Harmony", $"  - {method.DeclaringType?.Name}.{method.Name}");
         }
-        
+
         // Initialize quest tracker
         InitializeQuestTracker();
     }
-    
+
     void Update()
     {
         try
@@ -108,7 +108,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour
             ModLogger.LogError($"CleanupResources failed: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 初始化任务追踪器
     /// </summary>
@@ -196,9 +196,9 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour
                 }
                 return;
             }
-            
+
             bool isInRaid = LevelManager.Instance.IsRaidMap;
-            
+
             // 进入Raid
             if (isInRaid && !_wasInRaid)
             {

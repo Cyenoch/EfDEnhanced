@@ -23,7 +23,7 @@ namespace EfDEnhanced.Utils.UI.Components
         /// <summary>
         /// Toggle组件
         /// </summary>
-        public Toggle Toggle => _toggle;
+        public Toggle Toggle => _toggle!;
 
         /// <summary>
         /// 当前值
@@ -46,7 +46,7 @@ namespace EfDEnhanced.Utils.UI.Components
         public static ModToggle Create(Transform parent, string name = "ModToggle")
         {
             // 创建容器
-            GameObject containerObj = new GameObject(name);
+            GameObject containerObj = new(name);
             containerObj.transform.SetParent(parent, false);
 
             RectTransform containerRect = containerObj.AddComponent<RectTransform>();
@@ -58,7 +58,7 @@ namespace EfDEnhanced.Utils.UI.Components
             layout.padding = new RectOffset(8, 8, 2, 2);
 
             // 创建复选框
-            GameObject checkboxObj = new GameObject("Checkbox");
+            GameObject checkboxObj = new("Checkbox");
             checkboxObj.transform.SetParent(containerObj.transform, false);
 
             RectTransform checkboxRect = checkboxObj.AddComponent<RectTransform>();
@@ -78,7 +78,7 @@ namespace EfDEnhanced.Utils.UI.Components
             border.effectDistance = new Vector2(1.5f, -1.5f);
 
             // 创建勾选标记
-            GameObject checkmarkObj = new GameObject("Checkmark");
+            GameObject checkmarkObj = new("Checkmark");
             checkmarkObj.transform.SetParent(checkboxObj.transform, false);
 
             RectTransform checkmarkRect = checkmarkObj.AddComponent<RectTransform>();
@@ -96,7 +96,7 @@ namespace EfDEnhanced.Utils.UI.Components
             toggle.graphic = checkmarkImage;
 
             // 创建标签
-            GameObject labelObj = new GameObject("Label");
+            GameObject labelObj = new("Label");
             labelObj.transform.SetParent(containerObj.transform, false);
 
             LayoutElement labelLayout = labelObj.AddComponent<LayoutElement>();

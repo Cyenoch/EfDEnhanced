@@ -21,7 +21,7 @@ public class RaidEntryPatches
 {
     private static bool _isWaitingForConfirmation = false;
     private static bool _bypassCheck = false;
-    
+
     /// <summary>
     /// 在NotifyEntryClicked之前执行检查
     /// </summary>
@@ -32,7 +32,7 @@ public class RaidEntryPatches
             // 检查 loading 标志，防止重复点击
             var loadingField = typeof(MapSelectionView).GetField("loading",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            
+
             if (loadingField != null)
             {
                 bool loading = (bool)loadingField.GetValue(__instance);
@@ -42,14 +42,14 @@ public class RaidEntryPatches
                     return false;
                 }
             }
-            
+
             // 如果正在等待确认，阻止重复调用
             if (_isWaitingForConfirmation)
             {
                 ModLogger.Log("RaidCheck", "Already waiting for confirmation, blocking duplicate call");
                 return false;
             }
-            
+
             // 如果是用户确认后的调用，放行并重置标志
             if (_bypassCheck)
             {
@@ -57,31 +57,31 @@ public class RaidEntryPatches
                 _bypassCheck = false;
                 return true;
             }
-            
+
             // 获取目标场景ID
             string sceneID = mapSelectionEntry.SceneID;
-            
+
             // 判断该地图是否需要进行 Raid 检查（排除新手引导等）
             if (!RaidCheckUtility.ShouldCheckRaidMap(sceneID))
             {
                 ModLogger.Log("RaidCheck", $"Scene '{sceneID}' does not require raid check, allowing entry");
                 return true;
             }
-            
+
             // 执行检查，传入场景ID以便只检查该场景相关的任务
             ModLogger.Log("RaidCheck", $"Starting raid readiness check for scene: {sceneID}");
             var result = RaidCheckUtility.CheckPlayerReadiness(sceneID);
-            
+
             // 如果一切正常，直接放行
             if (result.IsReady)
             {
                 ModLogger.Log("RaidCheck", "All checks passed, allowing entry");
                 return true;
             }
-            
+
             // 有问题，启动异步确认流程
             ModLogger.Log("RaidCheck", $"Issues detected for scene {sceneID}, showing confirmation dialog");
-            
+
             // 立即设置 loading 标志，防止重复点击
             var loadingFieldSet = typeof(MapSelectionView).GetField("loading",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -90,9 +90,9 @@ public class RaidEntryPatches
                 loadingFieldSet.SetValue(__instance, true);
                 ModLogger.Log("RaidCheck", "Set loading flag to prevent duplicate clicks");
             }
-            
+
             HandleCheckFailure(__instance, mapSelectionEntry, result).Forget();
-            
+
             // 阻止原方法执行
             return false;
         }
@@ -103,7 +103,7 @@ public class RaidEntryPatches
             return true;
         }
     }
-    
+
     /// <summary>
     /// 处理检查失败的情况
     /// </summary>
@@ -115,7 +115,7 @@ public class RaidEntryPatches
         try
         {
             _isWaitingForConfirmation = true;
-            
+
             // 获取或创建准备界面
             var prepView = RaidPreparationView.Instance ?? RaidPreparationView.Create();
             if (prepView == null)
@@ -124,19 +124,19 @@ public class RaidEntryPatches
                 ResetLoadingFlag(view);
                 return;
             }
-            
+
             // 显示准备界面并等待用户选择
             ModLogger.Log("RaidCheck", "Showing RaidPreparationView...");
             bool shouldContinue = await prepView.ShowAndWaitForConfirmation(result);
             ModLogger.Log("RaidCheck", $"User confirmation result: {shouldContinue}");
-            
+
             if (shouldContinue)
             {
                 ModLogger.Log("RaidCheck", "User chose to continue despite warnings");
-                
+
                 // 设置绕过标志并调用原始方法
                 _bypassCheck = true;
-                
+
                 // 调用原始的 NotifyEntryClicked 逻辑
                 // 这次 Prefix 会因为 _bypassCheck = true 而放行
                 InvokeOriginalMethod(view, mapEntry);
@@ -161,7 +161,7 @@ public class RaidEntryPatches
             ModLogger.Log("RaidCheck", "HandleCheckFailure completed, waiting flag reset");
         }
     }
-    
+
     /// <summary>
     /// 重置 MapSelectionView 的 loading 标志
     /// </summary>
@@ -171,7 +171,7 @@ public class RaidEntryPatches
         {
             var loadingField = typeof(MapSelectionView).GetField("loading",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            
+
             if (loadingField != null)
             {
                 loadingField.SetValue(view, false);
@@ -183,7 +183,7 @@ public class RaidEntryPatches
             ModLogger.LogError($"Failed to reset loading flag: {ex}");
         }
     }
-    
+
     /// <summary>
     /// 调用原始的 NotifyEntryClicked 方法
     /// 通过重新调用方法，但这次 _bypassCheck 标志会让 Prefix 放行
@@ -193,29 +193,26 @@ public class RaidEntryPatches
         try
         {
             ModLogger.Log("RaidCheck", "Invoking original NotifyEntryClicked with bypass flag");
-            
+
             // 直接调用LoadTask方法
             var loadTaskMethod = typeof(MapSelectionView).GetMethod("LoadTask",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            
+
             if (loadTaskMethod != null)
             {
                 // 设置loading标志
                 var loadingField = typeof(MapSelectionView).GetField("loading",
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (loadingField != null)
-                {
-                    loadingField.SetValue(view, true);
-                }
-                
+                loadingField?.SetValue(view, true);
+
                 // 设置beacon index
                 LevelManager.loadLevelBeaconIndex = mapEntry.BeaconIndex;
-                
+
                 // 播放音效
                 AudioManager.Post("UI/confirm");
-                
+
                 // 调用LoadTask
-                var task = loadTaskMethod.Invoke(view, new object[] { mapEntry.SceneID, mapEntry.Cost });
+                var task = loadTaskMethod.Invoke(view, [mapEntry.SceneID, mapEntry.Cost]);
                 ModLogger.Log("RaidCheck", "Original method logic executed successfully");
             }
             else

@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Duckov.ItemUsage;
 using Duckov.Quests;
+using Duckov.Scenes;
 using Duckov.Weathers;
 using ItemStatsSystem;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace EfDEnhanced.Utils;
 
@@ -33,68 +35,68 @@ public class RaidCheckResult
     public bool HasFood { get; set; }
     public bool IsWeatherSafe { get; set; }
     public bool IsStormComing { get; set; }
-    public List<QuestItemRequirement> QuestItems { get; set; } = new List<QuestItemRequirement>();
-    
+    public List<QuestItemRequirement> QuestItems { get; set; } = [];
+
     /// <summary>
     /// 是否携带了所有任务物品
     /// </summary>
     public bool HasAllQuestItems => QuestItems.All(q => q.IsSatisfied);
-    
+
     /// <summary>
     /// 是否满足所有条件
     /// </summary>
     public bool IsReady => HasWeapon && HasAmmo && HasMedicine && HasFood && IsWeatherSafe && !IsStormComing && HasAllQuestItems;
-    
+
     /// <summary>
     /// 获取所有警告信息
     /// </summary>
     public List<string> GetWarnings()
     {
         var warnings = new List<string>();
-        
+
         if (!HasWeapon)
         {
             warnings.Add(LocalizationHelper.Get("Warning_NoWeapon"));
         }
-        
+
         if (!HasAmmo)
         {
             warnings.Add(LocalizationHelper.Get("Warning_NoAmmo"));
         }
-        
+
         if (!HasMedicine)
         {
             warnings.Add(LocalizationHelper.Get("Warning_NoMedicine"));
         }
-        
+
         if (!HasFood)
         {
             warnings.Add(LocalizationHelper.Get("Warning_NoFood"));
         }
-        
+
         if (!IsWeatherSafe)
         {
             warnings.Add(LocalizationHelper.Get("Warning_StormyWeather"));
         }
-        
+
         if (IsStormComing)
         {
             warnings.Add(LocalizationHelper.Get("Warning_StormComing"));
         }
-        
+
         // 添加任务物品警告
         foreach (var questItem in QuestItems.Where(q => !q.IsSatisfied))
         {
-            warnings.Add(LocalizationHelper.GetFormatted("Warning_QuestItem", 
-                questItem.ItemName, 
-                questItem.CurrentCount, 
-                questItem.RequiredCount, 
+            warnings.Add(LocalizationHelper.GetFormatted("Warning_QuestItem",
+                questItem.ItemName,
+                questItem.CurrentCount,
+                questItem.RequiredCount,
                 questItem.QuestName));
         }
-        
+
         return warnings;
     }
-    
+
     /// <summary>
     /// 获取格式化的警告文本
     /// </summary>
@@ -105,7 +107,7 @@ public class RaidCheckResult
         {
             return LocalizationHelper.Get("RaidCheck_AllClear");
         }
-        
+
         return LocalizationHelper.Get("RaidCheck_HasIssues") + "\n" + string.Join("\n", warnings);
     }
 }
@@ -119,8 +121,8 @@ public static class RaidCheckUtility
     /// 需要进行 Raid 检查的地图列表
     /// 排除新手引导关卡（Level_Guide_1, Level_Guide_2）
     /// </summary>
-    private static readonly HashSet<string> RaidMapsToCheck = new HashSet<string>
-    {
+    private static readonly HashSet<string> RaidMapsToCheck =
+    [
         // 农场系列
         "Level_Farm_Main",
         "Level_Farm_01",
@@ -153,8 +155,8 @@ public static class RaidCheckUtility
         "Level_StormZone_B2",
         "Level_StormZone_B3",
         "Level_StormZone_B4"
-    };
-    
+    ];
+
     /// <summary>
     /// 判断指定场景是否需要进行 Raid 检查
     /// </summary>
@@ -167,24 +169,24 @@ public static class RaidCheckUtility
             ModLogger.LogWarning("RaidCheck", "Scene ID is null or empty");
             return false;
         }
-        
+
         // 移除可能的路径前缀和.unity后缀
         var cleanSceneID = sceneID;
         if (cleanSceneID.Contains("/"))
         {
-            cleanSceneID = cleanSceneID.Substring(cleanSceneID.LastIndexOf('/') + 1);
+            cleanSceneID = cleanSceneID[(cleanSceneID.LastIndexOf('/') + 1)..];
         }
         if (cleanSceneID.EndsWith(".unity"))
         {
             cleanSceneID = cleanSceneID.Replace(".unity", "");
         }
-        
+
         bool shouldCheck = RaidMapsToCheck.Contains(cleanSceneID);
         ModLogger.Log("RaidCheck", $"Scene '{sceneID}' (cleaned: '{cleanSceneID}') should check: {shouldCheck}");
-        
+
         return shouldCheck;
     }
-    
+
     /// <summary>
     /// 检查玩家是否准备好进入Raid
     /// </summary>
@@ -233,7 +235,7 @@ public static class RaidCheckUtility
             HasFood = true,
             IsWeatherSafe = true,
             IsStormComing = false,
-            QuestItems = new List<QuestItemRequirement>()
+            QuestItems = []
         };
     }
 
@@ -245,7 +247,7 @@ public static class RaidCheckUtility
         var mainCharacter = LevelManager.Instance?.MainCharacter;
         var characterItem = mainCharacter?.CharacterItem;
         var inventory = characterItem?.Inventory;
-        
+
         return (inventory, characterItem);
     }
 
@@ -271,7 +273,7 @@ public static class RaidCheckUtility
     /// </summary>
     private static void LogCheckResult(RaidCheckResult result, string? targetSceneID)
     {
-        ModLogger.Log("RaidCheck", 
+        ModLogger.Log("RaidCheck",
             $"Check result for scene '{targetSceneID ?? "any"}' - " +
             $"Weapon: {result.HasWeapon}, " +
             $"Ammo: {result.HasAmmo}, " +
@@ -281,14 +283,14 @@ public static class RaidCheckUtility
             $"StormComing: {result.IsStormComing}, " +
             $"QuestItems: {result.QuestItems.Count}");
     }
-    
+
     /// <summary>
     /// 获取玩家所有物品（背包 + 装备栏）
     /// </summary>
     private static List<Item> GetAllPlayerItems(Inventory inventory, Item characterItem)
     {
         var allItems = new List<Item>();
-        
+
         // 防御性检查
         if (!ExceptionHelper.CheckNotNull(inventory, nameof(inventory), "GetAllPlayerItems") ||
             !ExceptionHelper.CheckNotNull(characterItem, nameof(characterItem), "GetAllPlayerItems"))
@@ -306,11 +308,11 @@ public static class RaidCheckUtility
                     allItems.Add(item);
                 }
             }
-            
+
             // 添加装备栏中的物品
             // 装备栏slot哈希值来自 CharacterEquipmentController
-            int[] equipmentSlotHashes = new int[]
-            {
+            int[] equipmentSlotHashes =
+            [
                 "Armor".GetHashCode(),      // 护甲
                 "Helmat".GetHashCode(),     // 头盔
                 "FaceMask".GetHashCode(),   // 面罩
@@ -319,8 +321,8 @@ public static class RaidCheckUtility
                 "PrimaryWeapon".GetHashCode(),   // 主武器
                 "SecondaryWeapon".GetHashCode(), // 副武器
                 "MeleeWeapon".GetHashCode()      // 近战武器
-            };
-            
+            ];
+
             foreach (var slotHash in equipmentSlotHashes)
             {
                 ExceptionHelper.SafeExecute(() =>
@@ -333,13 +335,13 @@ public static class RaidCheckUtility
                     }
                 }, $"CheckEquipmentSlot_{slotHash}");
             }
-            
+
             ModLogger.Log("RaidCheck", $"Total items checked: {allItems.Count} (inventory + equipment)");
         }, "GetAllPlayerItems");
-        
+
         return allItems;
     }
-    
+
     /// <summary>
     /// 检查是否携带枪支
     /// 使用游戏官方标准：检查 IsGun 布尔标志
@@ -351,7 +353,7 @@ public static class RaidCheckUtility
             foreach (var item in allItems)
             {
                 if (item == null) continue;
-                
+
                 // 游戏官方方式：检查 IsGun 标志（由 ItemSetting_Gun.SetMarkerParam 设置）
                 if (item.GetBool("IsGun", false))
                 {
@@ -359,11 +361,11 @@ public static class RaidCheckUtility
                     return true;
                 }
             }
-            
+
             return false;
         }, "HasWeapon", true); // 出错时假设有武器
     }
-    
+
     /// <summary>
     /// 检查是否携带弹药（包括背包中的额外弹药）
     /// 使用游戏官方标准：检查 IsBullet 布尔标志
@@ -375,7 +377,7 @@ public static class RaidCheckUtility
             foreach (var item in allItems)
             {
                 if (item == null) continue;
-                
+
                 // 游戏官方方式：检查 IsBullet 标志（由 ItemSetting_Bullet.SetMarkerParam 设置）
                 if (item.GetBool("IsBullet", false))
                 {
@@ -383,11 +385,11 @@ public static class RaidCheckUtility
                     return true;
                 }
             }
-            
+
             return false;
         }, "HasAmmo", true); // 出错时假设有弹药
     }
-    
+
     /// <summary>
     /// 检查是否携带药品
     /// 使用游戏官方标准：检查 UsageUtilities 中的 Drug 组件
@@ -399,7 +401,7 @@ public static class RaidCheckUtility
             foreach (var item in allItems)
             {
                 if (item == null) continue;
-                
+
                 // 游戏官方方式：检查UsageUtilities中是否有Drug类型
                 if (item.UsageUtilities?.behaviors != null)
                 {
@@ -413,7 +415,7 @@ public static class RaidCheckUtility
                     }
                 }
             }
-            
+
             return false;
         }
         catch (Exception ex)
@@ -422,7 +424,7 @@ public static class RaidCheckUtility
             return true; // 出错时假设有药品
         }
     }
-    
+
     /// <summary>
     /// 检查是否携带食物
     /// 使用游戏官方标准：检查 UsageUtilities 中的 FoodDrink 组件
@@ -434,7 +436,7 @@ public static class RaidCheckUtility
             foreach (var item in allItems)
             {
                 if (item == null) continue;
-                
+
                 // 游戏官方方式：检查UsageUtilities中是否有FoodDrink类型
                 if (item.UsageUtilities?.behaviors != null)
                 {
@@ -448,7 +450,7 @@ public static class RaidCheckUtility
                     }
                 }
             }
-            
+
             return false;
         }
         catch (Exception ex)
@@ -457,19 +459,27 @@ public static class RaidCheckUtility
             return true; // 出错时假设有食物
         }
     }
-    
+
     /// <summary>
     /// 检查天气是否安全（非风暴）
+    /// 如果当前已在raid地图且正处于风暴中，则不检测风暴（已经在里面了）
     /// </summary>
     private static bool IsWeatherSafe()
     {
         try
         {
+            // 如果已在raid地图且处于风暴中，不检测风暴
+            if (IsInRaidMapDuringStorm())
+            {
+                ModLogger.Log("RaidCheck", "Already in raid map during storm, skipping weather check");
+                return true;
+            }
+
             Weather currentWeather = WeatherManager.GetWeather();
             bool isSafe = currentWeather != Weather.Stormy_I && currentWeather != Weather.Stormy_II;
-            
+
             ModLogger.Log("RaidCheck", $"Current weather: {currentWeather}, Safe: {isSafe}");
-            
+
             return isSafe;
         }
         catch (Exception ex)
@@ -478,28 +488,36 @@ public static class RaidCheckUtility
             return true; // 出错时假设天气安全
         }
     }
-    
+
     /// <summary>
     /// 检查风暴是否即将来临（24小时内）
+    /// 如果当前已在raid地图且正处于风暴中，则不检测风暴预警（已经在里面了）
     /// </summary>
     private static bool IsStormComingSoon()
     {
         try
         {
+            // 如果已在raid地图且处于风暴中，不检测风暴预警
+            if (IsInRaidMapDuringStorm())
+            {
+                ModLogger.Log("RaidCheck", "Already in raid map during storm, skipping storm warning check");
+                return false;
+            }
+
             Weather currentWeather = WeatherManager.GetWeather();
-            
+
             // 如果已经在风暴中，不需要再警告"即将来临"
             if (currentWeather == Weather.Stormy_I || currentWeather == Weather.Stormy_II)
             {
                 return false;
             }
-            
+
             // 获取风暴到达时间（ETA）
             var stormETA = WeatherManager.Instance.Storm.GetStormETA(GameClock.Now);
             bool isComingSoon = stormETA.TotalHours < 24.0 && stormETA.TotalHours > 0;
-            
+
             ModLogger.Log("RaidCheck", $"Storm ETA: {stormETA.TotalHours:F2} hours, Coming soon: {isComingSoon}");
-            
+
             return isComingSoon;
         }
         catch (Exception ex)
@@ -508,16 +526,16 @@ public static class RaidCheckUtility
             return false; // 出错时假设风暴不会来临
         }
     }
-    
+
     /// <summary>
     /// 检查活跃任务所需的物品
     /// 这些是任务要求玩家携带到 Raid 中的物品（Quest.RequiredItemID）
     /// </summary>
     /// <param name="targetSceneID">目标场景ID（可选，如果提供则只检查该场景相关的任务）</param>
-    private static List<QuestItemRequirement> CheckQuestItems(string targetSceneID = null)
+    private static List<QuestItemRequirement> CheckQuestItems(string? targetSceneID = null)
     {
         var questItems = new List<QuestItemRequirement>();
-        
+
         try
         {
             // 检查 QuestManager 是否存在
@@ -526,16 +544,16 @@ public static class RaidCheckUtility
                 ModLogger.LogWarning("QuestCheck", "QuestManager.Instance is null");
                 return questItems;
             }
-            
+
             var activeQuests = QuestManager.Instance.ActiveQuests;
             if (activeQuests == null || activeQuests.Count == 0)
             {
                 ModLogger.Log("QuestCheck", "No active quests found");
                 return questItems;
             }
-            
+
             ModLogger.Log("QuestCheck", $"Found {activeQuests.Count} active quests, filtering for scene: '{targetSceneID ?? "any"}'");
-            
+
             // 遍历所有活跃任务
             foreach (var quest in activeQuests)
             {
@@ -543,13 +561,13 @@ public static class RaidCheckUtility
                 {
                     continue;
                 }
-                
+
                 // 如果任务已完成，跳过
                 if (quest.Complete)
                 {
                     continue;
                 }
-                
+
                 try
                 {
                     // 如果提供了目标场景ID，检查任务是否属于该场景
@@ -557,7 +575,7 @@ public static class RaidCheckUtility
                     {
                         // 获取任务的场景信息
                         var questSceneInfo = quest.RequireSceneInfo;
-                        
+
                         // 如果任务指定了特定场景要求
                         if (questSceneInfo != null && !string.IsNullOrEmpty(questSceneInfo.ID))
                         {
@@ -578,27 +596,27 @@ public static class RaidCheckUtility
                             ModLogger.Log("QuestCheck", $"Checking quest '{quest.DisplayName}' - no scene requirement (can be done in any map)");
                         }
                     }
-                    
+
                     // 检查任务的 RequiredItemID（任务要求携带的物品）
                     int itemTypeID = quest.RequiredItemID;
                     int requiredCount = quest.RequiredItemCount;
-                    
+
                     // 如果任务没有要求携带物品，跳过
                     if (itemTypeID <= 0 || requiredCount <= 0)
                     {
                         continue;
                     }
-                    
+
                     var itemMeta = ItemAssetsCollection.GetMetaData(itemTypeID);
                     if (itemMeta.id == 0)
                     {
                         ModLogger.LogWarning("QuestCheck", $"Item metadata not found for ID: {itemTypeID}");
                         continue;
                     }
-                    
+
                     // 使用游戏的官方方法获取物品数量（包括背包、仓库等所有位置）
                     int currentCount = ItemUtilities.GetItemCount(itemTypeID);
-                    
+
                     var requirement = new QuestItemRequirement
                     {
                         QuestName = quest.DisplayName,
@@ -607,9 +625,9 @@ public static class RaidCheckUtility
                         RequiredCount = requiredCount,
                         CurrentCount = currentCount
                     };
-                    
+
                     questItems.Add(requirement);
-                    
+
                     string status = requirement.IsSatisfied ? "✓" : "✗";
                     ModLogger.Log("QuestCheck", $"{status} Quest: {quest.DisplayName}, Item: {itemMeta.DisplayName}, Required: {requiredCount}, Current: {currentCount}");
                 }
@@ -618,15 +636,49 @@ public static class RaidCheckUtility
                     ModLogger.LogError($"Failed to check quest {quest.DisplayName}: {questEx.Message}");
                 }
             }
-            
+
             ModLogger.Log("QuestCheck", $"Total quest items to check for scene '{targetSceneID ?? "any"}': {questItems.Count}");
         }
         catch (Exception ex)
         {
             ModLogger.LogError($"CheckQuestItems failed: {ex}");
         }
-        
+
         return questItems;
+    }
+
+    /// <summary>
+    /// 检查是否当前在raid地图内且处于风暴中
+    /// </summary>
+    private static bool IsInRaidMapDuringStorm()
+    {
+        try
+        {
+            // 检查是否处于风暴
+            Weather currentWeather = WeatherManager.GetWeather();
+            if (currentWeather != Weather.Stormy_I && currentWeather != Weather.Stormy_II)
+            {
+                return false; // 不处于风暴
+            }
+
+            // 检查当前场景是否是raid地图
+            // Scene currentScene = SceneManager.GetActiveScene();
+            string currentSceneName = MultiSceneCore.MainSceneID;
+
+            // 使用现有的方法检查是否是raid地图
+            if (ShouldCheckRaidMap(currentSceneName))
+            {
+                ModLogger.Log("RaidCheck", $"Currently in raid map '{currentSceneName}' during storm");
+                return true;
+            }
+
+            return false;
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"IsInRaidMapDuringStorm check failed: {ex}");
+            return false; // 出错时假设不在raid地图
+        }
     }
 }
 

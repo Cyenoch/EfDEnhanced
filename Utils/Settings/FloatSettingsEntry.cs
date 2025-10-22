@@ -5,44 +5,33 @@ namespace EfDEnhanced.Utils.Settings
     /// <summary>
     /// Float settings entry
     /// </summary>
-    public class FloatSettingsEntry : SettingsEntry<float>
+    public class FloatSettingsEntry(
+        string prefix,
+        string key,
+        string name,
+        float defaultValue,
+        string category = "General",
+        string? description = null,
+        int version = 1) : SettingsEntry<float>(prefix, key, name, defaultValue, category, description, version)
     {
-        public FloatSettingsEntry(
-            string prefix,
-            string key,
-            string name,
-            float defaultValue,
-            string category = "General",
-            string? description = null,
-            int version = 1)
-            : base(prefix, key, name, defaultValue, category, description, version)
-        {
-        }
     }
 
     /// <summary>
     /// Float settings entry with range constraints
     /// </summary>
-    public class RangedFloatSettingsEntry : FloatSettingsEntry
+    public class RangedFloatSettingsEntry(
+        string prefix,
+        string key,
+        string name,
+        float defaultValue,
+        float minValue,
+        float maxValue,
+        string category = "General",
+        string? description = null,
+        int version = 1) : FloatSettingsEntry(prefix, key, name, defaultValue, category, description, version)
     {
-        public float MinValue { get; }
-        public float MaxValue { get; }
-
-        public RangedFloatSettingsEntry(
-            string prefix,
-            string key,
-            string name,
-            float defaultValue,
-            float minValue,
-            float maxValue,
-            string category = "General",
-            string? description = null,
-            int version = 1)
-            : base(prefix, key, name, defaultValue, category, description, version)
-        {
-            MinValue = minValue;
-            MaxValue = maxValue;
-        }
+        public float MinValue { get; } = minValue;
+        public float MaxValue { get; } = maxValue;
 
         protected override bool Validate(float value)
         {

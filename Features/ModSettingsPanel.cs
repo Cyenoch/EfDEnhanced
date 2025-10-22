@@ -54,22 +54,22 @@ namespace EfDEnhanced.Features
 
                 // Setup canvas components
                 SetupCanvas();
-                
+
                 // Create background
                 CreateBackground();
-                
+
                 // Create content panel
                 CreateContentPanel();
-                
+
                 // Create header
                 CreateHeader();
-                
+
                 // Create scroll view and build form
                 CreateScrollViewAndBuildForm();
-                
+
                 // Create footer with buttons
                 CreateFooter();
-                
+
                 // Start hidden
                 if (_canvasGroup != null)
                 {
@@ -158,8 +158,8 @@ namespace EfDEnhanced.Features
             var headerRect = header.AddComponent<RectTransform>();
             headerRect.anchorMin = new Vector2(0, 1);
             headerRect.anchorMax = new Vector2(1, 1);
-            headerRect.sizeDelta = new Vector2(0, 80);
-            headerRect.anchoredPosition = new Vector2(0, -40);
+            headerRect.sizeDelta = new Vector2(0, 60);
+            headerRect.anchoredPosition = new Vector2(0, -30);
 
             var title = new GameObject("Title");
             title.transform.SetParent(header.transform, false);
@@ -188,8 +188,8 @@ namespace EfDEnhanced.Features
             var scrollRect = scrollViewObj.AddComponent<RectTransform>();
             scrollRect.anchorMin = new Vector2(0, 0);
             scrollRect.anchorMax = new Vector2(1, 1);
-            scrollRect.offsetMin = new Vector2(20, 100); // Leave space for footer
-            scrollRect.offsetMax = new Vector2(-20, -100); // Leave space for header
+            scrollRect.offsetMin = new Vector2(15, 70); // Leave space for footer
+            scrollRect.offsetMax = new Vector2(-15, -70); // Leave space for header
 
             var scrollView = scrollViewObj.AddComponent<ScrollRect>();
 
@@ -223,7 +223,7 @@ namespace EfDEnhanced.Features
             layoutGroup.childForceExpandWidth = true;
             layoutGroup.childForceExpandHeight = false;
             layoutGroup.spacing = UIConstants.SETTINGS_ENTRY_SPACING;
-            layoutGroup.padding = new RectOffset(0, 0, 0, 20); // 只在底部添加padding
+            layoutGroup.padding = new RectOffset(0, 0, 0, 10); // 只在底部添加padding
 
             // Add ContentSizeFitter to automatically adjust content height
             var sizeFitter = content.AddComponent<ContentSizeFitter>();
@@ -257,6 +257,11 @@ namespace EfDEnhanced.Features
 
                 // Build the form using our elegant builder pattern
                 _formBuilder
+                    // UI Enhancement Section
+                    .AddSection("Settings_Category_UI")
+                    .AddToggle("Settings_EnableWeaponComparison_Name", ModSettings.EnableWeaponComparison)
+                    .AddSpacer()
+
                     // Pre-Raid Check Section
                     .AddSection("Settings_Category_PreRaidCheck")
                     .AddToggle("Settings_EnableRaidCheck_Name", ModSettings.EnableRaidCheck)
@@ -266,16 +271,17 @@ namespace EfDEnhanced.Features
                     .AddToggle("Settings_CheckFood_Name", ModSettings.CheckFood, ModSettings.EnableRaidCheck, 30)
                     .AddToggle("Settings_CheckWeather_Name", ModSettings.CheckWeather, ModSettings.EnableRaidCheck, 30)
                     .AddSpacer()
-                    
+
                     // Movement Enhancement Section
                     .AddSection("Settings_Category_Movement")
                     .AddDropdown("Settings_MovementEnhancement_Name", ModSettings.MovementEnhancement)
                     .AddSpacer()
-                    
+
                     // Quest Tracker Section
                     .AddSection("Settings_Category_QuestTracker")
                     .AddToggle("Settings_EnableQuestTracker_Name", ModSettings.EnableQuestTracker)
                     .AddToggle("Settings_TrackerShowDescription_Name", ModSettings.TrackerShowDescription, ModSettings.EnableQuestTracker, 30)
+                    .AddToggle("Settings_TrackerFilterByMap_Name", ModSettings.TrackerFilterByMap, ModSettings.EnableQuestTracker, 30)
                     .AddSlider("Settings_TrackerPositionX_Name", 0f, 1f, ModSettings.TrackerPositionX, visibilityCondition: ModSettings.EnableQuestTracker, leftPadding: 30)
                     .AddSlider("Settings_TrackerPositionY_Name", 0f, 1f, ModSettings.TrackerPositionY, visibilityCondition: ModSettings.EnableQuestTracker, leftPadding: 30)
                     .AddSlider("Settings_TrackerScale_Name", 0.5f, 2f, ModSettings.TrackerScale, visibilityCondition: ModSettings.EnableQuestTracker, leftPadding: 30);
@@ -298,14 +304,14 @@ namespace EfDEnhanced.Features
             var footerRect = footer.AddComponent<RectTransform>();
             footerRect.anchorMin = new Vector2(0, 0);
             footerRect.anchorMax = new Vector2(1, 0);
-            footerRect.sizeDelta = new Vector2(0, 80);
-            footerRect.anchoredPosition = new Vector2(0, 40);
+            footerRect.sizeDelta = new Vector2(0, 60);
+            footerRect.anchoredPosition = new Vector2(0, 30);
 
             var layout = footer.AddComponent<HorizontalLayoutGroup>();
             layout.childAlignment = TextAnchor.MiddleCenter;
             layout.childControlWidth = false;
             layout.childForceExpandWidth = false;
-            layout.spacing = 24;
+            layout.spacing = 20;
 
             // Spacer
             var spacer1 = new GameObject("Spacer1");
