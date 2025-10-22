@@ -60,6 +60,10 @@ public class ActiveQuestTracker : MonoBehaviour
         {
             _instance = this;
             DontDestroyOnLoad(gameObject);
+            
+            // 订阅追踪状态变化事件（始终订阅，无论是否在 Raid 中）
+            QuestTrackingManager.OnTrackingChanged += OnQuestTrackingChanged;
+            ModLogger.Log("QuestTracker", "Subscribed to tracking changes in Awake");
         }
         else if (_instance != this)
         {
@@ -74,6 +78,9 @@ public class ActiveQuestTracker : MonoBehaviour
             _instance = null;
         }
 
+        // 取消订阅追踪状态变化事件
+        QuestTrackingManager.OnTrackingChanged -= OnQuestTrackingChanged;
+        
         // 取消订阅所有事件
         UnregisterEvents();
     }
@@ -224,8 +231,7 @@ public class ActiveQuestTracker : MonoBehaviour
     {
         try
         {
-            // 追踪状态变化（手动勾选/取消追踪）
-            QuestTrackingManager.OnTrackingChanged += OnQuestTrackingChanged;
+            // 注意：OnTrackingChanged 在 Awake 时已经订阅，这里不再重复订阅
 
             // 任务列表变化（新任务、任务完成等）
             QuestManager.onQuestListsChanged += OnQuestListsChanged;
@@ -255,7 +261,7 @@ public class ActiveQuestTracker : MonoBehaviour
     {
         try
         {
-            QuestTrackingManager.OnTrackingChanged -= OnQuestTrackingChanged;
+            // 注意：OnTrackingChanged 在 OnDestroy 时取消订阅，这里不处理
             QuestManager.onQuestListsChanged -= OnQuestListsChanged;
             Quest.onQuestStatusChanged -= OnQuestStatusChanged;
             Quest.onQuestCompleted -= OnQuestCompleted;
@@ -649,13 +655,14 @@ public class ActiveQuestTracker : MonoBehaviour
     {
         try
         {
-            if (!_isActive)
+            // 移除 _isActive 检查，因为玩家可能在局外勾选任务
+            // 如果当前在 Raid 中，立即刷新列表；否则，下次进入 Raid 时会自动加载
+            ModLogger.Log("QuestTracker", $"Quest {questId} tracking changed to {isTracked}, active={_isActive}");
+            
+            if (_isActive)
             {
-                return;
+                RefreshQuestList();
             }
-
-            ModLogger.Log("QuestTracker", $"Quest {questId} tracking changed to {isTracked}");
-            RefreshQuestList();
         }
         catch (Exception ex)
         {
