@@ -25,6 +25,17 @@ public class QuestItemRequirement
 }
 
 /// <summary>
+/// 武器弹药不足警告
+/// </summary>
+public class LowAmmoWarning
+{
+    public string WeaponName { get; set; } = string.Empty;
+    public string AmmoCaliber { get; set; } = string.Empty;
+    public int CurrentAmmoCount { get; set; }
+    public int MagazineCapacity { get; set; }
+}
+
+/// <summary>
 /// 检查结果数据结构
 /// </summary>
 public class RaidCheckResult
@@ -36,6 +47,7 @@ public class RaidCheckResult
     public bool IsWeatherSafe { get; set; }
     public bool IsStormComing { get; set; }
     public List<QuestItemRequirement> QuestItems { get; set; } = [];
+    public List<LowAmmoWarning> LowAmmoWarnings { get; set; } = [];
 
     /// <summary>
     /// 是否携带了所有任务物品
@@ -43,9 +55,14 @@ public class RaidCheckResult
     public bool HasAllQuestItems => QuestItems.All(q => q.IsSatisfied);
 
     /// <summary>
+    /// 是否有低弹药警告
+    /// </summary>
+    public bool HasLowAmmoWarnings => LowAmmoWarnings.Count > 0;
+
+    /// <summary>
     /// 是否满足所有条件
     /// </summary>
-    public bool IsReady => HasWeapon && HasAmmo && HasMedicine && HasFood && IsWeatherSafe && !IsStormComing && HasAllQuestItems;
+    public bool IsReady => HasWeapon && HasAmmo && HasMedicine && HasFood && IsWeatherSafe && !IsStormComing && HasAllQuestItems && !HasLowAmmoWarnings;
 
     /// <summary>
     /// 获取所有警告信息
@@ -92,6 +109,16 @@ public class RaidCheckResult
                 questItem.CurrentCount,
                 questItem.RequiredCount,
                 questItem.QuestName));
+        }
+
+        // 添加低弹药警告
+        foreach (var lowAmmoWarning in LowAmmoWarnings)
+        {
+            warnings.Add(LocalizationHelper.GetFormatted("Warning_LowAmmo",
+                lowAmmoWarning.WeaponName,
+                lowAmmoWarning.AmmoCaliber,
+                lowAmmoWarning.CurrentAmmoCount,
+                lowAmmoWarning.MagazineCapacity));
         }
 
         return warnings;
@@ -203,15 +230,15 @@ public static class RaidCheckUtility
             }
 
             // 获取玩家数据
-            var (inventory, characterItem) = GetPlayerInventoryAndCharacter();
-            if (inventory == null || characterItem == null)
+            var (inventory, characterItem, petInventory) = GetPlayerInventoryAndCharacter();
+            if (inventory == null || characterItem == null || petInventory == null)
             {
                 ModLogger.LogWarning("RaidCheck", "Player character data unavailable, skipping check");
                 return CreatePassedResult();
             }
 
             // 收集所有物品：背包 + 装备栏
-            var allItems = GetAllPlayerItems(inventory, characterItem);
+            var allItems = GetAllPlayerItems(inventory, characterItem, petInventory);
 
             // 执行所有检查项
             var result = PerformAllChecks(allItems, targetSceneID);
@@ -235,20 +262,22 @@ public static class RaidCheckUtility
             HasFood = true,
             IsWeatherSafe = true,
             IsStormComing = false,
-            QuestItems = []
+            QuestItems = [],
+            LowAmmoWarnings = []
         };
     }
 
     /// <summary>
     /// 获取玩家背包和角色物品
     /// </summary>
-    private static (Inventory? inventory, Item? characterItem) GetPlayerInventoryAndCharacter()
+    private static (Inventory? inventory, Item? characterItem, Inventory? petInventory) GetPlayerInventoryAndCharacter()
     {
         var mainCharacter = LevelManager.Instance?.MainCharacter;
         var characterItem = mainCharacter?.CharacterItem;
         var inventory = characterItem?.Inventory;
+        var petInventory = PetProxy.PetInventory;
 
-        return (inventory, characterItem);
+        return (inventory, characterItem, petInventory);
     }
 
     /// <summary>
@@ -264,7 +293,8 @@ public static class RaidCheckUtility
             HasFood = !ModSettings.CheckFood.Value || HasFoodItems(allItems),
             IsWeatherSafe = !ModSettings.CheckWeather.Value || IsWeatherSafe(),
             IsStormComing = ModSettings.CheckWeather.Value && IsStormComingSoon(),
-            QuestItems = CheckQuestItems(targetSceneID)
+            QuestItems = CheckQuestItems(targetSceneID),
+            LowAmmoWarnings = ModSettings.CheckAmmo.Value ? CheckWeaponAmmoSufficiency() : []
         };
     }
 
@@ -287,13 +317,14 @@ public static class RaidCheckUtility
     /// <summary>
     /// 获取玩家所有物品（背包 + 装备栏）
     /// </summary>
-    private static List<Item> GetAllPlayerItems(Inventory inventory, Item characterItem)
+    private static List<Item> GetAllPlayerItems(Inventory inventory, Item characterItem, Inventory petInventory)
     {
         var allItems = new List<Item>();
 
         // 防御性检查
         if (!ExceptionHelper.CheckNotNull(inventory, nameof(inventory), "GetAllPlayerItems") ||
-            !ExceptionHelper.CheckNotNull(characterItem, nameof(characterItem), "GetAllPlayerItems"))
+            !ExceptionHelper.CheckNotNull(characterItem, nameof(characterItem), "GetAllPlayerItems") ||
+            !ExceptionHelper.CheckNotNull(petInventory, nameof(petInventory), "GetAllPlayerItems"))
         {
             return allItems;
         }
@@ -336,7 +367,16 @@ public static class RaidCheckUtility
                 }, $"CheckEquipmentSlot_{slotHash}");
             }
 
-            ModLogger.Log("RaidCheck", $"Total items checked: {allItems.Count} (inventory + equipment)");
+            // 添加宠物背包中的物品
+            foreach (var item in petInventory)
+            {
+                if (item != null)
+                {
+                    allItems.Add(item);
+                }
+            }
+
+            ModLogger.Log("RaidCheck", $"Total items checked: {allItems.Count} (inventory + equipment + pet)");
         }, "GetAllPlayerItems");
 
         return allItems;
@@ -614,8 +654,8 @@ public static class RaidCheckUtility
                         continue;
                     }
 
-                    // 使用游戏的官方方法获取物品数量（包括背包、仓库等所有位置）
-                    int currentCount = ItemUtilities.GetItemCount(itemTypeID);
+                    // 只计算玩家当前携带的物品数量（背包+装备），不包括仓库
+                    int currentCount = CountItemInPlayerInventory(itemTypeID);
 
                     var requirement = new QuestItemRequirement
                     {
@@ -645,6 +685,95 @@ public static class RaidCheckUtility
         }
 
         return questItems;
+    }
+
+    /// <summary>
+    /// 计算玩家背包、装备栏和宠物身上特定物品的数量（不包括仓库）
+    /// 使用游戏内置的方法来判断物品位置
+    /// </summary>
+    /// <param name="itemTypeID">物品类型ID</param>
+    /// <returns>玩家和宠物当前携带的物品数量</returns>
+    private static int CountItemInPlayerInventory(int itemTypeID)
+    {
+        try
+        {
+            // 使用游戏内置方法查找所有该类型的物品（包括所有位置：仓库、角色、宠物等）
+            var allItemsOfType = ItemUtilities.FindAllBelongsToPlayer(item => 
+                item != null && item.TypeID == itemTypeID);
+            
+            if (allItemsOfType == null || allItemsOfType.Count == 0)
+            {
+                ModLogger.Log("QuestCheck", $"No items of type {itemTypeID} found anywhere");
+                return 0;
+            }
+
+            int count = 0;
+
+            // 计算在玩家角色和宠物身上的物品（排除仓库）
+            foreach (var item in allItemsOfType)
+            {
+                if (item == null) continue;
+
+                // 首先排除仓库中的物品
+                if (item.IsInPlayerStorage())
+                {
+                    ModLogger.Log("QuestCheck", $"Item {item.DisplayName} is in storage, skipping");
+                    continue;
+                }
+
+                // 检查是否在玩家角色身上
+                bool isOnCharacter = item.IsInPlayerCharacter();
+                
+                // 检查是否在宠物身上
+                bool isOnPet = IsItemInPet(item);
+
+                if (isOnCharacter || isOnPet)
+                {
+                    // 使用 StackCount 属性获取堆叠数量
+                    int stackCount = item.StackCount;
+                    count += Math.Max(1, stackCount); // 至少算1个
+                    
+                    string location = isOnCharacter ? "character" : "pet";
+                    ModLogger.Log("QuestCheck", $"Found item on {location}: {item.DisplayName} (stack: {stackCount})");
+                }
+                else
+                {
+                    ModLogger.Log("QuestCheck", $"Item {item.DisplayName} found in unknown location, skipping");
+                }
+            }
+
+            ModLogger.Log("QuestCheck", $"Total found {count} of item type {itemTypeID} on player character and pet");
+            return count;
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"CountItemInPlayerInventory failed: {ex}");
+            return 0;
+        }
+    }
+
+    /// <summary>
+    /// 检查物品是否在宠物身上
+    /// </summary>
+    private static bool IsItemInPet(Item item)
+    {
+        try
+        {
+            // 获取宠物的 Inventory
+            var petInventory = PetProxy.PetInventory;
+            if (petInventory == null)
+            {
+                return false;
+            }
+
+            // 检查物品的所有父级中是否有在宠物 Inventory 中的
+            return item.GetAllParents().Any(e => e.InInventory == petInventory);
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"IsItemInPet check failed: {ex}");
+            return false;
+        }
     }
 
     /// <summary>
@@ -679,6 +808,257 @@ public static class RaidCheckUtility
             ModLogger.LogError($"IsInRaidMapDuringStorm check failed: {ex}");
             return false; // 出错时假设不在raid地图
         }
+    }
+
+    /// <summary>
+    /// 检查武器弹药是否充足
+    /// 对于每把枪，检查玩家携带的对应口径弹药总数（包括装载在武器中的）是否小于一个弹匣容量
+    /// </summary>
+    private static List<LowAmmoWarning> CheckWeaponAmmoSufficiency()
+    {
+        var warnings = new List<LowAmmoWarning>();
+
+        return ExceptionHelper.SafeExecute(() =>
+        {
+            // 获取玩家角色和背包
+            var (inventory, characterItem, petInventory) = GetPlayerInventoryAndCharacter();
+            if (inventory == null || characterItem == null || petInventory == null)
+            {
+                ModLogger.LogWarning("AmmoCheck", "Player character data unavailable");
+                return warnings;
+            }
+
+            // 获取所有玩家物品（背包 + 装备 + 宠物）
+            var allItems = GetAllPlayerItems(inventory, characterItem, petInventory);
+
+            // 获取玩家携带的所有枪支
+            var guns = GetAllPlayerGuns(allItems);
+            
+            ModLogger.Log("AmmoCheck", $"Found {guns.Count} guns to check");
+
+            // 对于每把枪，检查弹药是否充足
+            foreach (var gun in guns)
+            {
+                ExceptionHelper.SafeExecute(() =>
+                {
+                    CheckSingleGunAmmo(gun, allItems, warnings);
+                }, $"CheckAmmoForGun_{gun.DisplayName}");
+            }
+
+            ModLogger.Log("AmmoCheck", $"Generated {warnings.Count} low ammo warnings");
+            return warnings;
+        }, "CheckWeaponAmmoSufficiency", warnings);
+    }
+
+    /// <summary>
+    /// 获取玩家携带的所有枪支（从背包、装备栏、宠物）
+    /// </summary>
+    private static List<Item> GetAllPlayerGuns(List<Item> allItems)
+    {
+        var guns = new List<Item>();
+
+        try
+        {
+            foreach (var item in allItems)
+            {
+                if (item == null) continue;
+
+                // 使用游戏官方标准：检查 IsGun 标志
+                if (item.GetBool("IsGun", false))
+                {
+                    guns.Add(item);
+                    ModLogger.Log("AmmoCheck", $"Found gun: {item.DisplayName}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"GetAllPlayerGuns failed: {ex}");
+        }
+
+        return guns;
+    }
+
+    /// <summary>
+    /// 检查单把枪的弹药是否充足
+    /// </summary>
+    private static void CheckSingleGunAmmo(Item gun, List<Item> allItems, List<LowAmmoWarning> warnings)
+    {
+        try
+        {
+            // 获取枪支的设置组件
+            var gunSetting = gun.GetComponent<ItemSetting_Gun>();
+            if (gunSetting == null)
+            {
+                ModLogger.LogWarning("AmmoCheck", $"Gun {gun.DisplayName} has no ItemSetting_Gun component");
+                return;
+            }
+
+            // 获取弹匣容量
+            int magazineCapacity = gunSetting.Capacity;
+            if (magazineCapacity <= 0)
+            {
+                ModLogger.Log("AmmoCheck", $"Gun {gun.DisplayName} has invalid capacity: {magazineCapacity}");
+                return;
+            }
+
+            // 获取枪支的口径
+            var caliberHash = "Caliber".GetHashCode();
+            string gunCaliber = gun.Constants.GetString(caliberHash);
+            
+            if (string.IsNullOrEmpty(gunCaliber))
+            {
+                ModLogger.LogWarning("AmmoCheck", $"Gun {gun.DisplayName} has no caliber info");
+                return;
+            }
+
+            ModLogger.Log("AmmoCheck", $"Checking gun: {gun.DisplayName}, Caliber: {gunCaliber}, Capacity: {magazineCapacity}");
+
+            // 统计玩家携带的该口径弹药总数
+            int totalAmmoCount = CountAmmoForCaliber(gunCaliber, allItems, gun);
+
+            ModLogger.Log("AmmoCheck", $"Gun {gun.DisplayName}: Found {totalAmmoCount} ammo vs capacity {magazineCapacity}");
+
+            // 如果弹药总数小于弹匣容量，生成警告
+            if (totalAmmoCount < magazineCapacity)
+            {
+                warnings.Add(new LowAmmoWarning
+                {
+                    WeaponName = gun.DisplayName,
+                    AmmoCaliber = gunCaliber,
+                    CurrentAmmoCount = totalAmmoCount,
+                    MagazineCapacity = magazineCapacity
+                });
+
+                ModLogger.LogWarning("AmmoCheck", 
+                    $"LOW AMMO: {gun.DisplayName} ({gunCaliber}) - {totalAmmoCount}/{magazineCapacity}");
+            }
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"CheckSingleGunAmmo failed for {gun?.DisplayName ?? "unknown"}: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// 统计玩家携带的特定口径弹药总数（包括背包、装备、宠物、以及装载在所有武器中的）
+    /// </summary>
+    private static int CountAmmoForCaliber(string caliber, List<Item> allItems, Item currentGun)
+    {
+        int totalCount = 0;
+
+        try
+        {
+            var caliberHash = "Caliber".GetHashCode();
+
+            foreach (var item in allItems)
+            {
+                if (item == null) continue;
+
+                // 检查是否是弹药（使用游戏官方标准）
+                if (!item.GetBool("IsBullet", false))
+                {
+                    continue;
+                }
+
+                // 检查弹药的口径是否匹配
+                string ammoCaliber = item.Constants.GetString(caliberHash);
+                if (ammoCaliber != caliber)
+                {
+                    continue;
+                }
+
+                // 统计弹药数量（使用 StackCount）
+                int stackCount = Math.Max(1, item.StackCount);
+                totalCount += stackCount;
+
+                ModLogger.Log("AmmoCheck", $"Found matching ammo: {item.DisplayName} ({ammoCaliber}) x{stackCount}");
+            }
+
+            // 额外统计装载在当前枪支中的弹药
+            int loadedAmmo = GetLoadedAmmoCount(currentGun);
+            if (loadedAmmo > 0)
+            {
+                totalCount += loadedAmmo;
+                ModLogger.Log("AmmoCheck", $"Gun {currentGun.DisplayName} has {loadedAmmo} loaded ammo");
+            }
+
+            // 检查其他同口径枪支中装载的弹药（避免重复计算）
+            totalCount += CountAmmoLoadedInOtherGuns(caliber, allItems, currentGun);
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"CountAmmoForCaliber failed: {ex}");
+        }
+
+        return totalCount;
+    }
+
+    /// <summary>
+    /// 获取枪支中装载的弹药数量
+    /// </summary>
+    private static int GetLoadedAmmoCount(Item gun)
+    {
+        try
+        {
+            var gunSetting = gun.GetComponent<ItemSetting_Gun>();
+            if (gunSetting == null)
+            {
+                return 0;
+            }
+
+            return gunSetting.BulletCount;
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"GetLoadedAmmoCount failed: {ex}");
+            return 0;
+        }
+    }
+
+    /// <summary>
+    /// 统计其他枪支中装载的同口径弹药（避免重复计算）
+    /// </summary>
+    private static int CountAmmoLoadedInOtherGuns(string caliber, List<Item> allItems, Item currentGun)
+    {
+        int totalCount = 0;
+
+        try
+        {
+            var caliberHash = "Caliber".GetHashCode();
+
+            foreach (var item in allItems)
+            {
+                if (item == null || item == currentGun) continue;
+
+                // 检查是否是枪支
+                if (!item.GetBool("IsGun", false))
+                {
+                    continue;
+                }
+
+                // 检查枪支的口径是否匹配
+                string gunCaliber = item.Constants.GetString(caliberHash);
+                if (gunCaliber != caliber)
+                {
+                    continue;
+                }
+
+                // 获取枪支中装载的弹药数量
+                int loadedAmmo = GetLoadedAmmoCount(item);
+                if (loadedAmmo > 0)
+                {
+                    totalCount += loadedAmmo;
+                    ModLogger.Log("AmmoCheck", $"Other gun {item.DisplayName} has {loadedAmmo} loaded {caliber} ammo");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"CountAmmoLoadedInOtherGuns failed: {ex}");
+        }
+
+        return totalCount;
     }
 }
 

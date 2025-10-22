@@ -60,6 +60,7 @@
 进入地图前自动检查并提醒：
 [list]
 [*]武器和弹药
+[*][b]弹药充足性[/b] - 检查每把枪是否有足够一个弹匣的弹药
 [*]医疗用品
 [*]食物和水
 [*]天气状况（风暴警告）
@@ -67,6 +68,15 @@
 [/list]
 
 检测到缺少装备时会弹出提示，可选择继续或返回准备。
+
+[b]弹药检查详情：[/b]
+[list]
+[*]自动检测所有携带的枪支（背包、装备栏、宠物）
+[*]按口径统计对应弹药总数（包括装载在武器中的）
+[*]如果某把枪的弹药总数 < 弹匣容量，则发出警告
+[*]显示具体的武器名称、口径、当前弹药数量和弹匣容量
+[*]仅对枪支生效，不影响近战武器
+[/list]
 
 [h3]🎨 完整设置面板[/h3]
 在游戏设置页面中添加了新的 EfD Enhanced 设置入口：
@@ -163,6 +173,7 @@ Automatically shows stat comparison when hovering over weapons while one is sele
 Automatically checks and reminds you before entering the map:
 [list]
 [*]Weapons and ammunition
+[*][b]Ammo Sufficiency[/b] - Checks if you have at least one magazine worth of ammo for each gun
 [*]Medical supplies
 [*]Food and water
 [*]Weather conditions (storm warning)
@@ -170,6 +181,15 @@ Automatically checks and reminds you before entering the map:
 [/list]
 
 If missing equipment is detected, a prompt will appear allowing you to continue or go back and prepare.
+
+[b]Ammo Check Details:[/b]
+[list]
+[*]Automatically detects all carried guns (inventory, equipment, pet)
+[*]Counts total ammo by caliber (including ammo loaded in weapons)
+[*]Warns if total ammo for a gun < magazine capacity
+[*]Shows specific weapon name, caliber, current ammo count, and magazine capacity
+[*]Only applies to guns, not melee weapons
+[/list]
 
 [h3]🎨 Full Settings Panel[/h3]
 Adds a new [b]EfD Enhanced[/b] tab directly to the in-game settings panel for easy configuration!
@@ -187,8 +207,8 @@ Fully supports: Simplified Chinese, Traditional Chinese, English, and Japanese
 [h2]Known Limitations[/h2]
 [b]Pre-Raid Check:[/b]
 [list]
-[*]Does not check for correct ammo types
-[*]Does not verify minimum carry quantities
+[*]Ammo sufficiency check warns only if total ammo < one magazine capacity (not multiple magazines)
+[*]Does not check if the right ammo type is loaded in the gun (only checks total matching caliber)
 [/list]
 
 [b]Movement Enhancement:[/b]

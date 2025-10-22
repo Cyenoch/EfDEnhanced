@@ -95,6 +95,7 @@ Automatically checks before entering a map via teleporter:
 
 - **武器** | Weapon - 是否携带了枪支？| Are you carrying weapons?
 - **弹药** | Ammunition - 是否携带了弹药？| Are you carrying ammunition?
+- **弹药充足性** | Ammo Sufficiency - 每把枪的弹药是否足够一个弹匣？| Do you have at least one magazine worth of ammo for each gun?
 - **医疗用品** | Medicine - 是否携带了急救包？| Are you carrying medical supplies?
 - **食物饮水** | Food/Drink - 是否携带了食物和水？| Are you carrying food and water?
 - **天气警告** | Weather - 当前是否为风暴天气？| Is it stormy weather?
@@ -107,9 +108,17 @@ Automatically checks before entering a map via teleporter:
 
 If any issues are detected, a clear dialog shows you:
 - 缺少的装备内容（带颜色标记）| What's missing from your loadout (color-coded)
+- 弹药不足的武器（显示当前数量/弹匣容量）| Weapons with low ammo (showing current/magazine capacity)
 - 需要的任务物品（带任务名称）| Which quest items you need (with quest names)
 - 当前天气状况和风暴警告 | Current weather conditions and storm warnings
 - 可选择继续或返回准备 | Option to continue anyway or go back to prepare
+
+**弹药充足性检查详情 | Ammo Sufficiency Check Details:**
+- 自动检测所有携带的枪支（背包、装备栏、宠物）| Automatically detects all carried guns (inventory, equipment, pet)
+- 按口径统计对应弹药总数 | Counts total ammo by caliber
+- 包括装载在武器中的弹药 | Includes ammo loaded in weapons
+- 如果某把枪的弹药总数 < 弹匣容量，则警告 | Warns if total ammo for a gun < magazine capacity
+- 仅对枪支生效，不影响其他武器 | Only applies to guns, not other weapons
 
 ---
 
@@ -217,6 +226,9 @@ The mod uses the game's official item detection APIs:
 
 - **Guns**: Uses `item.GetBool("IsGun")` marker
 - **Ammo**: Uses `item.GetBool("IsBullet")` marker  
+- **Ammo Caliber**: Reads `Caliber` constant from gun and ammo items
+- **Magazine Capacity**: Reads `Capacity` stat from `ItemSetting_Gun` component
+- **Loaded Ammo**: Reads `BulletCount` from `ItemSetting_Gun` component
 - **Medicine**: Checks for `Drug` behavior component
 - **Food**: Checks for `FoodDrink` behavior component
 - **Quest Items**: Reads `RequiredItemID` from active quests
@@ -247,19 +259,23 @@ tail -f ~/Library/Logs/TeamSoda/Duckov/Player.log
 [EfDEnhanced] [RaidCheck] Starting raid readiness check...
 [EfDEnhanced] [RaidCheck] Found weapon: AK-47
 [EfDEnhanced] [RaidCheck] Found ammo: 5.45x39 弹药
+[EfDEnhanced] [AmmoCheck] Found 2 guns to check
+[EfDEnhanced] [AmmoCheck] Checking gun: AK-47, Caliber: 7.62x39, Capacity: 30
+[EfDEnhanced] [AmmoCheck] Gun AK-47: Found 25 ammo vs capacity 30
+[EfDEnhanced] [AmmoCheck] LOW AMMO: AK-47 (7.62x39) - 25/30
 [EfDEnhanced] [RaidCheck] Found medicine: 急救包
 [EfDEnhanced] [RaidCheck] Found food: 罐头
 [EfDEnhanced] [RaidCheck] Current weather: Sunny, Safe: True
 [EfDEnhanced] [QuestCheck] Found 2 active quests
 [EfDEnhanced] [QuestCheck] ✓ Quest: 解救人质, Item: 钥匙卡, Required: 1, Current: 1
-[EfDEnhanced] [RaidCheck] All checks passed, allowing entry
+[EfDEnhanced] [RaidCheck] Check complete with 1 low ammo warning
 ```
 
 ## Known Limitations
 
 ### Pre-Raid Check:
-- Doesn't check if ammo matches your gun type
-- Doesn't verify minimum quantities (just checks if you have any)
+- Ammo sufficiency check warns only if total ammo < one magazine capacity (not two or more magazines)
+- Doesn't check if you have the right ammo type loaded in the gun (only checks total ammo of matching caliber)
 - Quest item checks only verify `RequiredItemID` (items you must bring)
 - Doesn't check `SubmitItems` (items to find and turn in later)
 
@@ -297,7 +313,7 @@ EfDEnhanced/
     ├── ModLogger.cs            # Logging utilities
     ├── ModSettings.cs          # Centralized settings manager
     ├── QuestTrackingManager.cs # Quest tracking persistence
-    ├── RaidCheckUtility.cs     # Pre-raid check logic
+    ├── RaidCheckUtility.cs     # Pre-raid check logic (weapon, ammo, meds, food, weather, quests)
     ├── Settings/               # Settings entry classes
     │   ├── BoolSettingsEntry.cs
     │   ├── FloatSettingsEntry.cs

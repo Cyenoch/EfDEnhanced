@@ -448,24 +448,57 @@ publishedFileId=3590346461        # Steam创意工坊ID（可选）
 **功能**: 在玩家进入Raid地图前自动检查装备和天气条件
 
 **核心组件**:
-- `RaidCheckUtility.cs` - 检查逻辑实现
+- `RaidCheckUtility.cs` - 检查逻辑实现（1000+ 行）
 - `RaidPreparationView.cs` - 警告对话框UI
 - `RaidEntryPatches.cs` - 拦截Raid进入点
 
 **检查项目**:
-1. 枪支 - 使用`item.GetBool("IsGun")`检查
-2. 弹药 - 使用`item.GetBool("IsBullet")`检查
-3. 药品 - 检查`UsageUtilities.behaviors`中的`Drug`组件
-4. 食物 - 检查`UsageUtilities.behaviors`中的`FoodDrink`组件
-5. 天气 - 检测当前是否为风暴天气（Stormy_I/Stormy_II）
-6. 风暴预警 - 检测24小时内是否有风暴来临
-7. 任务物品 - 根据目标地图检查活跃任务的`RequiredItemID`
+1. **枪支** - 使用`item.GetBool("IsGun")`检查
+2. **弹药** - 使用`item.GetBool("IsBullet")`检查
+3. **弹药充足性** - 检查每把枪的弹药是否足够一个弹匣
+   - 自动检测所有携带的枪支（背包、装备栏、宠物）
+   - 按口径（Caliber）统计对应弹药总数
+   - 包括装载在武器中的弹药（BulletCount）
+   - 包括其他同口径枪支中的弹药
+   - 如果弹药总数 < 弹匣容量（Capacity），则发出警告
+   - 仅对枪支生效，不影响近战武器
+4. **药品** - 检查`UsageUtilities.behaviors`中的`Drug`组件
+5. **食物** - 检查`UsageUtilities.behaviors`中的`FoodDrink`组件
+6. **天气** - 检测当前是否为风暴天气（Stormy_I/Stormy_II）
+7. **风暴预警** - 检测24小时内是否有风暴来临
+8. **任务物品** - 根据目标地图检查活跃任务的`RequiredItemID`
+
+**弹药充足性检查实现细节**:
+```csharp
+// 数据结构
+public class LowAmmoWarning {
+    public string WeaponName;      // 武器名称
+    public string AmmoCaliber;     // 弹药口径
+    public int CurrentAmmoCount;   // 当前弹药总数
+    public int MagazineCapacity;   // 弹匣容量
+}
+
+// 检查流程
+CheckWeaponAmmoSufficiency() {
+    1. GetAllPlayerGuns() - 获取所有携带的枪支
+    2. foreach gun:
+       - 读取 Caliber (口径) 和 Capacity (弹匣容量)
+       - CountAmmoForCaliber() - 统计对应口径弹药
+         * 背包中的弹药（StackCount）
+         * 枪支内装载的弹药（BulletCount）
+         * 其他同口径枪支中的弹药
+       - 如果总数 < 弹匣容量，生成警告
+    3. 返回 List<LowAmmoWarning>
+}
+```
 
 **技术实现**:
 - Patch `MapSelectionView.NotifyEntryClicked`方法
 - 使用UniTask实现异步确认流程
 - 智能场景过滤（只检查目标地图相关的任务）
 - 失效保护设计（错误时不阻止进入）
+- 使用游戏官方的`ItemSetting_Gun`组件获取弹匣容量
+- 支持宠物背包的物品检测（通过`PetProxy.PetInventory`）
 
 ---
 

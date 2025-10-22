@@ -107,6 +107,7 @@ public static class LocalizationHelper
             { "Warning_StormyWeather", "<color=#FF4444>⚠ 当前为风暴天气</color>" },
             { "Warning_StormComing", "<color=#FFA500>⚠ 风暴即将来临（24小时内）</color>" },
             { "Warning_QuestItem", "<color=#FFD700>⚠ 任务物品不足: {0} ({1}/{2}) - {3}</color>" },
+            { "Warning_LowAmmo", "<color=#FF8C00>⚠ 武器弹药不足: {0} ({1}) - {2}/{3} 发</color>" },
             
             // 任务追踪器
             { "QuestTracker_Title", "活跃任务" },
@@ -186,6 +187,7 @@ public static class LocalizationHelper
             { "Warning_StormyWeather", "<color=#FF4444>⚠ 當前為風暴天氣</color>" },
             { "Warning_StormComing", "<color=#FFA500>⚠ 風暴即將來臨（24小時內）</color>" },
             { "Warning_QuestItem", "<color=#FFD700>⚠ 任務物品不足: {0} ({1}/{2}) - {3}</color>" },
+            { "Warning_LowAmmo", "<color=#FF8C00>⚠ 武器彈藥不足: {0} ({1}) - {2}/{3} 發</color>" },
 
             { "QuestTracker_Title", "活躍任務" },
             { "QuestTracker_Progress", "進度: {0}/{1}" },
@@ -264,6 +266,7 @@ public static class LocalizationHelper
             { "Warning_StormyWeather", "<color=#FF4444>⚠ Stormy weather conditions</color>" },
             { "Warning_StormComing", "<color=#FFA500>⚠ Storm approaching (within 24 hours)</color>" },
             { "Warning_QuestItem", "<color=#FFD700>⚠ Quest item insufficient: {0} ({1}/{2}) - {3}</color>" },
+            { "Warning_LowAmmo", "<color=#FF8C00>⚠ Low ammo for weapon: {0} ({1}) - {2}/{3} rounds</color>" },
 
             { "QuestTracker_Title", "Active Quests" },
             { "QuestTracker_Progress", "Progress: {0}/{1}" },
@@ -342,6 +345,7 @@ public static class LocalizationHelper
             { "Warning_StormyWeather", "<color=#FF4444>⚠ 嵐の天候</color>" },
             { "Warning_StormComing", "<color=#FFA500>⚠ 嵐が接近中（24時間以内）</color>" },
             { "Warning_QuestItem", "<color=#FFD700>⚠ クエストアイテム不足: {0} ({1}/{2}) - {3}</color>" },
+            { "Warning_LowAmmo", "<color=#FF8C00>⚠ 武器の弾薬不足: {0} ({1}) - {2}/{3} 発</color>" },
 
             { "QuestTracker_Title", "アクティブクエスト" },
             { "QuestTracker_Progress", "進行状況: {0}/{1}" },
