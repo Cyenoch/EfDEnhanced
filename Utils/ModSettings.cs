@@ -215,6 +215,17 @@ namespace EfDEnhanced.Utils
             )
         );
 
+        public static readonly KeyCodeSettingsEntry ItemWheelMenuHotkey = Register(
+            new KeyCodeSettingsEntry(
+                PREFIX,
+                "ItemWheelMenuHotkey",
+                "Settings_ItemWheelMenuHotkey_Name",
+                UnityEngine.KeyCode.BackQuote, // Default: ~ key
+                CATEGORY_UI,
+                "Settings_ItemWheelMenuHotkey_Desc"
+            )
+        );
+
         #endregion
 
         /// <summary>

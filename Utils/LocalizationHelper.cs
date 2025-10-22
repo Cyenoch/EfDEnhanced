@@ -172,6 +172,9 @@ public static class LocalizationHelper
             { "Settings_EnableWeaponComparison_Desc", "在鼠标悬停时对比选中武器和悬停武器的属性，显示差异并用颜色标识优劣" },
             { "Settings_ItemWheelScale_Name", "物品轮盘缩放" },
             { "Settings_ItemWheelScale_Desc", "调整物品轮盘菜单的显示大小" },
+            { "Settings_ItemWheelMenuHotkey_Name", "物品轮盘快捷键" },
+            { "Settings_ItemWheelMenuHotkey_Desc", "按下并松开此键来打开物品轮盘菜单" },
+            { "Settings_PressAnyKey", "按任意键..." },
         };
 
         // 繁体中文
@@ -254,6 +257,9 @@ public static class LocalizationHelper
             { "Settings_EnableWeaponComparison_Desc", "在鼠標懸停時對比選中武器和懸停武器的屬性，顯示差異並用顏色標識優劣" },
             { "Settings_ItemWheelScale_Name", "物品輪盤縮放" },
             { "Settings_ItemWheelScale_Desc", "調整物品輪盤選單的顯示大小" },
+            { "Settings_ItemWheelMenuHotkey_Name", "物品輪盤快捷鍵" },
+            { "Settings_ItemWheelMenuHotkey_Desc", "按下並鬆開此鍵來打開物品輪盤選單" },
+            { "Settings_PressAnyKey", "按任意鍵..." },
         };
 
         // 英语
@@ -336,6 +342,9 @@ public static class LocalizationHelper
             { "Settings_EnableWeaponComparison_Desc", "Compare selected weapon with hovered weapon in inventory, showing differences with color-coded indicators" },
             { "Settings_ItemWheelScale_Name", "Item Wheel Scale" },
             { "Settings_ItemWheelScale_Desc", "Adjust the display size of the item wheel menu" },
+            { "Settings_ItemWheelMenuHotkey_Name", "Item Wheel Hotkey" },
+            { "Settings_ItemWheelMenuHotkey_Desc", "Press and release this key to open the item wheel menu" },
+            { "Settings_PressAnyKey", "Press any key..." },
         };
 
         // 日语
@@ -418,6 +427,9 @@ public static class LocalizationHelper
             { "Settings_EnableWeaponComparison_Desc", "インベントリで選択した武器とホバーした武器を比較し、差異を色付きインジケーターで表示" },
             { "Settings_ItemWheelScale_Name", "アイテムホイールスケール" },
             { "Settings_ItemWheelScale_Desc", "アイテムホイールメニューの表示サイズを調整" },
+            { "Settings_ItemWheelMenuHotkey_Name", "アイテムホイールホットキー" },
+            { "Settings_ItemWheelMenuHotkey_Desc", "このキーを押して離すとアイテムホイールメニューが開きます" },
+            { "Settings_PressAnyKey", "任意のキーを押してください..." },
         };
 
         ModLogger.Log("Localization", $"Loaded translations for {LocalizationData.Count} languages");

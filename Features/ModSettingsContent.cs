@@ -75,6 +75,7 @@ namespace EfDEnhanced.Features
                     .AddSection("Settings_Category_UI")
                     .AddToggle("Settings_EnableWeaponComparison_Name", ModSettings.EnableWeaponComparison)
                     .AddSlider("Settings_ItemWheelScale_Name", 0.5f, 2f, ModSettings.ItemWheelScale)
+                    .AddKeybinding(ModSettings.ItemWheelMenuHotkey)
                     .AddSpacer()
 
                     // Pre-Raid Check Section

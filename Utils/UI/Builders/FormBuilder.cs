@@ -86,7 +86,10 @@ namespace EfDEnhanced.Utils.UI.Builders
                 // 监听条件变化
                 visibilityCondition.ValueChanged += (sender, args) =>
                 {
-                    element?.SetActive(args.NewValue);
+                    if (element != null)
+                    {
+                        element.SetActive(args.NewValue);
+                    }
                 };
             }
 
@@ -144,7 +147,10 @@ namespace EfDEnhanced.Utils.UI.Builders
                 // 监听条件变化
                 visibilityCondition.ValueChanged += (sender, args) =>
                 {
-                    element?.SetActive(args.NewValue);
+                    if (element != null)
+                    {
+                        element.SetActive(args.NewValue);
+                    }
                 };
             }
 
@@ -203,7 +209,10 @@ namespace EfDEnhanced.Utils.UI.Builders
                 // 监听条件变化
                 visibilityCondition.ValueChanged += (sender, args) =>
                 {
-                    element?.SetActive(args.NewValue);
+                    if (element != null)
+                    {
+                        element.SetActive(args.NewValue);
+                    }
                 };
             }
 
@@ -238,7 +247,10 @@ namespace EfDEnhanced.Utils.UI.Builders
                 // 监听条件变化
                 visibilityCondition.ValueChanged += (sender, args) =>
                 {
-                    container?.SetActive(args.NewValue);
+                    if (container != null)
+                    {
+                        container.SetActive(args.NewValue);
+                    }
                 };
             }
 
@@ -576,6 +588,54 @@ namespace EfDEnhanced.Utils.UI.Builders
                 .Build();
 
             _elements.Add(button);
+            return this;
+        }
+
+        /// <summary>
+        /// 添加键位绑定按钮（自动绑定到KeyCodeSettingsEntry）
+        /// </summary>
+        /// <param name="setting">绑定的设置项</param>
+        /// <param name="visibilityCondition">可见性条件（可选）</param>
+        /// <param name="leftPadding">左边距（用于表示层级关系，默认0）</param>
+        public FormBuilder AddKeybinding(KeyCodeSettingsEntry setting,
+                                          BoolSettingsEntry? visibilityCondition = null, int leftPadding = 0)
+        {
+            if (setting == null)
+            {
+                ModLogger.LogWarning($"Attempted to add keybinding with null setting");
+                return this;
+            }
+
+            var keybindingButton = ModKeybindingButton.Create(_parent, setting);
+            GameObject element = keybindingButton.gameObject;
+            _elements.Add(element);
+
+            // 应用左边距
+            if (leftPadding > 0)
+            {
+                var layout = element.GetComponent<HorizontalLayoutGroup>();
+                if (layout != null)
+                {
+                    layout.padding.left += leftPadding;
+                }
+            }
+
+            // 如果有可见性条件，注册并设置初始状态
+            if (visibilityCondition != null)
+            {
+                _conditionalElements[element] = visibilityCondition;
+                element.SetActive(visibilityCondition.Value);
+
+                // 监听条件变化
+                visibilityCondition.ValueChanged += (sender, args) =>
+                {
+                    if (element != null)
+                    {
+                        element.SetActive(args.NewValue);
+                    }
+                };
+            }
+
             return this;
         }
 

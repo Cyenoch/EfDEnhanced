@@ -50,23 +50,24 @@ namespace EfDEnhanced.Patches
           return;
         }
 
-        // Check for ~ key press to show menu
-        if (Input.GetKeyDown(KeyCode.BackQuote) || Input.GetKeyDown(KeyCode.Tilde))
+        // Check for configured hotkey press to show menu
+        KeyCode hotkey = ModSettings.ItemWheelMenuHotkey.Value;
+        if (Input.GetKeyDown(hotkey))
         {
           if (_wheelMenu != null && !_wheelMenu.IsOpen)
           {
             _wheelMenu.Show();
-            ModLogger.Log("ItemWheelMenuPatch", "Wheel menu opened with ~ key");
+            ModLogger.Log("ItemWheelMenuPatch", $"Wheel menu opened with {hotkey} key");
           }
         }
-        // Check for ~ key release to trigger item and hide menu
-        else if (Input.GetKeyUp(KeyCode.BackQuote) || Input.GetKeyUp(KeyCode.Tilde))
+        // Check for configured hotkey release to trigger item and hide menu
+        else if (Input.GetKeyUp(hotkey))
         {
           if (_wheelMenu != null && _wheelMenu.IsOpen)
           {
             // Hide with invoke - will trigger selected item if any
             _wheelMenu.Hide(invokeSelectedItem: true);
-            ModLogger.Log("ItemWheelMenuPatch", "Wheel menu closed with ~ key release (invoke if selected)");
+            ModLogger.Log("ItemWheelMenuPatch", $"Wheel menu closed with {hotkey} key release (invoke if selected)");
           }
         }
       }
