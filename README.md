@@ -22,6 +22,8 @@ Quests can be tracked in the quest panel, and will be displayed in the upper lef
 - **任务状态** | Task Status - ✓ 表示已完成，○ 表示待完成
 - **地图过滤** | Map Filtering - 自动只显示当前地图相关的任务
 - **可调外观** | Customizable - 调整位置、缩放、是否显示描述
+- **快捷键切换** | Hotkey Toggle - 按住设置的快捷键（默认 `.`）即可快速折叠/展开追踪器
+- **智能帮助文本** | Smart Help Text - 首次使用时显示快捷键提示，使用后自动隐藏
 - **持久化设置** | Persistent Settings - 追踪偏好会在会话间保存
 - **自动显隐** | Auto Show/Hide - 仅在突袭时可见，打开菜单时隐藏
 - **多语言支持** | Multi-language - 完整支持中文、英文和日文
@@ -31,6 +33,7 @@ Quests can be tracked in the quest panel, and will be displayed in the upper lef
 2. 点击任意任务查看详情 | Click any quest to view details
 3. 勾选任务标题下方的"局内追踪"复选框 | Check the "Track in Raid" checkbox below the quest title
 4. 进入突袭后在左上角查看追踪的任务！| Enter raid and see your tracked quests in top-left corner!
+5. 按住快捷键（默认 `.` 键）快速折叠或展开追踪器 | Hold the hotkey (default `.`) to quickly collapse or expand the tracker!
 
 ---
 
@@ -196,6 +199,7 @@ If any issues are detected, a clear dialog shows you:
 - **传送前检查设置** | Pre-Raid Check Settings - 启用/禁用各项检查
 - **移动增强设置** | Movement Enhancement Settings - 4档位调节移动手感
 - **任务追踪器设置** | Quest Tracker Settings - 调整位置、大小、显示选项、地图过滤
+- **追踪器快捷键** | Tracker Hotkey - 自定义快速切换追踪器的热键（默认 `.` 键）
 - **界面增强设置** | UI Enhancement Settings - 武器对比等界面功能开关
 - **按键绑定设置** | Keybinding Settings - 自定义模组功能的快捷键
 - **一键重置** | Reset to Defaults - 恢复所有设置为默认值

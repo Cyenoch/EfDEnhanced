@@ -7,6 +7,7 @@
 [*]显示任务完成进度（如 2/3）和已完成子任务（✓）
 [*]只显示当前地图的任务
 [*]可调整位置、大小、是否显示描述
+[*]快捷键切换（默认 . 键）快速折叠/展开追踪器
 [*]打开菜单时自动隐藏
 [/list]
 [h3]🏃 移动增强[/h3]
@@ -74,6 +75,7 @@ Check "In-Raid Tracking" on quest details to display progress on screen during r
 [*]Shows completion progress (e.g., 2/3) and completed sub-tasks (✓)
 [*]Only shows quests for current map
 [*]Adjustable position, scale, and description display
+[*]Hotkey toggle (default . key) to quickly collapse/expand tracker
 [*]Auto-hides when opening menus
 [/list]
 [h3]🏃 Movement Enhancement[/h3]
