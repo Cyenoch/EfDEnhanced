@@ -1,3 +1,25 @@
+# 202510232323
+
+[h1]更新日志[/h1]
+[h3]功能更新[/h3]
+[list]
+[*][b]通用轮盘菜单基类[/b] - 引入了 `GenericWheelMenuBase<T>` 来统一轮盘菜单的实现，消除了重复代码
+[*][b]轮盘菜单管理器[/b] - 实现了全局菜单单例管理，确保同时只能显示一个菜单实例，自动处理菜单切换时的取消逻辑
+[*][b]菜单生命周期优化[/b] - 简化了派遣菜单初始化和事件订阅流程，提升了可维护性
+[/list]
+[h3]文档更新[/h3]
+[list]
+[*]PieMenuManager 使用指南已发布
+[*]README 补充了新架构说明
+[/list]
+[h3]技术改进[/h3]
+[list]
+[*]ContainerWheelMenu, ItemWheelMenu, ThrowableWheelMenu - 改为继承 GenericWheelMenuBase
+[*]PieMenuManager - 全局管理器用于单菜单控制
+[*]GenericWheelMenuBase - 通用轮盘菜单基类，统一生命周期管理
+[/list]
+[hr][/hr]
+
 # 2510232230
 
 [h1]更新日志[/h1]
