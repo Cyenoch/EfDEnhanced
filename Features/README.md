@@ -76,6 +76,36 @@
 
 ---
 
+## 概览
+
+### 轮盘菜单体系
+
+轮盘菜单通过 `PieMenuComponent` 提供实现，通过 `GenericWheelMenuBase<T>` 基类来消除重复代码：
+
+**基类架构**:
+- `GenericWheelMenuBase<T>` - 通用轮盘菜单基类，处理所有 PieMenuComponent 生命周期
+  - 单例管理
+  - PieMenuComponent 初始化
+  - 事件订阅（OnItemInvoked, OnMenuShown, OnMenuHidden）
+  - 缩放设置管理
+  - 标准的菜单控制方法（Show, Hide, Toggle, Cancel）
+
+**具体实现**:
+- `ItemWheelMenu` - 继承自 `GenericWheelMenuBase<int>`，管理物品栏快捷键
+- `ThrowableWheelMenu` - 继承自 `GenericWheelMenuBase<int>`，管理投掷物品
+- `ContainerWheelMenu` - 继承自 `GenericWheelMenuBase<Item?>`，管理容器物品
+
+**子类需要实现的方法**:
+- `RefreshItems()` - 获取并更新菜单项
+- `OnItemInvoked(T itemId)` - 处理物品选中事件
+- `OnMenuShown()` - 菜单显示时的回调（可选）
+- `OnMenuHidden()` - 菜单隐藏时的回调（可选）
+
+**优点**:
+- 消除 ~100 行重复代码
+- 统一生命周期管理
+- 易于添加新的轮盘菜单
+
 ## 开发指南
 
 ### 添加新功能

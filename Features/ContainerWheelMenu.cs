@@ -11,22 +11,17 @@ namespace EfDEnhanced.Features
     /// Container wheel menu that displays when a container item is invoked
     /// Shows items from container inventory in a radial pie menu
     /// </summary>
-    public class ContainerWheelMenu : MonoBehaviour
+    public class ContainerWheelMenu : GenericWheelMenuBase<int>
     {
         private static ContainerWheelMenu? _instance;
 
-        // Components
-        private PieMenuComponent? _pieMenu;
-
         // State
         private Item? _currentContainer;
-        private CharacterMainControl Character => CharacterMainControl.Main;
 
         public static ContainerWheelMenu? Instance => _instance;
-        public bool IsOpen => _pieMenu != null && _pieMenu.IsOpen;
         public Item? CurrentContainer => _currentContainer;
 
-        private void Awake()
+        protected override void Awake()
         {
             if (_instance != null && _instance != this)
             {
@@ -37,83 +32,29 @@ namespace EfDEnhanced.Features
             _instance = this;
             DontDestroyOnLoad(gameObject);
 
-            InitializePieMenu();
-
-            // Subscribe to settings changes
-            ModSettings.ItemWheelScale.ValueChanged += OnScaleChanged;
+            base.Awake();
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
             if (_instance == this)
             {
                 _instance = null;
             }
 
-            // Unsubscribe from settings changes
-            ModSettings.ItemWheelScale.ValueChanged -= OnScaleChanged;
+            base.OnDestroy();
         }
 
-        private void InitializePieMenu()
-        {
-            try
-            {
-                // Create pie menu GameObject
-                GameObject pieMenuObj = new GameObject("ContainerPieMenu");
-                pieMenuObj.transform.SetParent(transform, false);
-
-                _pieMenu = pieMenuObj.AddComponent<PieMenuComponent>();
-
-                // Initialize with configuration
-                var config = PieMenuConfig.Default;
-                config.Scale = ModSettings.ItemWheelScale.Value;
-                _pieMenu.Initialize(config);
-
-                // Subscribe to events
-                _pieMenu.OnItemInvoked += OnItemInvoked;
-                _pieMenu.OnMenuShown += OnMenuShown;
-                _pieMenu.OnMenuHidden += OnMenuHidden;
-
-                ModLogger.Log("ContainerWheelMenu", "Pie menu initialized successfully");
-            }
-            catch (Exception ex)
-            {
-                ModLogger.LogError($"ContainerWheelMenu: Failed to initialize pie menu: {ex}");
-            }
-        }
-
-        private void OnScaleChanged(object? sender, Utils.Settings.SettingsValueChangedEventArgs<float> e)
-        {
-            if (_pieMenu != null)
-            {
-                _pieMenu.SetScale(e.NewValue);
-                ModLogger.Log("ContainerWheelMenu", $"Scale changed to {e.NewValue:F2}");
-            }
-        }
-
-        private void OnMenuShown()
-        {
-            // Any setup needed when menu is shown
-            ModLogger.Log("ContainerWheelMenu", $"Menu shown for container: {_currentContainer?.DisplayName}");
-        }
-
-        private void OnMenuHidden()
+        protected override void OnMenuHidden()
         {
             // Reset container reference when menu is hidden
             _currentContainer = null;
         }
 
-        private void OnItemInvoked(string itemId)
+        protected override void OnItemInvoked(int itemIndex)
         {
             try
             {
-                // Parse item index from ID
-                if (!int.TryParse(itemId, out int itemIndex))
-                {
-                    ModLogger.LogWarning($"ContainerWheelMenu: Invalid item ID: {itemId}");
-                    return;
-                }
-
                 UseContainerItem(itemIndex);
             }
             catch (Exception ex)
@@ -122,17 +63,9 @@ namespace EfDEnhanced.Features
             }
         }
 
-        public void Toggle()
-        {
-            if (_pieMenu != null)
-            {
-                _pieMenu.Toggle();
-            }
-        }
-
         public void Show(Item container)
         {
-            if (_pieMenu == null) return;
+            if (PieMenu == null) return;
 
             try
             {
@@ -144,7 +77,7 @@ namespace EfDEnhanced.Features
 
                 _currentContainer = container;
                 RefreshItems();
-                _pieMenu.Show();
+                PieMenu.Show();
 
                 ModLogger.Log("ContainerWheelMenu", $"Showing container menu for: {container.DisplayName}");
             }
@@ -154,41 +87,9 @@ namespace EfDEnhanced.Features
             }
         }
 
-        public void Hide(bool invokeSelectedItem = true)
+        protected override void RefreshItems()
         {
-            if (_pieMenu != null)
-            {
-                _pieMenu.Hide(invokeSelectedItem);
-            }
-        }
-
-        /// <summary>
-        /// Cancel the wheel menu (for abnormal closes, never invokes items)
-        /// </summary>
-        public void Cancel()
-        {
-            if (_pieMenu != null)
-            {
-                _pieMenu.Cancel();
-            }
-        }
-
-        /// <summary>
-        /// Get the mouse position that should be used by the game's camera system
-        /// When wheel menu is open, return saved position to prevent camera movement
-        /// </summary>
-        public Vector2 GetOverrideMousePosition()
-        {
-            if (_pieMenu != null)
-            {
-                return _pieMenu.GetSavedMousePosition();
-            }
-            return Input.mousePosition;
-        }
-
-        private void RefreshItems()
-        {
-            if (_pieMenu == null || _currentContainer == null) return;
+            if (_currentContainer == null) return;
 
             try
             {
@@ -230,7 +131,7 @@ namespace EfDEnhanced.Features
                     items = items.GetRange(0, MAX_ITEMS);
                     ModLogger.Log("ContainerWheelMenu", $"Item count exceeds {MAX_ITEMS}, only showing first {MAX_ITEMS} items.");
                 }
-                _pieMenu.SetItems(items);
+                SetMenuItems(items);
             }
             catch (Exception ex)
             {

@@ -12,11 +12,10 @@ namespace EfDEnhanced.Patches
     /// Blocks mouse input while menu is open but allows keyboard input
     /// </summary>
     [HarmonyPatch]
-    public class ThrowableWheelMenuPatch
+    public class ThrowableWheelMenuPatch : PieMenuPatternBase
     {
         private static ThrowableWheelMenu? _wheelMenu;
         private static bool _wheelMenuInitialized = false;
-        private static CharacterInputControl? _inputControl;
 
         /// <summary>
         /// Patch CharacterInputControl.Update to monitor for G key press/release and capture input control instance
@@ -46,13 +45,9 @@ namespace EfDEnhanced.Patches
                 }
 
                 // Check if we're in a state where the wheel menu can be opened
+                CancelIfGameStateBlocks(_wheelMenu);
                 if (GameManager.Paused || Duckov.UI.View.ActiveView != null)
                 {
-                    if (_wheelMenu != null && _wheelMenu.IsOpen)
-                    {
-                        // Cancel menu when game state changes (no invoke)
-                        _wheelMenu.Cancel();
-                    }
                     return;
                 }
 
@@ -112,95 +107,13 @@ namespace EfDEnhanced.Patches
         }
 
         /// <summary>
-        /// Patch to block and clear mouse delta (camera rotation) when wheel menu is open
-        /// This prevents accumulated mouse movement from affecting the camera
-        /// </summary>
-        [HarmonyPatch(typeof(CharacterInputControl), "OnPlayerMouseDelta")]
-        [HarmonyPrefix]
-        public static bool PreventMouseDeltaWhenWheelOpen()
-        {
-            try
-            {
-                if (_wheelMenu != null && _wheelMenu.IsOpen)
-                {
-                    // Block mouse delta to prevent camera rotation
-                    // The input system will discard this delta
-                    return false;
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                ExceptionHelper.LogDetailedException(ex, "ThrowableWheelMenuPatch.PreventMouseDeltaWhenWheelOpen");
-                return true;
-            }
-        }
-
-        /// <summary>
-        /// Patch to block mouse movement affecting aim when wheel menu is open
-        /// </summary>
-        [HarmonyPatch(typeof(CharacterInputControl), "OnPlayerMouseMove")]
-        [HarmonyPrefix]
-        public static bool PreventMouseMoveWhenWheelOpen()
-        {
-            try
-            {
-                if (_wheelMenu != null && _wheelMenu.IsOpen)
-                {
-                    // Block mouse position updates to prevent aim changes
-                    return false;
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                ExceptionHelper.LogDetailedException(ex, "ThrowableWheelMenuPatch.PreventMouseMoveWhenWheelOpen");
-                return true;
-            }
-        }
-
-        /// <summary>
-        /// Patch to block shooting/trigger input when wheel menu is open
-        /// </summary>
-        [HarmonyPatch(typeof(CharacterInputControl), "OnPlayerTriggerInputUsingMouseKeyboard")]
-        [HarmonyPrefix]
-        public static bool PreventTriggerWhenWheelOpen()
-        {
-            try
-            {
-                if (_wheelMenu != null && _wheelMenu.IsOpen)
-                {
-                    // Block trigger input to prevent shooting while using the wheel
-                    return false;
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                ExceptionHelper.LogDetailedException(ex, "ThrowableWheelMenuPatch.PreventTriggerWhenWheelOpen");
-                return true;
-            }
-        }
-
-        /// <summary>
         /// Patch to cancel wheel menu when game is paused
         /// </summary>
         [HarmonyPatch(typeof(PauseMenu), "Show")]
         [HarmonyPostfix]
         public static void CancelWheelMenuOnPause()
         {
-            try
-            {
-                if (_wheelMenu != null && _wheelMenu.IsOpen)
-                {
-                    _wheelMenu.Cancel();
-                    ModLogger.Log("ThrowableWheelMenuPatch", "Cancelled throwable wheel menu due to pause");
-                }
-            }
-            catch (Exception ex)
-            {
-                ExceptionHelper.LogDetailedException(ex, "ThrowableWheelMenuPatch.CancelWheelMenuOnPause");
-            }
+            HandlePauseMenuShow(_wheelMenu);
         }
 
         /// <summary>
@@ -222,45 +135,7 @@ namespace EfDEnhanced.Patches
         /// </summary>
         private static void OnWheelMenuOpened()
         {
-            try
-            {
-                if (_inputControl == null)
-                {
-                    ModLogger.LogWarning("ThrowableWheelMenuPatch: Cannot clear input - InputControl is null");
-                    return;
-                }
-
-                // Use reflection to clear mouse delta field in CharacterInputControl
-                // This prevents accumulated mouse movement from affecting camera when menu opens
-                var mouseDeltaField = AccessTools.Field(typeof(CharacterInputControl), "mouseDelta");
-                if (mouseDeltaField != null)
-                {
-                    mouseDeltaField.SetValue(_inputControl, Vector2.zero);
-                    ModLogger.Log("ThrowableWheelMenuPatch", "Cleared mouseDelta input state");
-                }
-                else
-                {
-                    ModLogger.LogWarning("ThrowableWheelMenuPatch: mouseDelta field not found");
-                }
-
-                // Clear mousePos field
-                var mousePosField = AccessTools.Field(typeof(CharacterInputControl), "mousePos");
-                if (mousePosField != null)
-                {
-                    // Convert Vector3 mousePosition to Vector2 for mousePos field
-                    Vector2 currentMousePos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
-                    mousePosField.SetValue(_inputControl, currentMousePos);
-                    ModLogger.Log("ThrowableWheelMenuPatch", "Reset mousePos to current cursor position");
-                }
-                else
-                {
-                    ModLogger.LogWarning("ThrowableWheelMenuPatch: mousePos field not found");
-                }
-            }
-            catch (Exception ex)
-            {
-                ExceptionHelper.LogDetailedException(ex, "ThrowableWheelMenuPatch.OnWheelMenuOpened");
-            }
+            ClearInputState();
         }
 
         /// <summary>
@@ -268,18 +143,7 @@ namespace EfDEnhanced.Patches
         /// </summary>
         private static void OnActiveViewChanged()
         {
-            try
-            {
-                if (_wheelMenu != null && _wheelMenu.IsOpen && Duckov.UI.View.ActiveView != null)
-                {
-                    _wheelMenu.Cancel();
-                    ModLogger.Log("ThrowableWheelMenuPatch", "Cancelled throwable wheel menu due to view opening");
-                }
-            }
-            catch (Exception ex)
-            {
-                ExceptionHelper.LogDetailedException(ex, "ThrowableWheelMenuPatch.OnActiveViewChanged");
-            }
+            HandleActiveViewChanged(_wheelMenu);
         }
     }
 }

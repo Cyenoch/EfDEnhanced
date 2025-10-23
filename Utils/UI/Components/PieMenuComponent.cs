@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using EfDEnhanced.Utils.UI.Constants;
 
 namespace EfDEnhanced.Utils.UI.Components
 {
@@ -71,7 +72,7 @@ namespace EfDEnhanced.Utils.UI.Components
 
         // Colors
         private Color _normalColor = new Color(0.2f, 0.2f, 0.2f, 0.5f);
-        private Color _hoverColor = new Color(0.3f, 0.3f, 0.35f, 0.85f);
+        private Color _hoverColor = new Color(0.5f, 0.6f, 0.75f, 0.95f);
         private Color _selectedColor = new Color(0.35f, 0.4f, 0.5f, 0.9f);
 
         // UI Components
@@ -504,7 +505,7 @@ namespace EfDEnhanced.Utils.UI.Components
                 countTextRect.pivot = new Vector2(.5f, .5f);
                 
                 // Position count text closer to pie center using same angle but shorter distance
-                float countTextDistance = ScaledItemDistance * .5f;
+                float countTextDistance = ScaledItemDistance * .7f;
                 Vector2 countTextPosition = new Vector2(
                     Mathf.Sin(angleRad) * countTextDistance,
                     Mathf.Cos(angleRad) * countTextDistance
@@ -525,6 +526,9 @@ namespace EfDEnhanced.Utils.UI.Components
                 Outline outline = countTextObj.AddComponent<Outline>();
                 outline.effectColor = Color.black;
                 outline.effectDistance = new Vector2(1f, -1f);
+
+                // Apply standard text shadow for better visibility
+                UIStyles.ApplyStandardTextShadow(countTextObj);
 
                 PieSegment segment = new PieSegment
                 {
@@ -587,6 +591,7 @@ namespace EfDEnhanced.Utils.UI.Components
 
             _centerDot = new GameObject("CenterDot");
             _centerDot.transform.SetParent(_wheelContainer.transform, false);
+            _centerDot.SetActive(false); // Disable center dot - not visible
 
             RectTransform dotRect = _centerDot.AddComponent<RectTransform>();
             dotRect.anchorMin = new Vector2(0.5f, 0.5f);
@@ -725,6 +730,8 @@ namespace EfDEnhanced.Utils.UI.Components
             Outline outline = _labelDisplay.AddComponent<Outline>();
             outline.effectColor = Color.black;
             outline.effectDistance = new Vector2(2f, -2f); // Larger outline for better contrast
+
+            UIStyles.ApplyStandardTextShadow(_labelDisplay);
         }
 
         private void RefreshItems()
@@ -826,7 +833,7 @@ namespace EfDEnhanced.Utils.UI.Components
         public static PieMenuConfig Default => new PieMenuConfig
         {
             WheelRadius = 167f,
-            IconSize = 67f,
+            IconSize = 62f,
             InnerRadiusRatio = 0.4f,
             SegmentGapRatio = 0.95f,
             Scale = 1.0f,

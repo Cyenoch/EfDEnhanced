@@ -10,28 +10,20 @@ namespace EfDEnhanced.Features
     /// <summary>
     /// Item wheel menu that displays when ~ key is pressed
     /// Shows items from hotbar slots in a radial pie menu
-    /// Now uses PieMenuComponent for display
     /// </summary>
-    public class ItemWheelMenu : MonoBehaviour
+    public class ItemWheelMenu : GenericWheelMenuBase<int>
     {
         // Event triggered when the menu is opened
         public static event Action? OnMenuOpened;
 
         private static ItemWheelMenu? _instance;
 
-        // Components
-        private PieMenuComponent? _pieMenu;
-
         // Configuration
         private const int ITEM_COUNT = 6; // Number of hotbar slots
 
-        // State
-        private CharacterMainControl Character => CharacterMainControl.Main;
-
         public static ItemWheelMenu? Instance => _instance;
-        public bool IsOpen => _pieMenu != null && _pieMenu.IsOpen;
 
-        private void Awake()
+        protected override void Awake()
         {
             if (_instance != null && _instance != this)
             {
@@ -42,85 +34,29 @@ namespace EfDEnhanced.Features
             _instance = this;
             DontDestroyOnLoad(gameObject);
 
-            InitializePieMenu();
-
-            // Subscribe to settings changes
-            ModSettings.ItemWheelScale.ValueChanged += OnScaleChanged;
+            base.Awake();
         }
 
-        private void OnDestroy()
+        protected override void OnDestroy()
         {
             if (_instance == this)
             {
                 _instance = null;
             }
 
-            // Unsubscribe from settings changes
-            ModSettings.ItemWheelScale.ValueChanged -= OnScaleChanged;
+            base.OnDestroy();
         }
 
-        private void InitializePieMenu()
+        protected override void OnMenuShown()
         {
-            try
-            {
-                // Create pie menu GameObject
-                GameObject pieMenuObj = new GameObject("PieMenu");
-                pieMenuObj.transform.SetParent(transform, false);
-
-                _pieMenu = pieMenuObj.AddComponent<PieMenuComponent>();
-
-                // Initialize with configuration
-                var config = PieMenuConfig.Default;
-                config.Scale = ModSettings.ItemWheelScale.Value;
-                _pieMenu.Initialize(config);
-
-                // Subscribe to events
-                _pieMenu.OnItemInvoked += OnItemInvoked;
-                _pieMenu.OnMenuShown += OnMenuShown;
-                _pieMenu.OnMenuHidden += OnMenuHidden;
-
-                ModLogger.Log("ItemWheelMenu", "Pie menu initialized successfully");
-            }
-            catch (Exception ex)
-            {
-                ModLogger.LogError($"ItemWheelMenu: Failed to initialize pie menu: {ex}");
-            }
-        }
-
-        private void OnScaleChanged(object? sender, Utils.Settings.SettingsValueChangedEventArgs<float> e)
-        {
-            if (_pieMenu != null)
-            {
-                _pieMenu.SetScale(e.NewValue);
-                ModLogger.Log("ItemWheelMenu", $"Scale changed to {e.NewValue:F2}");
-            }
-        }
-
-        private void OnMenuShown()
-        {
-            // Update items when menu is shown
-            RefreshItems();
-
             // Trigger event to clear input state in patches
             OnMenuOpened?.Invoke();
         }
 
-        private void OnMenuHidden()
-        {
-            // Any cleanup needed when menu is hidden
-        }
-
-        private void OnItemInvoked(string itemId)
+        protected override void OnItemInvoked(int slotIndex)
         {
             try
             {
-                // Parse item index from ID
-                if (!int.TryParse(itemId, out int slotIndex))
-                {
-                    ModLogger.LogWarning($"ItemWheelMenu: Invalid item ID: {itemId}");
-                    return;
-                }
-
                 UseItem(slotIndex);
             }
             catch (Exception ex)
@@ -129,58 +65,8 @@ namespace EfDEnhanced.Features
             }
         }
 
-        public void Toggle()
+        protected override void RefreshItems()
         {
-            if (_pieMenu != null)
-            {
-                _pieMenu.Toggle();
-            }
-        }
-
-        public void Show()
-        {
-            if (_pieMenu != null)
-            {
-                _pieMenu.Show();
-            }
-        }
-
-        public void Hide(bool invokeSelectedItem = true)
-        {
-            if (_pieMenu != null)
-            {
-                _pieMenu.Hide(invokeSelectedItem);
-            }
-        }
-
-        /// <summary>
-        /// Cancel the wheel menu (for abnormal closes, never invokes items)
-        /// </summary>
-        public void Cancel()
-        {
-            if (_pieMenu != null)
-            {
-                _pieMenu.Cancel();
-            }
-        }
-
-        /// <summary>
-        /// Get the mouse position that should be used by the game's camera system
-        /// When wheel menu is open, return saved position to prevent camera movement
-        /// </summary>
-        public Vector2 GetOverrideMousePosition()
-        {
-            if (_pieMenu != null)
-            {
-                return _pieMenu.GetSavedMousePosition();
-            }
-            return Input.mousePosition;
-        }
-
-        private void RefreshItems()
-        {
-            if (_pieMenu == null) return;
-
             try
             {
                 List<PieMenuItem> items = new List<PieMenuItem>();
@@ -201,7 +87,7 @@ namespace EfDEnhanced.Features
                     }
                 }
 
-                _pieMenu.SetItems(items);
+                SetMenuItems(items);
             }
             catch (Exception ex)
             {
