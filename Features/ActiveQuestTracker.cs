@@ -1361,6 +1361,8 @@ public class QuestEntryUI
     private Quest? _currentQuest; // 保存当前任务引用，用于事件订阅
     private float _lastTaskStatusChangeTime = -1f; // 防抖：记录上次处理Task状态变化的时间
     private const float TASK_STATUS_DEBOUNCE_INTERVAL = 0.25f; // 防抖间隔（250ms）
+    private bool _taskStatusChangePending = false; // 防抖：标记是否有待处理的任务状态变更
+    private Coroutine? _debouncedUpdateCoroutine; // 防抖协程引用
 
     /// <summary>
     /// 订阅任务的Task事件
@@ -1431,9 +1433,25 @@ public class QuestEntryUI
                 float currentTime = Time.time;
                 if (currentTime - _lastTaskStatusChangeTime < TASK_STATUS_DEBOUNCE_INTERVAL)
                 {
-                    return; // 忽略此次调用，等待下一个防抖窗口
+                    // 标记为待处理，在防抖窗口结束后调用一次
+                    _taskStatusChangePending = true;
+                    // 如果还没有启动延迟更新协程，就启动一个
+                    if (_debouncedUpdateCoroutine == null && ActiveQuestTracker.Instance != null)
+                    {
+                        _debouncedUpdateCoroutine = ActiveQuestTracker.Instance.StartCoroutine(DebouncedUpdateCoroutine());
+                    }
+                    return;
                 }
+                
                 _lastTaskStatusChangeTime = currentTime;
+                _taskStatusChangePending = false;
+                
+                // 停止之前的延迟更新协程（如果有的话）
+                if (_debouncedUpdateCoroutine != null && ActiveQuestTracker.Instance != null)
+                {
+                    ActiveQuestTracker.Instance.StopCoroutine(_debouncedUpdateCoroutine);
+                    _debouncedUpdateCoroutine = null;
+                }
 
                 // ModLogger.Log("QuestTracker", $"Task status changed in quest {_currentQuest.ID} {_currentQuest.DisplayName}, updating display");
                 UpdateDisplay(_currentQuest);
@@ -1446,6 +1464,26 @@ public class QuestEntryUI
     }
 
     /// <summary>
+    /// 延迟更新协程 - 在防抖窗口结束后执行一次更新
+    /// </summary>
+    private System.Collections.IEnumerator DebouncedUpdateCoroutine()
+    {
+        // 等待防抖间隔剩余的时间
+        float remainingTime = TASK_STATUS_DEBOUNCE_INTERVAL - (Time.time - _lastTaskStatusChangeTime);
+        yield return new WaitForSeconds(Mathf.Max(0, remainingTime));
+
+        // 检查是否有待处理的更新
+        if (_taskStatusChangePending && _currentQuest != null)
+        {
+            _taskStatusChangePending = false;
+            _lastTaskStatusChangeTime = Time.time;
+            UpdateDisplay(_currentQuest);
+        }
+
+        _debouncedUpdateCoroutine = null;
+    }
+
+    /// <summary>
     /// 清理资源
     /// </summary>
     public void Cleanup()
@@ -1455,6 +1493,14 @@ public class QuestEntryUI
             UnsubscribeFromTaskEvents();
             _currentQuest = null;
             _lastTaskStatusChangeTime = -1f; // 重置防抖时间戳
+            _taskStatusChangePending = false; // 清除待处理标志
+            
+            // 停止任何正在运行的延迟更新协程
+            if (_debouncedUpdateCoroutine != null && ActiveQuestTracker.Instance != null)
+            {
+                ActiveQuestTracker.Instance.StopCoroutine(_debouncedUpdateCoroutine);
+                _debouncedUpdateCoroutine = null;
+            }
         }
         catch (Exception ex)
         {
