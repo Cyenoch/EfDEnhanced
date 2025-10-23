@@ -166,6 +166,28 @@ namespace EfDEnhanced.Utils
             )
         );
 
+        public static readonly KeyCodeSettingsEntry TrackerToggleHotkey = Register(
+            new KeyCodeSettingsEntry(
+                PREFIX,
+                "TrackerToggleHotkey",
+                "Settings_TrackerToggleHotkey_Name",
+                UnityEngine.KeyCode.Period, // Default: . key
+                CATEGORY_QUEST_TRACKER,
+                "Settings_TrackerToggleHotkey_Desc"
+            )
+        );
+
+        public static readonly BoolSettingsEntry TrackerHotkeyUsed = Register(
+            new BoolSettingsEntry(
+                PREFIX,
+                "TrackerHotkeyUsed",
+                "Settings_TrackerHotkeyUsed_Name",
+                false,
+                CATEGORY_QUEST_TRACKER,
+                "Settings_TrackerHotkeyUsed_Desc"
+            )
+        );
+
         #endregion
 
         #region Movement Enhancement Settings

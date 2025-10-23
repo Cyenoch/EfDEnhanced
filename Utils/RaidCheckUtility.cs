@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Duckov.ItemUsage;
+using Duckov.MasterKeys;
 using Duckov.Quests;
 using Duckov.Quests.Tasks;
 using Duckov.Scenes;
@@ -163,7 +164,7 @@ public class RaidCheckResult
             return LocalizationHelper.Get("RaidCheck_AllClear");
         }
 
-        return LocalizationHelper.Get("RaidCheck_HasIssues") + "\n" + string.Join("\n", warnings);
+        return LocalizationHelper.Get("RaidCheck_HasIssues") + string.Join("\n", warnings);
     }
 }
 
@@ -292,7 +293,7 @@ public static class RaidCheckUtility
     {
         // 使用统一的物品检查辅助类
         var basicEquipment = ItemCheckHelper.CheckBasicEquipment();
-        
+
         return new RaidCheckResult
         {
             HasWeapon = !ModSettings.CheckWeapon.Value || basicEquipment.HasWeapon,
@@ -439,25 +440,46 @@ public static class RaidCheckUtility
                     {
                         // 获取任务的场景信息
                         var questSceneInfo = quest.RequireSceneInfo;
+                        var taskSceneIDs = new List<string>();
 
-                        // 如果任务指定了特定场景要求
-                        if (questSceneInfo != null && !string.IsNullOrEmpty(questSceneInfo.ID))
+                        foreach (var task in quest.Tasks)
                         {
-                            // 只检查与目标场景匹配的任务
-                            if (questSceneInfo.ID != targetSceneID)
+                            if (task is QuestTask_ReachLocation rl)
                             {
-                                ModLogger.Log("QuestCheck", $"Skipping quest '{quest.DisplayName}' - requires scene '{questSceneInfo.ID}', target is '{targetSceneID}'");
-                                continue;
+                                var locationField = typeof(QuestTask_ReachLocation).GetField("location", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                                if (locationField?.GetValue(rl) is MultiSceneLocation location)
+                                {
+                                    var sceneIDField = typeof(MultiSceneLocation).GetField("sceneID", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                                    if (sceneIDField?.GetValue(location) is string sceneID && !string.IsNullOrEmpty(sceneID))
+                                    {
+                                        taskSceneIDs.Add(sceneID);
+                                    }
+                                }
                             }
-                            else
+                            if (task is QuestTask_KillCount kc)
                             {
-                                ModLogger.Log("QuestCheck", $"Checking quest '{quest.DisplayName}' - matches target scene '{targetSceneID}'");
+                                var requireSceneIDField = typeof(QuestTask_KillCount).GetField("requireSceneID", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                                if (requireSceneIDField?.GetValue(kc) is string sceneID && !string.IsNullOrEmpty(sceneID))
+                                {
+                                    taskSceneIDs.Add(sceneID);
+                                }
                             }
                         }
-                        // 如果任务没有指定场景要求，说明可以在任意地图完成，需要检查
-                        else
+
+                        // quest的子tasks可能用到的场景 和 自身要求的场景 ID，去重
+                        List<string> relatedSceneIDs = [.. taskSceneIDs.Append(questSceneInfo?.ID ?? string.Empty).Where(x => !string.IsNullOrEmpty(x)).Distinct()];
+                        if (relatedSceneIDs.Count == 0)
                         {
                             ModLogger.Log("QuestCheck", $"Checking quest '{quest.DisplayName}' - no scene requirement (can be done in any map)");
+                        }
+                        else
+                        {
+                            ModLogger.Log("QuestCheck", $"Checking quest '{quest.DisplayName}' - related scene '{string.Join(", ", relatedSceneIDs)}'");
+                            if (!relatedSceneIDs.Any(x => x == targetSceneID))
+                            {
+                                ModLogger.Log("QuestCheck", $"Skipping quest '{quest.DisplayName}' - related scene '{string.Join(", ", relatedSceneIDs)}', target is '{targetSceneID}'");
+                                continue;
+                            }
                         }
                     }
 
@@ -479,8 +501,17 @@ public static class RaidCheckUtility
                     }
 
                     // 只计算玩家当前携带的物品数量（背包+装备），不包括仓库
-                    int currentCount = InventoryHelper.CountItemsOfType(itemTypeID, 
+                    int currentCount = InventoryHelper.CountItemsOfType(itemTypeID,
                         ItemSourceFilter.CharacterInventory | ItemSourceFilter.PetInventory | ItemSourceFilter.SlotCollection);
+
+                    // 检查是否是钥匙，并且已有万能钥匙激活
+                    if (itemMeta.tags != null && itemMeta.tags.Any(tag => tag != null && tag.name == "Key"))
+                    {
+                        if (MasterKeysManager.IsActive(itemTypeID))
+                        {
+                            currentCount = requiredCount;
+                        }
+                    }
 
                     var requirement = new QuestItemRequirement
                     {
@@ -492,6 +523,7 @@ public static class RaidCheckUtility
                     };
 
                     questItems.Add(requirement);
+
 
                     string status = requirement.IsSatisfied ? "✓" : "✗";
                     ModLogger.Log("QuestCheck", $"{status} Quest: {quest.DisplayName}, Item: {itemMeta.DisplayName}, Required: {requiredCount}, Current: {currentCount}");

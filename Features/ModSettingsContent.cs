@@ -99,6 +99,7 @@ namespace EfDEnhanced.Features
                     .AddToggle("Settings_EnableQuestTracker_Name", ModSettings.EnableQuestTracker)
                     .AddToggle("Settings_TrackerShowDescription_Name", ModSettings.TrackerShowDescription, ModSettings.EnableQuestTracker, 30)
                     .AddToggle("Settings_TrackerFilterByMap_Name", ModSettings.TrackerFilterByMap, ModSettings.EnableQuestTracker, 30)
+                    .AddKeybinding(ModSettings.TrackerToggleHotkey)
                     .AddSlider("Settings_TrackerPositionX_Name", 0f, 1f, ModSettings.TrackerPositionX, visibilityCondition: ModSettings.EnableQuestTracker, leftPadding: 30)
                     .AddSlider("Settings_TrackerPositionY_Name", 0f, 1f, ModSettings.TrackerPositionY, visibilityCondition: ModSettings.EnableQuestTracker, leftPadding: 30)
                     .AddSlider("Settings_TrackerScale_Name", 0.5f, 2f, ModSettings.TrackerScale, visibilityCondition: ModSettings.EnableQuestTracker, leftPadding: 30)

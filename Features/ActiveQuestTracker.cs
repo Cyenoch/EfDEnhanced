@@ -84,8 +84,8 @@ public class ActiveQuestTracker : MonoBehaviour
             return;
         }
 
-        // 支持主键盘和小键盘上的"."键以及部分输入法下的句号（兼容更多布局）
-        if (Input.GetKeyDown(KeyCode.Period) || Input.GetKeyDown(KeyCode.KeypadPeriod))
+        // 检查折叠/展开快捷键
+        if (Input.GetKeyDown(ModSettings.TrackerToggleHotkey.Value))
         {
             ToggleCollapse();
         }
@@ -165,6 +165,9 @@ public class ActiveQuestTracker : MonoBehaviour
             LayoutElement helpTextLayout = _helpTextObject.AddComponent<LayoutElement>();
             helpTextLayout.preferredHeight = -1;
 
+            // 根据是否首次使用来设置提示文本的初始可见性
+            UpdateHelpTextVisibility();
+
             // 直接创建任务列表容器（不使用ScrollRect）
             _questListContainer = new GameObject("QuestListContainer");
             _questListContainer.transform.SetParent(_questPanel.transform, false);
@@ -193,17 +196,41 @@ public class ActiveQuestTracker : MonoBehaviour
     }
 
     /// <summary>
+    /// 更新帮助文本的可见性（首次使用后隐藏）
+    /// </summary>
+    private void UpdateHelpTextVisibility()
+    {
+        try
+        {
+            if (_helpTextObject != null)
+            {
+                // 如果用户已经使用过快捷键，则隐藏提示文本
+                bool shouldShow = !ModSettings.TrackerHotkeyUsed.Value;
+                _helpTextObject.SetActive(shouldShow);
+                ModLogger.Log("QuestTracker", $"Help text visibility: {shouldShow}");
+            }
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestTracker.UpdateHelpTextVisibility failed: {ex}");
+        }
+    }
+
+    /// <summary>
     /// 切换折叠/展开状态
     /// </summary>
     private void ToggleCollapse()
     {
         try
         {
+
             _isCollapsed = !_isCollapsed;
 
-            if (_questListContainer != null)
+            _questListContainer?.SetActive(!_isCollapsed);
+
+            if (!ModSettings.TrackerHotkeyUsed.Value)
             {
-                _questListContainer.SetActive(!_isCollapsed);
+                ModSettings.TrackerHotkeyUsed.Value = true;
             }
 
             ModLogger.Log("QuestTracker", $"Tracker {(_isCollapsed ? "collapsed" : "expanded")}");
@@ -250,6 +277,7 @@ public class ActiveQuestTracker : MonoBehaviour
             ModSettings.TrackerScale.ValueChanged += OnTrackerScaleChanged;
             ModSettings.TrackerShowDescription.ValueChanged += OnShowDescriptionChanged;
             ModSettings.TrackerFilterByMap.ValueChanged += OnFilterByMapChanged;
+            ModSettings.TrackerHotkeyUsed.ValueChanged += OnHotkeyUsedChanged;
 
             // 延迟刷新任务列表，等待玩家背包/装备完全加载
             // 这样 SubmitItems 任务的持有数量才能正确显示
@@ -301,6 +329,7 @@ public class ActiveQuestTracker : MonoBehaviour
             ModSettings.TrackerScale.ValueChanged -= OnTrackerScaleChanged;
             ModSettings.TrackerShowDescription.ValueChanged -= OnShowDescriptionChanged;
             ModSettings.TrackerFilterByMap.ValueChanged -= OnFilterByMapChanged;
+            ModSettings.TrackerHotkeyUsed.ValueChanged -= OnHotkeyUsedChanged;
         }
         catch (Exception ex)
         {
@@ -485,17 +514,56 @@ public class ActiveQuestTracker : MonoBehaviour
                 }
 
                 // 如果任务的场景ID匹配当前地图，显示
-                bool matches = questSceneInfo.ID == currentMapID;
-                if (matches)
+                if (questSceneInfo.ID == currentMapID)
                 {
                     ModLogger.Log("QuestTracker", $"Quest '{q.DisplayName}' matches current map '{currentMapID}' - showing");
+                    return true;
                 }
                 else
                 {
-                    ModLogger.Log("QuestTracker", $"Quest '{q.DisplayName}' requires map '{questSceneInfo.ID}' but current is '{currentMapID}' - hiding");
+                    List<string> taskSceneIDs = [];
+                    // 可能子task有不同地图要求
+                    foreach (var task in q.Tasks)
+                    {
+                        if (task is QuestTask_ReachLocation rl)
+                        {
+                            var locationField = typeof(QuestTask_ReachLocation).GetField("location", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                            if (locationField?.GetValue(rl) is MultiSceneLocation location)
+                            {
+                                var sceneIDField = typeof(MultiSceneLocation).GetField("sceneID", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                                if (sceneIDField?.GetValue(location) is string sceneID && !string.IsNullOrEmpty(sceneID))
+                                {
+                                    taskSceneIDs.Add(sceneID);
+                                }
+                            }
+                        }
+                        if (task is QuestTask_Evacuate evacuate)
+                        {
+                            var requireSceneIDField = typeof(QuestTask_Evacuate).GetField("requireSceneID", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                            if (requireSceneIDField?.GetValue(evacuate) is string sceneID && !string.IsNullOrEmpty(sceneID))
+                            {
+                                taskSceneIDs.Add(sceneID);
+                            }
+                        }
+                        if (task is QuestTask_KillCount killCount)
+                        {
+                            var requireSceneIDField = typeof(QuestTask_KillCount).GetField("requireSceneID", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                            if (requireSceneIDField?.GetValue(killCount) is string sceneID && !string.IsNullOrEmpty(sceneID))
+                            {
+                                taskSceneIDs.Add(sceneID);
+                            }
+                        }
+                    }
+                    if (taskSceneIDs.Count > 0 && taskSceneIDs.Any(x => x == currentMapID))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        ModLogger.Log("QuestTracker", $"Quest '{q.DisplayName}' requires map '{questSceneInfo.ID}' but current is '{currentMapID}' - hiding");
+                    }
                 }
-
-                return matches;
+                return false;
             }).ToList();
 
             ModLogger.Log("QuestTracker", $"Filtered {quests.Count} quests to {filteredQuests.Count} for map '{currentMapID}'");
@@ -1106,7 +1174,19 @@ public class ActiveQuestTracker : MonoBehaviour
             float xPos = ModSettings.TrackerPositionX.Value * screenWidth;
             float yPos = -ModSettings.TrackerPositionY.Value * screenHeight;
 
-            ModLogger.Log("QuestTracker", $"Position calculation: X={ModSettings.TrackerPositionX.Value} * {screenWidth} = {xPos}, Y={ModSettings.TrackerPositionY.Value} * {screenHeight} = {yPos}");
+            if (!ModSettings.TrackerPositionY.WasModifiedByUser)
+            {
+
+                // 计算 TimeOfDayDisplay 的偏移量以避免重叠
+                float timeDisplayOffset = CalculateTimeOfDayDisplayOffset();
+                yPos -= timeDisplayOffset;
+                ModLogger.Log("QuestTracker", $"Position calculation: X={ModSettings.TrackerPositionX.Value} * {screenWidth} = {xPos}, Y={ModSettings.TrackerPositionY.Value} * {screenHeight} = {yPos}, TimeDisplay offset: {timeDisplayOffset}");
+
+            }
+            else
+            {
+                ModLogger.Log("QuestTracker", $"TrackerPositionY WasModifiedByUser is true, not calculating TimeOfDayDisplay offset");
+            }
 
             panelRect.anchoredPosition = new Vector2(xPos, yPos);
 
@@ -1119,6 +1199,63 @@ public class ActiveQuestTracker : MonoBehaviour
         catch (Exception ex)
         {
             ModLogger.LogError($"QuestTracker.ApplySettingsToUI failed: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// 计算 TimeOfDayDisplay 的高度偏移量，用于避免 UI 重叠
+    /// </summary>
+    private float CalculateTimeOfDayDisplayOffset()
+    {
+        try
+        {
+            // 查找场景中的 TimeOfDayDisplay 组件
+            TimeOfDayDisplay? timeDisplay = FindObjectOfType<TimeOfDayDisplay>();
+            if (timeDisplay == null)
+            {
+                ModLogger.Log("QuestTracker", "TimeOfDayDisplay not found in scene");
+                return 0f;
+            }
+
+            // 获取 stormTitleText 的 RectTransform
+            if (timeDisplay.stormTitleText == null)
+            {
+                ModLogger.Log("QuestTracker", "stormTitleText not found in TimeOfDayDisplay");
+                return 0f;
+            }
+
+            RectTransform stormTextRect = timeDisplay.stormTitleText.GetComponent<RectTransform>();
+            if (stormTextRect == null)
+            {
+                ModLogger.Log("QuestTracker", "RectTransform not found for stormTitleText");
+                return 0f;
+            }
+
+            // 获取 stormTitleText 在屏幕空间中的位置
+            // 由于它是左上角锚点，我们需要计算它的底部位置
+            Vector3[] worldCorners = new Vector3[4];
+            stormTextRect.GetWorldCorners(worldCorners);
+
+            // worldCorners[0] 是左下角，worldCorners[1] 是左上角
+            // 我们需要知道从屏幕顶部到 stormTitleText 底部的距离
+            float screenTop = Screen.height;
+            float stormTextBottom = worldCorners[0].y;
+
+            // 计算从屏幕顶部到 stormText 底部的距离
+            float distanceFromTop = screenTop - stormTextBottom;
+
+            // 添加额外的边距（比如 20 像素）
+            float additionalMargin = 20f;
+            float totalOffset = distanceFromTop + additionalMargin;
+
+            ModLogger.Log("QuestTracker", $"TimeOfDayDisplay offset calculated: {totalOffset}px (stormText bottom: {stormTextBottom}, screen top: {screenTop}, margin: {additionalMargin})");
+
+            return totalOffset;
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestTracker.CalculateTimeOfDayDisplayOffset failed: {ex}");
+            return 0f;
         }
     }
 
@@ -1166,6 +1303,14 @@ public class ActiveQuestTracker : MonoBehaviour
             // 刷新任务列表以应用新的过滤规则
             ModLogger.Log("QuestTracker", $"Map filter setting changed to: {args.NewValue}");
             RefreshQuestList();
+        }
+    }
+
+    private void OnHotkeyUsedChanged(object? sender, SettingsValueChangedEventArgs<bool> args)
+    {
+        if (_isActive)
+        {
+            UpdateHelpTextVisibility();
         }
     }
 }

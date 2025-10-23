@@ -7,6 +7,7 @@ using EfDEnhanced.Utils.UI.Constants;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 namespace EfDEnhanced.Features;
 
@@ -110,32 +111,87 @@ public class RaidPreparationView : MonoBehaviour
         _titleText.alignment = TextAlignmentOptions.Center;
         _titleText.color = new Color(1f, 0.8f, 0f);
 
-        // 创建警告文本容器（带边距）
-        GameObject warningContainer = new("WarningContainer");
-        warningContainer.transform.SetParent(_panel.transform, false);
+        // 创建滚动视图容器
+        GameObject scrollViewContainer = new("ScrollViewContainer");
+        scrollViewContainer.transform.SetParent(_panel.transform, false);
 
-        RectTransform containerRect = warningContainer.AddComponent<RectTransform>();
-        containerRect.anchorMin = new Vector2(0.5f, 0.5f);
-        containerRect.anchorMax = new Vector2(0.5f, 0.5f);
-        containerRect.sizeDelta = new Vector2(700, 350);
-        containerRect.anchoredPosition = new Vector2(0, 20);
+        RectTransform scrollContainerRect = scrollViewContainer.AddComponent<RectTransform>();
+        scrollContainerRect.anchorMin = new Vector2(0.5f, 0.5f);
+        scrollContainerRect.anchorMax = new Vector2(0.5f, 0.5f);
+        scrollContainerRect.sizeDelta = new Vector2(700, 350);
+        scrollContainerRect.anchoredPosition = new Vector2(0, 20);
+
+        // 添加背景
+        Image scrollBgImage = scrollViewContainer.AddComponent<Image>();
+        scrollBgImage.color = new Color(0.1f, 0.1f, 0.1f, 0.5f);
+        scrollBgImage.raycastTarget = false; // 避免拦截滚轮事件
+
+        // 创建 ScrollRect
+        ScrollRect scrollRect = scrollViewContainer.AddComponent<ScrollRect>();
+        scrollRect.horizontal = false;
+        scrollRect.vertical = true;
+        scrollRect.scrollSensitivity = 20f;
+        scrollRect.movementType = ScrollRect.MovementType.Clamped;
+        scrollRect.inertia = true;
+        scrollRect.decelerationRate = 0.135f;
+
+        // 创建 Viewport
+        GameObject viewport = new("Viewport");
+        viewport.transform.SetParent(scrollViewContainer.transform, false);
+
+        RectTransform viewportRect = viewport.AddComponent<RectTransform>();
+        viewportRect.anchorMin = Vector2.zero;
+        viewportRect.anchorMax = Vector2.one;
+        viewportRect.sizeDelta = Vector2.zero;
+        viewportRect.offsetMin = new Vector2(10, 10); // 边距
+        viewportRect.offsetMax = new Vector2(-10, -10);
+
+        // 需要一个可射线的组件作为 Viewport 承载滚轮事件
+        Image viewportImage = viewport.AddComponent<Image>();
+        viewportImage.color = Color.clear; // 透明但可射线
+        viewport.AddComponent<RectMask2D>(); // 使用 Mask 裁剪内容
+        scrollRect.viewport = viewportRect;
+
+        // 创建 Content 容器
+        GameObject content = new("Content");
+        content.transform.SetParent(viewport.transform, false);
+
+        RectTransform contentRect = content.AddComponent<RectTransform>();
+        contentRect.anchorMin = new Vector2(0f, 1f); // 左上角锚点
+        contentRect.anchorMax = new Vector2(1f, 1f);
+        contentRect.pivot = new Vector2(0.5f, 1f); // 从顶部开始
+        contentRect.sizeDelta = new Vector2(0, 0); // 宽度匹配父级，高度自适应
+
+        // 添加 VerticalLayoutGroup 控制子元素布局
+        VerticalLayoutGroup contentLayout = content.AddComponent<VerticalLayoutGroup>();
+        contentLayout.childControlHeight = true;
+        contentLayout.childControlWidth = true;
+        contentLayout.childForceExpandHeight = false;
+        contentLayout.childForceExpandWidth = true;
+        contentLayout.padding = new RectOffset(20, 20, 10, 10); // 内边距
+        
+        // 添加 ContentSizeFitter 自动调整高度
+        ContentSizeFitter contentFitter = content.AddComponent<ContentSizeFitter>();
+        contentFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+        contentFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        scrollRect.content = contentRect;
 
         // 创建警告文本
-        GameObject warningObj = new("Warning");
-        warningObj.transform.SetParent(warningContainer.transform, false);
-
-        RectTransform warningRect = warningObj.AddComponent<RectTransform>();
-        warningRect.anchorMin = Vector2.zero;
-        warningRect.anchorMax = Vector2.one;
-        warningRect.offsetMin = new Vector2(30, 10); // 左下边距
-        warningRect.offsetMax = new Vector2(-30, -10); // 右上边距
+        GameObject warningObj = new("WarningText");
+        warningObj.transform.SetParent(content.transform, false);
 
         _warningText = warningObj.AddComponent<TextMeshProUGUI>();
         _warningText.fontSize = UIConstants.RAID_CHECK_WARNING_FONT_SIZE;
         _warningText.alignment = TextAlignmentOptions.TopLeft;
         _warningText.color = Color.white;
         _warningText.enableWordWrapping = true; // 启用自动换行
-        _warningText.overflowMode = TextOverflowModes.Overflow; // 允许内容溢出但会换行
+        _warningText.overflowMode = TextOverflowModes.Overflow; // 允许扩展，由ContentSizeFitter控制
+        
+        // 添加 ContentSizeFitter 让文本高度自适应
+        ContentSizeFitter textFitter = warningObj.AddComponent<ContentSizeFitter>();
+        textFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        textFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
 
         // 创建按钮容器
         GameObject buttonContainer = new("ButtonContainer");
@@ -170,6 +226,15 @@ public class RaidPreparationView : MonoBehaviour
             .Build();
         _confirmButton = confirmButtonObj.GetComponent<Button>();
 
+        // 确保存在 EventSystem 以接收滚轮和点击事件
+        if (EventSystem.current == null)
+        {
+            GameObject eventSystemObj = new("EventSystem");
+            eventSystemObj.transform.SetParent(_rootCanvas.transform, false);
+            eventSystemObj.AddComponent<EventSystem>();
+            eventSystemObj.AddComponent<StandaloneInputModule>();
+        }
+
         // 默认隐藏
         _rootCanvas.SetActive(false);
     }
@@ -189,6 +254,21 @@ public class RaidPreparationView : MonoBehaviour
 
             // 显示UI并禁用玩家输入
             _rootCanvas.SetActive(true);
+            
+            // 等待一帧让 TextMeshPro 和 ContentSizeFitter 计算完成
+            await UniTask.Yield();
+            
+            // 强制重建布局
+            Canvas.ForceUpdateCanvases();
+            RectTransform? contentRect = _warningText.rectTransform.parent as RectTransform;
+            if (contentRect != null)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(contentRect);
+                
+                // 调试信息
+                ModLogger.Log("RaidPreparationView", $"Content size: {contentRect.sizeDelta}, Text preferred height: {_warningText.preferredHeight}");
+            }
+            
             InputManager.DisableInput(gameObject);
 
             ModLogger.Log("RaidPreparationView", "View opened, waiting for user input");

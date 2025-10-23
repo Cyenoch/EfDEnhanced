@@ -158,6 +158,10 @@ public static class LocalizationHelper
             { "Settings_TrackerShowDescription_Desc", "在追踪器中显示任务描述" },
             { "Settings_TrackerFilterByMap_Name", "只显示当前地图任务" },
             { "Settings_TrackerFilterByMap_Desc", "只显示当前地图相关的任务，以及没有地图限制的任务" },
+            { "Settings_TrackerToggleHotkey_Name", "任务追踪器折叠/展开快捷键" },
+            { "Settings_TrackerToggleHotkey_Desc", "按此键折叠或展开任务追踪列表" },
+            { "Settings_TrackerHotkeyUsed_Name", "快捷键已使用标记" },
+            { "Settings_TrackerHotkeyUsed_Desc", "内部设置：标记用户是否已使用过显示/隐藏快捷键" },
 
             // Movement Enhancement Settings
             { "Settings_MovementEnhancement_Name", "移动响应增强" },
@@ -247,6 +251,10 @@ public static class LocalizationHelper
             { "Settings_TrackerShowDescription_Desc", "在追蹤器中顯示任務描述" },
             { "Settings_TrackerFilterByMap_Name", "只顯示當前地圖任務" },
             { "Settings_TrackerFilterByMap_Desc", "只顯示當前地圖相關的任務，以及沒有地圖限制的任務" },
+            { "Settings_TrackerToggleHotkey_Name", "任務追蹤器折疊/展開快捷鍵" },
+            { "Settings_TrackerToggleHotkey_Desc", "按此鍵折疊或展開任務追蹤列表" },
+            { "Settings_TrackerHotkeyUsed_Name", "快捷鍵已使用標記" },
+            { "Settings_TrackerHotkeyUsed_Desc", "內部設置：標記用戶是否已使用過顯示/隱藏快捷鍵" },
 
             // Movement Enhancement Settings
             { "Settings_MovementEnhancement_Name", "移動響應增強" },
@@ -336,6 +344,10 @@ public static class LocalizationHelper
             { "Settings_TrackerShowDescription_Desc", "Display quest descriptions in tracker" },
             { "Settings_TrackerFilterByMap_Name", "Show Only Current Map Quests" },
             { "Settings_TrackerFilterByMap_Desc", "Show only quests for the current map and quests without map requirements" },
+            { "Settings_TrackerToggleHotkey_Name", "Quest Tracker Collapse/Expand Hotkey" },
+            { "Settings_TrackerToggleHotkey_Desc", "Press this key to collapse or expand the quest tracker list" },
+            { "Settings_TrackerHotkeyUsed_Name", "Hotkey Used Flag" },
+            { "Settings_TrackerHotkeyUsed_Desc", "Internal setting: Marks whether the user has used the show/hide hotkey" },
 
             // Movement Enhancement Settings
             { "Settings_MovementEnhancement_Name", "Movement Response Enhancement" },
@@ -425,6 +437,10 @@ public static class LocalizationHelper
             { "Settings_TrackerShowDescription_Desc", "トラッカーにクエスト説明を表示" },
             { "Settings_TrackerFilterByMap_Name", "現在のマップのクエストのみ表示" },
             { "Settings_TrackerFilterByMap_Desc", "現在のマップに関連するクエストと、マップ制限のないクエストのみ表示" },
+            { "Settings_TrackerToggleHotkey_Name", "クエストトラッカー折りたたみホットキー" },
+            { "Settings_TrackerToggleHotkey_Desc", "このキーを押してクエストトラッカーリストを折りたたむ/展開する" },
+            { "Settings_TrackerHotkeyUsed_Name", "ホットキー使用済みフラグ" },
+            { "Settings_TrackerHotkeyUsed_Desc", "内部設定：ユーザーが表示/非表示ホットキーを使用したかどうかを示す" },
 
             // Movement Enhancement Settings
             { "Settings_MovementEnhancement_Name", "移動レスポンス強化" },
