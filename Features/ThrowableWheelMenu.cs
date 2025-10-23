@@ -142,7 +142,11 @@ namespace EfDEnhanced.Features
                 ThrowableStack stack = _throwableStacks[stackIndex];
                 if (stack.Items.Count > 0)
                 {
-                    UseThrowableItem(stack.Items[0]);
+                    var item = stack.Items[0];
+                    if (item != null)
+                    {
+                        ItemUsageHelper.UseItem(item);
+                    }
                 }
                 else
                 {
@@ -291,7 +295,8 @@ namespace EfDEnhanced.Features
                     menuItems.Add(new PieMenuItem(
                         (_throwableStacks.Count - 1).ToString(),
                         stack.Icon,
-                        stack.TotalCount
+                        stack.TotalCount,
+                        stack.DisplayName
                     ));
 
                     ModLogger.Log("ThrowableWheelMenu",
@@ -306,32 +311,6 @@ namespace EfDEnhanced.Features
             catch (Exception ex)
             {
                 ModLogger.LogError($"ThrowableWheelMenu: Failed to refresh items: {ex}");
-            }
-        }
-
-        private void UseThrowableItem(Item item)
-        {
-            try
-            {
-                if (Character == null)
-                {
-                    ModLogger.LogWarning("ThrowableWheelMenu: Character is null, cannot use item");
-                    return;
-                }
-
-                if (item == null)
-                {
-                    ModLogger.LogWarning("ThrowableWheelMenu: Item is null");
-                    return;
-                }
-
-                // Equip the throwable as a skill item
-                Character.ChangeHoldItem(item);
-                ModLogger.Log("ThrowableWheelMenu", $"Equipped throwable: {item.DisplayName}");
-            }
-            catch (Exception ex)
-            {
-                ModLogger.LogError($"ThrowableWheelMenu: Failed to use throwable item: {ex}");
             }
         }
     }

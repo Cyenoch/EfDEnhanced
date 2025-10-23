@@ -191,13 +191,13 @@ namespace EfDEnhanced.Features
 
                     if (item != null && item.Icon != null)
                     {
-                        items.Add(new PieMenuItem(i.ToString(), item.Icon));
+                        items.Add(new PieMenuItem(i.ToString(), item.Icon, item.StackCount, item.DisplayName));
                         ModLogger.Log("ItemWheelMenu", $"Slot {i}: {item.DisplayName}");
                     }
                     else
                     {
                         // Add empty slot
-                        items.Add(new PieMenuItem(i.ToString(), null));
+                        items.Add(new PieMenuItem(i.ToString(), null, 1, "Empty"));
                     }
                 }
 
@@ -227,26 +227,27 @@ namespace EfDEnhanced.Features
                     return;
                 }
 
-                // Use the same logic as ItemShortcutButton
-                if (item.UsageUtilities != null && item.UsageUtilities.IsUsable(item, Character))
+                // Check if item is a container - if so, show ContainerWheelMenu instead
+                if (ItemUsageHelper.IsContainer(item))
                 {
-                    Character.UseItem(item);
-                    ModLogger.Log("ItemWheelMenu", $"Used item: {item.DisplayName}");
+                    // Close this menu and open container menu
+                    Hide(false);
+
+                    var containerMenu = ContainerWheelMenu.Instance;
+                    if (containerMenu != null)
+                    {
+                        containerMenu.Show(item);
+                    }
+                    else
+                    {
+                        ModLogger.LogWarning("ItemWheelMenu: ContainerWheelMenu instance not found");
+                    }
+
+                    return;
                 }
-                else if (item.GetBool("IsSkill"))
-                {
-                    Character.ChangeHoldItem(item);
-                    ModLogger.Log("ItemWheelMenu", $"Equipped skill: {item.DisplayName}");
-                }
-                else if (item.HasHandHeldAgent)
-                {
-                    Character.ChangeHoldItem(item);
-                    ModLogger.Log("ItemWheelMenu", $"Equipped item: {item.DisplayName}");
-                }
-                else
-                {
-                    ModLogger.LogWarning($"ItemWheelMenu: Item {item.DisplayName} is not usable");
-                }
+
+                // Use ItemUsageHelper to handle the item
+                ItemUsageHelper.UseItem(item);
             }
             catch (Exception ex)
             {
