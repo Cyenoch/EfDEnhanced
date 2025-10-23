@@ -1,43 +1,43 @@
-[h1]更新日志 | Changelog[/h1]
-[h2]2510232230[/h2]
-[h3]功能更新 | Features Update[/h3]
+# 2510232230
+
+[h1]更新日志[/h1]
+[h3]功能更新[/h3]
 [list]
-[*][b]任务追踪器快捷键[/b] - 加了个快捷键（默认 . 键）可以快速折叠/展开追踪器，这样就不用每次都去点UI了
-[*][b]智能帮助文本[/b] - 第一次进突袭的时候会提示你怎么用快捷键，用过之后就自动消失了，老玩家不会被烦到
-[*][b]设置面板完善[/b] - MOD 设置里加了追踪器快捷键的选项，支持自定义，想改快捷键直接去设置里改
+[*][b]任务追踪器快捷键[/b] - 新增了一个快捷键（默认 . 键），可以快速折叠/展开任务追踪器，无需每次手动点击界面
+[*][b]智能帮助文本[/b] - 首次进入突袭时会自动提示快捷键用法，使用后提示自动隐藏，不会频繁打扰老玩家
+[*][b]设置面板完善[/b] - MOD 设置中增加了快捷键选项，支持自定义调整
 [/list]
-[h3]文档更新 | Documentation[/h3]
+[h3]文档更新[/h3]
 [list]
-[*]README 更新了快捷键的用法说明
-[*]Steam 页面同步了最新功能说明
+[*]README 补充了快捷键的使用方法
+[*]Steam 页面已同步最新功能描述
 [/list]
-[h3]技术改进 | Technical[/h3]
+[h3]技术改进[/h3]
 [list]
-[*]ActiveQuestTracker - 新增快捷键切换逻辑和帮助文本管理
-[*]RaidPreparationView - 增强了 UI 交互体验
-[*]ModSettings - 添加了 TrackerToggleHotkey 和 TrackerHotkeyUsed 设置项
-[*]LocalizationHelper - 完整的多语言支持（中、繁、英、日）
-[*]优化了一些工具类的性能
+[*]ActiveQuestTracker - 增加了快捷键切换与帮助文本相关逻辑
+[*]RaidPreparationView - 改进了界面交互体验
+[*]ModSettings - 新增 TrackerToggleHotkey、TrackerHotkeyUsed 配置项
+[*]LocalizationHelper - 多语言支持（中、繁、英、日）
+[*]部分工具类性能优化
 [/list]
 [hr][/hr]
-[h1]Update Log | 更新日志[/h1]
-[h2]2510232230[/h2]
-[h3]Features Update | 功能更新[/h3]
+[h1]Update Log[/h1]
+[h3]Features Update[/h3]
 [list]
-[*][b]Quest Tracker Hotkey[/b] - Added a hotkey (default . key) to quickly collapse/expand the tracker, no need to click UI every time
-[*][b]Smart Help Text[/b] - Shows a tip on first raid about how to use the hotkey, then disappears automatically after use to not bother veteran players
-[*][b]Settings Panel Enhancement[/b] - Added tracker hotkey option in MOD settings with full customization support
+[*][b]Quest Tracker Hotkey[/b] - Added a hotkey (default .) for quick collapse/expand of the tracker
+[*][b]Smart Help Text[/b] - Shows tip on first raid, auto hides after use
+[*][b]Settings Panel Enhancement[/b] - Added option for tracker hotkey customization in mod settings
 [/list]
-[h3]Documentation | 文档更新[/h3]
+[h3]Documentation[/h3]
 [list]
-[*]Updated README with hotkey usage instructions
-[*]Synced Steam page with latest feature descriptions
+[*]README updated with hotkey usage
+[*]Steam page synced with latest features
 [/list]
-[h3]Technical | 技术改进[/h3]
+[h3]Technical[/h3]
 [list]
-[*]ActiveQuestTracker - New hotkey toggle and help text management logic
-[*]RaidPreparationView - Enhanced UI interaction experience
-[*]ModSettings - Added TrackerToggleHotkey and TrackerHotkeyUsed settings entries
-[*]LocalizationHelper - Complete multi-language support (Chinese, Traditional Chinese, English, Japanese)
-[*]Performance optimization in utility classes
+[*]ActiveQuestTracker - Hotkey toggle & help text logic
+[*]RaidPreparationView - UI interaction improvements
+[*]ModSettings - TrackerToggleHotkey & TrackerHotkeyUsed added
+[*]LocalizationHelper - Full multi-language support
+[*]Utility class optimizations
 [/list]
