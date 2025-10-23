@@ -57,4 +57,16 @@ public static class ModLogger
     {
         Debug.LogError($"{ModPrefix}[{component}] {message}");
     }
+
+    [System.Diagnostics.Conditional("VERBOSE")]
+    public static void VerboseLog(string message)
+    {
+        Debug.Log($"{ModPrefix} {message}");
+    }
+    [System.Diagnostics.Conditional("VERBOSE")]
+    public static void VerboseLog(string component, string message)
+    {
+        Debug.Log($"{ModPrefix}[{component}] {message}");
+    }
+
 }
