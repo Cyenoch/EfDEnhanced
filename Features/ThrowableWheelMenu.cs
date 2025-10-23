@@ -243,11 +243,11 @@ namespace EfDEnhanced.Features
                 _throwableStacks.Clear();
                 List<PieMenuItem> menuItems = new List<PieMenuItem>();
 
-                // Get character item (contains inventory)
-                Item? characterItem = Character?.CharacterItem;
-                if (characterItem == null || characterItem.Inventory == null)
+                // 使用 InventoryHelper 获取角色背包中的所有物品（包括嵌套物品）
+                var allItems = InventoryHelper.GetPlayerItems(ItemSourceFilter.CharacterInventory);
+                if (allItems.Count == 0)
                 {
-                    ModLogger.LogWarning("ThrowableWheelMenu: Character or inventory is null");
+                    ModLogger.LogWarning("ThrowableWheelMenu: No items found in inventory");
                     _pieMenu.SetItems(menuItems);
                     return;
                 }
@@ -255,8 +255,8 @@ namespace EfDEnhanced.Features
                 // Dictionary to group items by TypeID
                 Dictionary<int, ThrowableStack> stacksByTypeID = new Dictionary<int, ThrowableStack>();
 
-                // Iterate through all items in character inventory
-                foreach (Item item in characterItem.Inventory)
+                // Filter throwable items
+                foreach (Item item in allItems)
                 {
                     if (item == null) continue;
 
