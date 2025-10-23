@@ -207,7 +207,16 @@ public class ActiveQuestTracker : MonoBehaviour
                 // 如果用户已经使用过快捷键，则隐藏提示文本
                 bool shouldShow = !ModSettings.TrackerHotkeyUsed.Value;
                 _helpTextObject.SetActive(shouldShow);
-                ModLogger.Log("QuestTracker", $"Help text visibility: {shouldShow}");
+                
+                // 获取 LayoutElement 并设置 ignoreLayout
+                // 这样隐藏时就不会占据空间
+                LayoutElement? layoutElement = _helpTextObject.GetComponent<LayoutElement>();
+                if (layoutElement != null)
+                {
+                    layoutElement.ignoreLayout = !shouldShow;
+                }
+                
+                ModLogger.Log("QuestTracker", $"Help text visibility: {shouldShow}, ignoreLayout: {!shouldShow}");
             }
         }
         catch (Exception ex)
@@ -1153,16 +1162,36 @@ public class ActiveQuestTracker : MonoBehaviour
     }
 
     /// <summary>
-    /// 应用设置到UI（位置、缩放）
+    /// 应用设置到UI（位置、缩放）- 延迟一帧执行以确保 UI 布局完全更新
     /// </summary>
     private void ApplySettingsToUI()
     {
         try
         {
-            if (_questPanel == null) return;
+            // 如果我们在设置面板中调整滑块时调用这个方法，需要延迟一帧
+            // 以确保 UI 布局系统已经完全更新
+            StartCoroutine(DelayedApplySettingsToUI());
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestTracker.ApplySettingsToUI failed: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// 延迟一帧后应用设置到UI
+    /// </summary>
+    private System.Collections.IEnumerator DelayedApplySettingsToUI()
+    {
+        // 等待一帧以确保 UI 布局完全更新
+        yield return null;
+
+        try
+        {
+            if (_questPanel == null) yield break;
 
             RectTransform panelRect = _questPanel.GetComponent<RectTransform>();
-            if (panelRect == null) return;
+            if (panelRect == null) yield break;
 
             // 应用位置设置
             float screenWidth = Screen.width;
@@ -1198,7 +1227,7 @@ public class ActiveQuestTracker : MonoBehaviour
         }
         catch (Exception ex)
         {
-            ModLogger.LogError($"QuestTracker.ApplySettingsToUI failed: {ex}");
+            ModLogger.LogError($"QuestTracker.DelayedApplySettingsToUI failed: {ex}");
         }
     }
 
@@ -1330,6 +1359,8 @@ public class QuestEntryUI
     private readonly List<TaskUIElement> _taskElements = [];
     private string _lastProgressText = "";
     private Quest? _currentQuest; // 保存当前任务引用，用于事件订阅
+    private float _lastTaskStatusChangeTime = -1f; // 防抖：记录上次处理Task状态变化的时间
+    private const float TASK_STATUS_DEBOUNCE_INTERVAL = 0.25f; // 防抖间隔（250ms）
 
     /// <summary>
     /// 订阅任务的Task事件
@@ -1396,7 +1427,15 @@ public class QuestEntryUI
         {
             if (_currentQuest != null)
             {
-                ModLogger.Log("QuestTracker", $"Task status changed in quest {_currentQuest.ID}, updating display");
+                // 防抖检查：避免在短时间内多次处理相同的事件
+                float currentTime = Time.time;
+                if (currentTime - _lastTaskStatusChangeTime < TASK_STATUS_DEBOUNCE_INTERVAL)
+                {
+                    return; // 忽略此次调用，等待下一个防抖窗口
+                }
+                _lastTaskStatusChangeTime = currentTime;
+
+                // ModLogger.Log("QuestTracker", $"Task status changed in quest {_currentQuest.ID} {_currentQuest.DisplayName}, updating display");
                 UpdateDisplay(_currentQuest);
             }
         }
@@ -1415,6 +1454,7 @@ public class QuestEntryUI
         {
             UnsubscribeFromTaskEvents();
             _currentQuest = null;
+            _lastTaskStatusChangeTime = -1f; // 重置防抖时间戳
         }
         catch (Exception ex)
         {

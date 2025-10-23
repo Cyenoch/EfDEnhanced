@@ -15,6 +15,7 @@ namespace EfDEnhanced.Features
     public class ModSettingsContent : MonoBehaviour
     {
         private FormBuilder? _formBuilder;
+        private bool _isBuilt = false;
 
         /// <summary>
         /// Build the settings content (called by patch)
@@ -23,11 +24,19 @@ namespace EfDEnhanced.Features
         {
             try
             {
+                // Prevent rebuilding if already built
+                if (_isBuilt)
+                {
+                    ModLogger.Log("ModSettingsContent", "Mod settings content already built, skipping rebuild");
+                    return;
+                }
+
                 ModLogger.Log("ModSettingsContent", "Building mod settings tab content");
 
                 // Create scroll view and form
                 CreateScrollViewAndBuildForm();
 
+                _isBuilt = true;
                 ModLogger.Log("ModSettingsContent", "Mod settings tab content built successfully");
             }
             catch (Exception ex)
@@ -42,8 +51,12 @@ namespace EfDEnhanced.Features
             // We just need to add content directly here without creating another ScrollView
             // because the game's OptionsPanel already has a ScrollView that will handle all tab contents
 
-            // Add VerticalLayoutGroup for automatic layout
-            var layoutGroup = gameObject.AddComponent<VerticalLayoutGroup>();
+            // Add VerticalLayoutGroup for automatic layout (only if not already present)
+            var layoutGroup = GetComponent<VerticalLayoutGroup>();
+            if (layoutGroup == null)
+            {
+                layoutGroup = gameObject.AddComponent<VerticalLayoutGroup>();
+            }
             layoutGroup.childControlWidth = true;
             layoutGroup.childControlHeight = false; // Let children control their own height
             layoutGroup.childForceExpandWidth = true;
@@ -51,8 +64,12 @@ namespace EfDEnhanced.Features
             layoutGroup.spacing = UIConstants.SETTINGS_ENTRY_SPACING;
             layoutGroup.padding = new RectOffset(20, 20, 20, 20); // Add padding on all sides
 
-            // Add ContentSizeFitter to automatically adjust content height
-            var sizeFitter = gameObject.AddComponent<ContentSizeFitter>();
+            // Add ContentSizeFitter to automatically adjust content height (only if not already present)
+            var sizeFitter = GetComponent<ContentSizeFitter>();
+            if (sizeFitter == null)
+            {
+                sizeFitter = gameObject.AddComponent<ContentSizeFitter>();
+            }
             sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             sizeFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
 

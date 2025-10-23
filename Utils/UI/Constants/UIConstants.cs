@@ -301,7 +301,7 @@ namespace EfDEnhanced.Utils.UI.Constants
         /// <summary>
         /// 标题文字阴影大小
         /// </summary>
-        public const float TITLE_SHADOW_SIZE = 20f;
+        public const float TITLE_SHADOW_SIZE = 16f;
 
         /// <summary>
         /// 标题文字阴影扩散
@@ -316,7 +316,7 @@ namespace EfDEnhanced.Utils.UI.Constants
         /// <summary>
         /// 普通文字阴影大小
         /// </summary>
-        public const float TEXT_SHADOW_SIZE = 16f;
+        public const float TEXT_SHADOW_SIZE = 12f;
 
         /// <summary>
         /// 普通文字阴影扩散

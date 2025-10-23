@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
+using EfDEnhanced.Utils;
+using System;
 
 namespace EfDEnhanced.Utils.UI.Constants
 {
@@ -41,22 +43,81 @@ namespace EfDEnhanced.Utils.UI.Constants
         /// </summary>
         public static void ApplyStandardTextShadow(GameObject textObject, bool isTitle = false)
         {
-            var shadow = textObject.GetComponent<LeTai.TrueShadow.TrueShadow>() ?? textObject.AddComponent<LeTai.TrueShadow.TrueShadow>();
-            if (isTitle)
+            try
             {
-                shadow.Size = UIConstants.TITLE_SHADOW_SIZE;
-                shadow.Spread = UIConstants.TITLE_SHADOW_SPREAD;
-                shadow.OffsetDistance = UIConstants.TITLE_SHADOW_DISTANCE;
-            }
-            else
-            {
-                shadow.Size = UIConstants.TEXT_SHADOW_SIZE;
-                shadow.Spread = UIConstants.TEXT_SHADOW_SPREAD;
-                shadow.OffsetDistance = UIConstants.TEXT_SHADOW_DISTANCE;
-            }
+                var shadow = textObject.GetComponent<LeTai.TrueShadow.TrueShadow>() ?? textObject.AddComponent<LeTai.TrueShadow.TrueShadow>();
+                
+                if (shadow == null)
+                {
+                    ModLogger.Log("UIStyles", "Failed to get or add TrueShadow component");
+                    return;
+                }
 
-            shadow.OffsetAngle = -90f;
-            shadow.Color = UIConstants.SHADOW_COLOR;
+                // 仅在 TrueShadow 完全初始化后设置属性
+                // 如果 GameObject 是活跃的，使用协程延迟一帧以确保 TrueShadow 初始化完成
+                // 如果 GameObject 不活跃，直接尝试设置（可能失败但至少不会报警告）
+                if (textObject.activeInHierarchy)
+                {
+                    var monoBehaviour = textObject.GetComponent<MonoBehaviour>();
+                    if (monoBehaviour != null)
+                    {
+                        monoBehaviour.StartCoroutine(SetTrueShadowPropertiesDelayed(shadow, isTitle));
+                    }
+                    else
+                    {
+                        // 如果没有 MonoBehaviour，直接尝试设置
+                        SetTrueShadowProperties(shadow, isTitle);
+                    }
+                }
+                else
+                {
+                    // GameObject 不活跃，直接设置属性（TrueShadow 在不活跃状态下可能不会渲染，但属性应该能设置）
+                    SetTrueShadowProperties(shadow, isTitle);
+                }
+            }
+            catch (Exception ex)
+            {
+                ModLogger.LogError($"UIStyles.ApplyStandardTextShadow failed: {ex}");
+            }
+        }
+
+        private static System.Collections.IEnumerator SetTrueShadowPropertiesDelayed(LeTai.TrueShadow.TrueShadow shadow, bool isTitle)
+        {
+            yield return null; // 等待一帧
+            
+            if (shadow != null && shadow.gameObject.activeInHierarchy)
+            {
+                SetTrueShadowProperties(shadow, isTitle);
+            }
+        }
+
+        private static void SetTrueShadowProperties(LeTai.TrueShadow.TrueShadow shadow, bool isTitle)
+        {
+            try
+            {
+                if (shadow == null)
+                    return;
+
+                if (isTitle)
+                {
+                    shadow.Size = UIConstants.TITLE_SHADOW_SIZE;
+                    shadow.Spread = UIConstants.TITLE_SHADOW_SPREAD;
+                    shadow.OffsetDistance = UIConstants.TITLE_SHADOW_DISTANCE;
+                }
+                else
+                {
+                    shadow.Size = UIConstants.TEXT_SHADOW_SIZE;
+                    shadow.Spread = UIConstants.TEXT_SHADOW_SPREAD;
+                    shadow.OffsetDistance = UIConstants.TEXT_SHADOW_DISTANCE;
+                }
+
+                shadow.OffsetAngle = -90f;
+                shadow.Color = UIConstants.SHADOW_COLOR;
+            }
+            catch (Exception ex)
+            {
+                ModLogger.LogError($"UIStyles.SetTrueShadowProperties failed: {ex}");
+            }
         }
 
         /// <summary>

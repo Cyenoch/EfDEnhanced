@@ -87,8 +87,12 @@ namespace EfDEnhanced.Utils.UI.Components
 
             // 添加ModButton组件
             ModButton modButton = buttonObj.AddComponent<ModButton>();
+            // 直接设置所有字段，而不是依赖Awake
+            modButton._button = button;
             modButton._text = text;
             modButton._buttonImage = image;
+            modButton._rectTransform = rect;
+            modButton._animation = buttonAnim;
 
             return modButton;
         }
@@ -159,6 +163,11 @@ namespace EfDEnhanced.Utils.UI.Components
         /// </summary>
         public ModButton OnClick(UnityAction action)
         {
+            // Ensure _button is initialized (fallback to GetComponent if needed)
+            if (_button == null)
+            {
+                _button = GetComponent<Button>();
+            }
             _button?.onClick.AddListener(action);
             return this;
         }

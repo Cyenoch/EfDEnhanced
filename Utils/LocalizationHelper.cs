@@ -183,6 +183,9 @@ public static class LocalizationHelper
             { "Settings_ThrowableWheelHotkey_Name", "投掷物轮盘快捷键" },
             { "Settings_ThrowableWheelHotkey_Desc", "按下并松开此键来打开投掷物轮盘菜单（默认G键）" },
             { "Settings_PressAnyKey", "按任意键..." },
+
+            { "Settings_AutoTrackNewQuests_Name", "自动追踪新接受的任务" },
+            { "Settings_AutoTrackNewQuests_Desc", "新接受任务时自动将其添加到局内追踪列表" },
         };
 
         // 繁体中文
@@ -276,6 +279,9 @@ public static class LocalizationHelper
             { "Settings_ThrowableWheelHotkey_Name", "投擲物輪盤快捷鍵" },
             { "Settings_ThrowableWheelHotkey_Desc", "按下並鬆開此鍵來打開投擲物輪盤選單（預設G鍵）" },
             { "Settings_PressAnyKey", "按任意鍵..." },
+
+            { "Settings_AutoTrackNewQuests_Name", "自動追蹤新接受任務" },
+            { "Settings_AutoTrackNewQuests_Desc", "新接受任務時自動將其添加到局內追蹤列表" },
         };
 
         // 英语
@@ -369,6 +375,9 @@ public static class LocalizationHelper
             { "Settings_ThrowableWheelHotkey_Name", "Throwable Wheel Hotkey" },
             { "Settings_ThrowableWheelHotkey_Desc", "Press and release this key to open the throwable wheel menu (default G key)" },
             { "Settings_PressAnyKey", "Press any key..." },
+
+            { "Settings_AutoTrackNewQuests_Name", "Auto-track new accepted quests" },
+            { "Settings_AutoTrackNewQuests_Desc", "Automatically add new accepted quests to the in-raid tracker" },
         };
 
         // 日语
@@ -462,6 +471,9 @@ public static class LocalizationHelper
             { "Settings_ThrowableWheelHotkey_Name", "投擲物ホイールホットキー" },
             { "Settings_ThrowableWheelHotkey_Desc", "このキーを押して離すと投擲物ホイールメニューが開きます（デフォルトGキー）" },
             { "Settings_PressAnyKey", "任意のキーを押してください..." },
+
+            { "Settings_AutoTrackNewQuests_Name", "新規クエストを自動追跡" },
+            { "Settings_AutoTrackNewQuests_Desc", "新規クエストを受けた際に自動的に局内追跡リストに追加" },
         };
 
         ModLogger.Log("Localization", $"Loaded translations for {LocalizationData.Count} languages");

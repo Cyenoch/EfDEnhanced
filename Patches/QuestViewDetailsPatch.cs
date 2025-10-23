@@ -7,6 +7,7 @@ using HarmonyLib;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
 
 namespace EfDEnhanced.Patches;
 
@@ -323,6 +324,54 @@ public class QuestViewDetailsPatch
         catch (Exception ex)
         {
             ModLogger.LogError($"QuestViewDetailsPatch.OnTrackButtonClicked failed: {ex}");
+        }
+    }
+}
+
+/// <summary>
+/// 新任务接受自动追踪补丁
+/// 当玩家接受新任务时，自动将其添加到局内追踪列表中
+/// Patches QuestManager.ActivateQuest() which is called when a player accepts a new quest
+/// </summary>
+[HarmonyPatch(typeof(QuestManager), "ActivateQuest")]
+public class AutoTrackNewQuestPatch
+{
+    /// <summary>
+    /// Patch ActivateQuest to auto-track newly accepted quests
+    /// This is called right after the quest is added to activeQuests list
+    /// </summary>
+    [HarmonyPostfix]
+    private static void ActivateQuest_Postfix(QuestManager __instance, int id)
+    {
+        try
+        {
+            // Check if auto-track setting is enabled
+            if (!ModSettings.AutoTrackNewQuests.Value)
+            {
+                return;
+            }
+
+            // Find the quest that was just activated
+            if (__instance == null || __instance.ActiveQuests == null || __instance.ActiveQuests.Count == 0)
+            {
+                return;
+            }
+
+            QuestTrackingManager.SetQuestTracked(id, true);
+
+            // Get the quest with the matching ID
+            var newQuest = __instance.ActiveQuests.FirstOrDefault(q => q != null && q.ID == id);
+            if (newQuest == null)
+            {
+                return;
+            }
+
+            // Auto-track the newly accepted quest
+            ModLogger.Log("QuestTracker", $"Auto-tracking newly accepted quest: {newQuest.DisplayName} (ID: {newQuest.ID})");
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"AutoTrackNewQuestPatch.ActivateQuest_Postfix failed: {ex}");
         }
     }
 }

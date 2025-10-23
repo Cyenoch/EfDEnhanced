@@ -188,6 +188,17 @@ namespace EfDEnhanced.Utils
             )
         );
 
+        public static readonly BoolSettingsEntry AutoTrackNewQuests = Register(
+            new BoolSettingsEntry(
+                PREFIX,
+                "AutoTrackNewQuests",
+                "Settings_AutoTrackNewQuests_Name",
+                true,
+                CATEGORY_QUEST_TRACKER,
+                "Settings_AutoTrackNewQuests_Desc"
+            )
+        );
+
         #endregion
 
         #region Movement Enhancement Settings
@@ -344,12 +355,31 @@ namespace EfDEnhanced.Utils
         public static void ResetToDefaults()
         {
             // Use helper method to reset settings based on type
+            ModLogger.Log("ModSettings", $"Starting reset of {_allSettings.Count} settings to defaults");
+            
+            int resetCount = 0;
+            int failureCount = 0;
+
             foreach (var setting in _allSettings)
             {
-                setting.Reset();
+                try
+                {
+                    var settingKey = setting.Key;
+                    ModLogger.Log("ModSettings", $"[{resetCount + 1}/{_allSettings.Count}] Resetting setting: {settingKey}");
+                    
+                    setting.Reset();
+                    resetCount++;
+                    
+                    ModLogger.Log("ModSettings", $"✓ Successfully reset: {settingKey}");
+                }
+                catch (Exception ex)
+                {
+                    failureCount++;
+                    ModLogger.LogError($"✗ Failed to reset setting {setting.Key}: {ex.Message}");
+                }
             }
 
-            ModLogger.Log("ModSettings", "All settings reset to defaults");
+            ModLogger.Log("ModSettings", $"Reset complete: {resetCount} successful, {failureCount} failed out of {_allSettings.Count} total settings");
         }
 
         /// <summary>

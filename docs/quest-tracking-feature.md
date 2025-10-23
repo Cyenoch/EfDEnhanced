@@ -292,3 +292,125 @@ private static Dictionary<QuestViewDetails, ButtonData> _trackButtons =
 - `Duckov.Quests.UI.QuestEntry` - 任务列表项
 - `Duckov.Quests.UI.TaskEntry` - 任务目标列表项
 
+## 新增功能：自动追踪新接受的任务
+
+### 功能描述
+
+自动追踪功能（Auto-Track New Quests）可以让玩家在接受新任务时自动将其添加到局内追踪列表中，无需手动在任务详情面板中勾选追踪复选框。
+
+**默认启用**，可在设置中关闭。
+
+### 工作流程
+
+```
+玩家接受新任务
+  ↓
+QuestManager.ActivateQuest(id) 被调用
+  ↓
+创建新的 Quest 实例并添加到 activeQuests 列表
+  ↓
+Harmony Postfix 补丁触发
+  ↓
+检查 AutoTrackNewQuests 设置是否启用
+  ↓
+如果启用 → 调用 QuestTrackingManager.SetQuestTracked(questId, true)
+  ↓
+新任务自动添加到追踪列表
+  ↓
+如果玩家在 Raid 中 → 追踪器 UI 立即刷新显示新任务
+```
+
+### 实现原理
+
+**Patch 目标**：`Duckov.Quests.QuestManager.ActivateQuest(int id, QuestGiverID? overrideQuestGiverID = null)`
+
+**Patch 类型**：Postfix（在方法执行后运行）
+
+**核心代码**（位于 `Patches/QuestViewDetailsPatch.cs`）：
+
+```csharp
+[HarmonyPatch(typeof(QuestManager), "ActivateQuest")]
+public class AutoTrackNewQuestPatch
+{
+    [HarmonyPostfix]
+    private static void ActivateQuest_Postfix(QuestManager __instance, int id)
+    {
+        try
+        {
+            // 1. 检查设置是否启用
+            if (!ModSettings.AutoTrackNewQuests.Value)
+                return;
+
+            // 2. 获取刚激活的任务
+            var newQuest = __instance.ActiveQuests.FirstOrDefault(q => q != null && q.ID == id);
+            if (newQuest == null)
+                return;
+
+            // 3. 自动追踪
+            QuestTrackingManager.SetQuestTracked(newQuest.ID, true);
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"AutoTrackNewQuestPatch failed: {ex}");
+        }
+    }
+}
+```
+
+### 关键特性
+
+1. ✅ **自动触发** - 玩家接受任务时立即触发，无需任何操作
+2. ✅ **可配置** - 可在设置中启用/禁用
+3. ✅ **与追踪按钮兼容** - 不影响手动勾选/取消追踪的功能
+4. ✅ **异常安全** - 完整的 try-catch 保护，不会破坏游戏
+5. ✅ **本地化支持** - 设置在游戏选项面板中显示正确的语言
+
+### 设置项
+
+| 设置名称 | 类型 | 默认值 | 描述 |
+|---------|------|-------|------|
+| AutoTrackNewQuests | 布尔值 | true | 自动追踪新接受的任务 |
+
+**本地化键**：
+- 中文简体：`Settings_AutoTrackNewQuests_Name` / `Settings_AutoTrackNewQuests_Desc`
+- 中文繁体：同上
+- 英文：`Settings_AutoTrackNewQuests_Name` / `Settings_AutoTrackNewQuests_Desc`
+- 日文：同上
+
+### 与其他功能的交互
+
+1. **任务追踪管理器** (`QuestTrackingManager`)
+   - 通过调用 `SetQuestTracked()` 与之交互
+   - 自动触发 `OnTrackingChanged` 事件
+   - 持久化保存到磁盘
+
+2. **活跃任务追踪器** (`ActiveQuestTracker`)
+   - 监听 `OnTrackingChanged` 事件
+   - 自动刷新 UI 显示新任务
+
+3. **任务详情面板** (`QuestViewDetailsPatch`)
+   - 用户仍可手动取消追踪
+   - 不会冲突或相互干扰
+
+### 调试日志
+
+启用此功能后，会在 Mod 日志中输出以下信息：
+
+```
+[QuestTracker] Auto-tracking newly accepted quest: 探索地图 (ID: 1001)
+```
+
+可通过 `./scripts/rlog.sh` 实时查看。
+
+### 已知限制
+
+1. **不过滤任务类型** - 所有接受的任务都会被自动追踪，包括可选任务
+2. **不检查追踪限制** - 即使已追踪很多任务也会继续添加
+3. **离线任务处理** - 仅在游戏中生效，加载存档时不会追踪旧任务
+
+### 未来改进方向
+
+1. **选择性自动追踪** - 仅追踪特定 NPC 的任务、特定地图的任务等
+2. **自动追踪限制** - 设置最多自动追踪的任务数
+3. **快捷设置** - 游戏内快捷键快速启用/禁用自动追踪
+

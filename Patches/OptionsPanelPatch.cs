@@ -78,14 +78,42 @@ namespace EfDEnhanced.Patches
                     return;
                 }
 
-                // Check if our mod settings tab already exists
+                // Check if our mod settings tab already exists AND is valid
+                OptionsPanel_TabButton? existingModTab = null;
                 foreach (var btn in tabButtons)
                 {
                     if (btn != null && btn.gameObject.name == "ModSettingsTabButton")
                     {
-                        ModLogger.Log("OptionsPanelPatch", "Mod Settings tab already exists, skipping");
-                        return;
+                        existingModTab = btn;
+                        break;
                     }
+                }
+
+                // If existing tab found, verify its content GameObject is valid
+                if (existingModTab != null)
+                {
+                    var existingTabField = typeof(OptionsPanel_TabButton).GetField("tab", BindingFlags.NonPublic | BindingFlags.Instance);
+                    if (existingTabField != null)
+                    {
+                        var tabContent = existingTabField.GetValue(existingModTab) as GameObject;
+                        if (tabContent != null)
+                        {
+                            // Verify that ModSettingsContent component still exists
+                            var modSettingsContent = tabContent.GetComponent<ModSettingsContent>();
+                            if (modSettingsContent != null)
+                            {
+                                ModLogger.Log("OptionsPanelPatch", "Mod Settings tab already exists and is valid, skipping");
+                                return;
+                            }
+                        }
+                    }
+
+                    // If we reach here, the existing tab is invalid - remove it and recreate
+                    ModLogger.Log("OptionsPanelPatch", "Existing mod settings tab is invalid, removing and recreating");
+                    GameObject.Destroy(existingModTab.gameObject);
+                    tabButtons.Remove(existingModTab);
+                    tabButtonsField.SetValue(__instance, tabButtons);
+                    modSettingsContent = null;
                 }
 
                 ModLogger.Log("OptionsPanelPatch", "Adding Mod Settings tab to OptionsPanel");
