@@ -152,7 +152,7 @@ namespace EfDEnhanced.Utils.UI.Components
             }
 
             _isListening = true;
-            
+
             if (_keyText != null)
             {
                 _keyText.text = LocalizationHelper.Get("Settings_PressAnyKey");

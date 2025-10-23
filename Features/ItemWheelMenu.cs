@@ -16,21 +16,21 @@ namespace EfDEnhanced.Features
     {
         // Event triggered when the menu is opened
         public static event Action? OnMenuOpened;
-        
+
         private static ItemWheelMenu? _instance;
-        
+
         // Components
         private PieMenuComponent? _pieMenu;
-        
+
         // Configuration
         private const int ITEM_COUNT = 6; // Number of hotbar slots
-        
+
         // State
         private CharacterMainControl Character => CharacterMainControl.Main;
-        
+
         public static ItemWheelMenu? Instance => _instance;
         public bool IsOpen => _pieMenu != null && _pieMenu.IsOpen;
-        
+
         private void Awake()
         {
             if (_instance != null && _instance != this)
@@ -38,27 +38,27 @@ namespace EfDEnhanced.Features
                 Destroy(gameObject);
                 return;
             }
-            
+
             _instance = this;
             DontDestroyOnLoad(gameObject);
-            
+
             InitializePieMenu();
-            
+
             // Subscribe to settings changes
             ModSettings.ItemWheelScale.ValueChanged += OnScaleChanged;
         }
-        
+
         private void OnDestroy()
         {
             if (_instance == this)
             {
                 _instance = null;
             }
-            
+
             // Unsubscribe from settings changes
             ModSettings.ItemWheelScale.ValueChanged -= OnScaleChanged;
         }
-        
+
         private void InitializePieMenu()
         {
             try
@@ -66,19 +66,19 @@ namespace EfDEnhanced.Features
                 // Create pie menu GameObject
                 GameObject pieMenuObj = new GameObject("PieMenu");
                 pieMenuObj.transform.SetParent(transform, false);
-                
+
                 _pieMenu = pieMenuObj.AddComponent<PieMenuComponent>();
-                
+
                 // Initialize with configuration
                 var config = PieMenuConfig.Default;
                 config.Scale = ModSettings.ItemWheelScale.Value;
                 _pieMenu.Initialize(config);
-                
+
                 // Subscribe to events
                 _pieMenu.OnItemInvoked += OnItemInvoked;
                 _pieMenu.OnMenuShown += OnMenuShown;
                 _pieMenu.OnMenuHidden += OnMenuHidden;
-                
+
                 ModLogger.Log("ItemWheelMenu", "Pie menu initialized successfully");
             }
             catch (Exception ex)
@@ -86,7 +86,7 @@ namespace EfDEnhanced.Features
                 ModLogger.LogError($"ItemWheelMenu: Failed to initialize pie menu: {ex}");
             }
         }
-        
+
         private void OnScaleChanged(object? sender, Utils.Settings.SettingsValueChangedEventArgs<float> e)
         {
             if (_pieMenu != null)
@@ -95,21 +95,21 @@ namespace EfDEnhanced.Features
                 ModLogger.Log("ItemWheelMenu", $"Scale changed to {e.NewValue:F2}");
             }
         }
-        
+
         private void OnMenuShown()
         {
             // Update items when menu is shown
             RefreshItems();
-            
+
             // Trigger event to clear input state in patches
             OnMenuOpened?.Invoke();
         }
-        
+
         private void OnMenuHidden()
         {
             // Any cleanup needed when menu is hidden
         }
-        
+
         private void OnItemInvoked(string itemId)
         {
             try
@@ -120,7 +120,7 @@ namespace EfDEnhanced.Features
                     ModLogger.LogWarning($"ItemWheelMenu: Invalid item ID: {itemId}");
                     return;
                 }
-                
+
                 UseItem(slotIndex);
             }
             catch (Exception ex)
@@ -128,7 +128,7 @@ namespace EfDEnhanced.Features
                 ModLogger.LogError($"ItemWheelMenu: Failed to invoke item: {ex}");
             }
         }
-        
+
         public void Toggle()
         {
             if (_pieMenu != null)
@@ -136,7 +136,7 @@ namespace EfDEnhanced.Features
                 _pieMenu.Toggle();
             }
         }
-        
+
         public void Show()
         {
             if (_pieMenu != null)
@@ -144,7 +144,7 @@ namespace EfDEnhanced.Features
                 _pieMenu.Show();
             }
         }
-        
+
         public void Hide(bool invokeSelectedItem = true)
         {
             if (_pieMenu != null)
@@ -152,7 +152,7 @@ namespace EfDEnhanced.Features
                 _pieMenu.Hide(invokeSelectedItem);
             }
         }
-        
+
         /// <summary>
         /// Cancel the wheel menu (for abnormal closes, never invokes items)
         /// </summary>
@@ -163,7 +163,7 @@ namespace EfDEnhanced.Features
                 _pieMenu.Cancel();
             }
         }
-        
+
         /// <summary>
         /// Get the mouse position that should be used by the game's camera system
         /// When wheel menu is open, return saved position to prevent camera movement
@@ -176,19 +176,19 @@ namespace EfDEnhanced.Features
             }
             return Input.mousePosition;
         }
-        
+
         private void RefreshItems()
         {
             if (_pieMenu == null) return;
-            
+
             try
             {
                 List<PieMenuItem> items = new List<PieMenuItem>();
-                
+
                 for (int i = 0; i < ITEM_COUNT; i++)
                 {
                     Item? item = Duckov.ItemShortcut.Get(i);
-                    
+
                     if (item != null && item.Icon != null)
                     {
                         items.Add(new PieMenuItem(i.ToString(), item.Icon));
@@ -200,7 +200,7 @@ namespace EfDEnhanced.Features
                         items.Add(new PieMenuItem(i.ToString(), null));
                     }
                 }
-                
+
                 _pieMenu.SetItems(items);
             }
             catch (Exception ex)
@@ -208,7 +208,7 @@ namespace EfDEnhanced.Features
                 ModLogger.LogError($"ItemWheelMenu: Failed to refresh items: {ex}");
             }
         }
-        
+
         private void UseItem(int slotIndex)
         {
             try
@@ -218,15 +218,15 @@ namespace EfDEnhanced.Features
                     ModLogger.LogWarning("ItemWheelMenu: Character is null, cannot use item");
                     return;
                 }
-                
+
                 Item? item = Duckov.ItemShortcut.Get(slotIndex);
-                
+
                 if (item == null)
                 {
                     ModLogger.LogWarning($"ItemWheelMenu: No item in slot {slotIndex}");
                     return;
                 }
-                
+
                 // Use the same logic as ItemShortcutButton
                 if (item.UsageUtilities != null && item.UsageUtilities.IsUsable(item, Character))
                 {

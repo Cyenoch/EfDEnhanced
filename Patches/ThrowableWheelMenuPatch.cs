@@ -210,10 +210,10 @@ namespace EfDEnhanced.Patches
         {
             // Subscribe to view change events
             Duckov.UI.View.OnActiveViewChanged += OnActiveViewChanged;
-            
+
             // Subscribe to menu opened event to clear input state
             ThrowableWheelMenu.OnMenuOpened += OnWheelMenuOpened;
-            
+
             ModLogger.Log("ThrowableWheelMenuPatch", "Subscribed to view change and menu opened events");
         }
 

@@ -18,7 +18,7 @@ namespace EfDEnhanced.Patches
     public class OptionsPanelPatch
     {
         private static ModSettingsContent? modSettingsContent;
-        
+
         /// <summary>
         /// Flag to indicate if mod settings tab should be selected when panel opens
         /// Set this to true before opening the panel to auto-select mod settings
@@ -45,7 +45,7 @@ namespace EfDEnhanced.Patches
         public static void OnOpen_Postfix(OptionsPanel __instance)
         {
             AddModSettingsTab(__instance);
-            
+
             // Check if we should auto-select mod settings tab
             if (ShouldSelectModSettingsTab)
             {

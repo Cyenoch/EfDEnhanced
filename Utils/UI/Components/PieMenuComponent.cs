@@ -17,45 +17,45 @@ namespace EfDEnhanced.Utils.UI.Components
         public event Action? OnMenuShown; // Triggered when menu is shown
         public event Action? OnMenuHidden; // Triggered when menu is hidden (normal close with possible invoke)
         public event Action? OnMenuCancelled; // Triggered when menu is cancelled (no invoke)
-        
+
         // Configuration
         private float _wheelRadius = 167f;
         private float _iconSize = 67f;
         private float _innerRadiusRatio = 0.4f;
         private float _segmentGapRatio = 0.95f;
         private float _scale = 1.0f;
-        
+
         // Colors
         private Color _normalColor = new Color(0.2f, 0.2f, 0.2f, 0.5f);
         private Color _hoverColor = new Color(0.3f, 0.3f, 0.35f, 0.85f);
         private Color _selectedColor = new Color(0.35f, 0.4f, 0.5f, 0.9f);
-        
+
         // UI Components
         private Canvas? _canvas;
         private GameObject? _wheelContainer;
         private GameObject? _centerDot;
         private GameObject? _virtualCursorIndicator;
         private List<PieSegment> _segments = new List<PieSegment>();
-        
+
         // State
         private bool _isOpen = false;
         private Vector2 _savedMousePosition;
         private Vector2 _virtualCursorPosition;
         private int _hoveredIndex = -1;
         private int _selectedIndex = -1;
-        
+
         // Items
         private List<PieMenuItem> _items = new List<PieMenuItem>();
-        
+
         // Calculated properties
         private float ScaledWheelRadius => _wheelRadius * _scale;
         private float ScaledIconSize => _iconSize * _scale;
         private float ScaledInnerRadius => ScaledWheelRadius * _innerRadiusRatio;
         private float ScaledItemDistance => (ScaledInnerRadius + ScaledWheelRadius) / 2f;
         private float ScaledDeadZone => ScaledInnerRadius; // Dead zone matches inner ring radius
-        
+
         public bool IsOpen => _isOpen;
-        
+
         /// <summary>
         /// Initialize the pie menu with configuration
         /// </summary>
@@ -66,21 +66,21 @@ namespace EfDEnhanced.Utils.UI.Components
             _innerRadiusRatio = config.InnerRadiusRatio;
             _segmentGapRatio = config.SegmentGapRatio;
             _scale = config.Scale;
-            
+
             if (config.NormalColor.HasValue) _normalColor = config.NormalColor.Value;
             if (config.HoverColor.HasValue) _hoverColor = config.HoverColor.Value;
             if (config.SelectedColor.HasValue) _selectedColor = config.SelectedColor.Value;
-            
+
             CreateUI();
         }
-        
+
         /// <summary>
         /// Set the items to display in the pie menu
         /// </summary>
         public void SetItems(List<PieMenuItem> items)
         {
             _items = items;
-            
+
             // Recreate segments to match item count
             if (_wheelContainer != null)
             {
@@ -97,10 +97,10 @@ namespace EfDEnhanced.Utils.UI.Components
                     }
                 }
                 _segments.Clear();
-                
+
                 // Create new segments
                 CreateWheelSegments();
-                
+
                 // Update item displays
                 if (_isOpen)
                 {
@@ -108,7 +108,7 @@ namespace EfDEnhanced.Utils.UI.Components
                 }
             }
         }
-        
+
         /// <summary>
         /// Update the scale of the pie menu
         /// </summary>
@@ -117,33 +117,33 @@ namespace EfDEnhanced.Utils.UI.Components
             _scale = scale;
             RecreateUI();
         }
-        
+
         /// <summary>
         /// Show the pie menu
         /// </summary>
         public void Show()
         {
             if (_isOpen) return;
-            
+
             _isOpen = true;
             gameObject.SetActive(true);
-            
+
             // Save mouse position
             _savedMousePosition = Input.mousePosition;
-            
+
             // Reset virtual cursor
             _virtualCursorPosition = Vector2.zero;
-            
+
             // Reset selection
             _selectedIndex = -1;
             _hoveredIndex = -1;
-            
+
             // Refresh items
             RefreshItems();
-            
+
             OnMenuShown?.Invoke();
         }
-        
+
         /// <summary>
         /// Hide the pie menu (normal close, may invoke selected item)
         /// </summary>
@@ -151,21 +151,21 @@ namespace EfDEnhanced.Utils.UI.Components
         public void Hide(bool invokeSelectedItem = false)
         {
             if (!_isOpen) return;
-            
+
             // Invoke selected item if requested
             if (invokeSelectedItem && _hoveredIndex >= 0 && _hoveredIndex < _items.Count)
             {
                 string itemId = _items[_hoveredIndex].Id;
                 OnItemInvoked?.Invoke(itemId);
             }
-            
+
             _isOpen = false;
             gameObject.SetActive(false);
             UpdateSegmentVisuals();
-            
+
             OnMenuHidden?.Invoke();
         }
-        
+
         /// <summary>
         /// Cancel the pie menu (abnormal close, never invokes items)
         /// Use this for closing due to game state changes, pause, etc.
@@ -173,14 +173,14 @@ namespace EfDEnhanced.Utils.UI.Components
         public void Cancel()
         {
             if (!_isOpen) return;
-            
+
             _isOpen = false;
             gameObject.SetActive(false);
             UpdateSegmentVisuals();
-            
+
             OnMenuCancelled?.Invoke();
         }
-        
+
         /// <summary>
         /// Toggle the pie menu
         /// </summary>
@@ -195,7 +195,7 @@ namespace EfDEnhanced.Utils.UI.Components
                 Show();
             }
         }
-        
+
         /// <summary>
         /// Get the saved mouse position (for preventing camera movement)
         /// </summary>
@@ -203,18 +203,18 @@ namespace EfDEnhanced.Utils.UI.Components
         {
             return _savedMousePosition;
         }
-        
+
         private void Update()
         {
             if (!_isOpen) return;
-            
+
             // Update virtual cursor position from mouse delta
             if (Mouse.current != null)
             {
                 Vector2 mouseDelta = Mouse.current.delta.ReadValue();
                 _virtualCursorPosition += mouseDelta;
             }
-            
+
             // Update virtual cursor indicator position
             if (_virtualCursorIndicator != null)
             {
@@ -224,20 +224,20 @@ namespace EfDEnhanced.Utils.UI.Components
                     cursorRect.anchoredPosition = _virtualCursorPosition;
                 }
             }
-            
+
             // Calculate hovered segment
             if (_virtualCursorPosition.magnitude > ScaledDeadZone)
             {
                 float angle = Mathf.Atan2(_virtualCursorPosition.x, _virtualCursorPosition.y) * Mathf.Rad2Deg;
                 if (angle < 0) angle += 360f;
-                
+
                 float angleStep = 360f / _items.Count;
                 float adjustedAngle = angle + (angleStep / 2f);
                 if (adjustedAngle >= 360f) adjustedAngle -= 360f;
-                
+
                 int segmentIndex = Mathf.FloorToInt(adjustedAngle / angleStep);
                 segmentIndex = Mathf.Clamp(segmentIndex, 0, _items.Count - 1);
-                
+
                 if (segmentIndex != _hoveredIndex)
                 {
                     _hoveredIndex = segmentIndex;
@@ -252,7 +252,7 @@ namespace EfDEnhanced.Utils.UI.Components
                     UpdateSegmentVisuals();
                 }
             }
-            
+
             // Handle input
             // Left click: invoke if hovered, cancel if not
             if (Input.GetMouseButtonDown(0))
@@ -276,43 +276,43 @@ namespace EfDEnhanced.Utils.UI.Components
                 Cancel();
             }
         }
-        
+
         private void CreateUI()
         {
             // Create canvas
             _canvas = gameObject.AddComponent<Canvas>();
             _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             _canvas.sortingOrder = 1000;
-            
+
             CanvasScaler scaler = gameObject.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
-            
+
             gameObject.AddComponent<GraphicRaycaster>();
-            
+
             // Create wheel container
             _wheelContainer = new GameObject("WheelContainer");
             _wheelContainer.transform.SetParent(transform, false);
-            
+
             RectTransform containerRect = _wheelContainer.AddComponent<RectTransform>();
             containerRect.anchorMin = new Vector2(0.5f, 0.5f);
             containerRect.anchorMax = new Vector2(0.5f, 0.5f);
             containerRect.pivot = new Vector2(0.5f, 0.5f);
             containerRect.anchoredPosition = Vector2.zero;
             containerRect.sizeDelta = new Vector2(ScaledWheelRadius * 2.5f, ScaledWheelRadius * 2.5f);
-            
+
             // Create segments
             CreateWheelSegments();
-            
+
             // Create center dot
             CreateCenterDot();
-            
+
             // Create virtual cursor indicator
             CreateVirtualCursorIndicator();
-            
+
             gameObject.SetActive(false);
         }
-        
+
         private void RecreateUI()
         {
             if (_wheelContainer != null)
@@ -320,55 +320,55 @@ namespace EfDEnhanced.Utils.UI.Components
                 Destroy(_wheelContainer);
                 _segments.Clear();
             }
-            
+
             if (_centerDot != null)
             {
                 Destroy(_centerDot);
             }
-            
+
             if (_virtualCursorIndicator != null)
             {
                 Destroy(_virtualCursorIndicator);
             }
-            
+
             // Recreate
             _wheelContainer = new GameObject("WheelContainer");
             _wheelContainer.transform.SetParent(transform, false);
-            
+
             RectTransform containerRect = _wheelContainer.AddComponent<RectTransform>();
             containerRect.anchorMin = new Vector2(0.5f, 0.5f);
             containerRect.anchorMax = new Vector2(0.5f, 0.5f);
             containerRect.pivot = new Vector2(0.5f, 0.5f);
             containerRect.anchoredPosition = Vector2.zero;
             containerRect.sizeDelta = new Vector2(ScaledWheelRadius * 2.5f, ScaledWheelRadius * 2.5f);
-            
+
             CreateWheelSegments();
             CreateCenterDot();
             CreateVirtualCursorIndicator();
-            
+
             if (_isOpen)
             {
                 RefreshItems();
             }
         }
-        
+
         private void CreateWheelSegments()
         {
             if (_wheelContainer == null || _items.Count == 0) return;
-            
+
             float angleStep = 360f / _items.Count;
             float startOffset = -angleStep / 2f;
-            
+
             for (int i = 0; i < _items.Count; i++)
             {
                 float segmentStartAngle = startOffset + (i * angleStep);
                 float itemAngle = segmentStartAngle + (angleStep / 2f);
                 float angleRad = itemAngle * Mathf.Deg2Rad;
-                
+
                 // Create background segment
                 GameObject segmentObj = new GameObject($"Segment_{i}");
                 segmentObj.transform.SetParent(_wheelContainer.transform, false);
-                
+
                 RectTransform segmentRect = segmentObj.AddComponent<RectTransform>();
                 segmentRect.anchorMin = new Vector2(0.5f, 0.5f);
                 segmentRect.anchorMax = new Vector2(0.5f, 0.5f);
@@ -376,7 +376,7 @@ namespace EfDEnhanced.Utils.UI.Components
                 segmentRect.sizeDelta = new Vector2(ScaledWheelRadius * 2f, ScaledWheelRadius * 2f);
                 segmentRect.anchoredPosition = Vector2.zero;
                 segmentRect.localRotation = Quaternion.Euler(0, 0, -segmentStartAngle);
-                
+
                 Image segmentImage = segmentObj.AddComponent<Image>();
                 segmentImage.color = _normalColor;
                 segmentImage.raycastTarget = false;
@@ -386,7 +386,7 @@ namespace EfDEnhanced.Utils.UI.Components
                 // When there's only one item, fill the whole circle; otherwise use gap ratio
                 segmentImage.fillAmount = _items.Count == 1 ? 1.0f : (_segmentGapRatio / _items.Count);
                 segmentImage.fillClockwise = true;
-                
+
                 Texture2D ringTexture = CreateRingTexture();
                 Sprite sprite = Sprite.Create(
                     ringTexture,
@@ -395,48 +395,48 @@ namespace EfDEnhanced.Utils.UI.Components
                     100f
                 );
                 segmentImage.sprite = sprite;
-                
+
                 // Create item icon
                 GameObject iconHolder = new GameObject($"Item_{i}");
                 iconHolder.transform.SetParent(_wheelContainer.transform, false);
-                
+
                 RectTransform iconRect = iconHolder.AddComponent<RectTransform>();
                 iconRect.anchorMin = new Vector2(0.5f, 0.5f);
                 iconRect.anchorMax = new Vector2(0.5f, 0.5f);
                 iconRect.pivot = new Vector2(0.5f, 0.5f);
                 iconRect.sizeDelta = new Vector2(ScaledIconSize, ScaledIconSize);
-                
+
                 Vector2 itemPosition = new Vector2(
                     Mathf.Sin(angleRad) * ScaledItemDistance,
                     Mathf.Cos(angleRad) * ScaledItemDistance
                 );
                 iconRect.anchoredPosition = itemPosition;
-                
+
                 // Create icon image
                 GameObject iconObj = new GameObject("Icon");
                 iconObj.transform.SetParent(iconHolder.transform, false);
-                
+
                 RectTransform iconImageRect = iconObj.AddComponent<RectTransform>();
                 iconImageRect.anchorMin = Vector2.zero;
                 iconImageRect.anchorMax = Vector2.one;
                 iconImageRect.sizeDelta = Vector2.zero;
                 iconImageRect.anchoredPosition = Vector2.zero;
-                
+
                 Image iconImage = iconObj.AddComponent<Image>();
                 iconImage.raycastTarget = false;
                 iconImage.enabled = false;
-                
+
                 // Create count text (bottom right corner)
                 GameObject countTextObj = new GameObject("CountText");
                 countTextObj.transform.SetParent(iconHolder.transform, false);
-                
+
                 RectTransform countTextRect = countTextObj.AddComponent<RectTransform>();
                 countTextRect.anchorMin = new Vector2(1f, 0f); // Bottom right
                 countTextRect.anchorMax = new Vector2(1f, 0f);
                 countTextRect.pivot = new Vector2(1f, 0f);
                 countTextRect.anchoredPosition = new Vector2(-2f, 2f); // Small offset from corner
                 countTextRect.sizeDelta = new Vector2(30f, 20f);
-                
+
                 Text countText = countTextObj.AddComponent<Text>();
                 countText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
                 countText.fontSize = 14;
@@ -445,12 +445,12 @@ namespace EfDEnhanced.Utils.UI.Components
                 countText.alignment = TextAnchor.LowerRight;
                 countText.raycastTarget = false;
                 countText.enabled = false;
-                
+
                 // Add outline for better visibility
                 Outline outline = countTextObj.AddComponent<Outline>();
                 outline.effectColor = Color.black;
                 outline.effectDistance = new Vector2(1f, -1f);
-                
+
                 PieSegment segment = new PieSegment
                 {
                     index = i,
@@ -460,38 +460,38 @@ namespace EfDEnhanced.Utils.UI.Components
                     iconHolder = iconHolder,
                     countText = countText
                 };
-                
+
                 _segments.Add(segment);
             }
         }
-        
+
         private Texture2D CreateRingTexture()
         {
             int size = 256;
             Texture2D texture = new Texture2D(size, size);
             Color[] pixels = new Color[size * size];
-            
+
             Vector2 center = new Vector2(size / 2f, size / 2f);
             float outerRadius = size / 2f;
             float innerRadius = outerRadius * _innerRadiusRatio;
-            
+
             for (int y = 0; y < size; y++)
             {
                 for (int x = 0; x < size; x++)
                 {
                     Vector2 pos = new Vector2(x, y) - center;
                     float distance = pos.magnitude;
-                    
+
                     if (distance >= innerRadius && distance <= outerRadius)
                     {
                         float alpha = 1f;
-                        
+
                         // Smooth edges
                         if (distance < innerRadius + 2f)
                             alpha = (distance - innerRadius) / 2f;
                         else if (distance > outerRadius - 2f)
                             alpha = (outerRadius - distance) / 2f;
-                        
+
                         pixels[y * size + x] = new Color(1, 1, 1, alpha);
                     }
                     else
@@ -500,33 +500,33 @@ namespace EfDEnhanced.Utils.UI.Components
                     }
                 }
             }
-            
+
             texture.SetPixels(pixels);
             texture.Apply();
             return texture;
         }
-        
+
         private void CreateCenterDot()
         {
             if (_wheelContainer == null) return;
-            
+
             _centerDot = new GameObject("CenterDot");
             _centerDot.transform.SetParent(_wheelContainer.transform, false);
-            
+
             RectTransform dotRect = _centerDot.AddComponent<RectTransform>();
             dotRect.anchorMin = new Vector2(0.5f, 0.5f);
             dotRect.anchorMax = new Vector2(0.5f, 0.5f);
             dotRect.pivot = new Vector2(0.5f, 0.5f);
             dotRect.anchoredPosition = Vector2.zero;
             dotRect.sizeDelta = new Vector2(20 * _scale, 20 * _scale);
-            
+
             Image dotImage = _centerDot.AddComponent<Image>();
             dotImage.color = new Color(1f, 1f, 1f, 0.8f);
-            
+
             Texture2D dotTexture = new Texture2D(32, 32);
             Color[] pixels = new Color[32 * 32];
             Vector2 center = new Vector2(16, 16);
-            
+
             for (int y = 0; y < 32; y++)
             {
                 for (int x = 0; x < 32; x++)
@@ -543,26 +543,26 @@ namespace EfDEnhanced.Utils.UI.Components
                     }
                 }
             }
-            
+
             dotTexture.SetPixels(pixels);
             dotTexture.Apply();
-            
+
             Sprite dotSprite = Sprite.Create(
                 dotTexture,
                 new Rect(0, 0, 32, 32),
                 new Vector2(0.5f, 0.5f),
                 100f
             );
-            
+
             dotImage.sprite = dotSprite;
             dotImage.raycastTarget = false;
         }
-        
+
         private void CreateVirtualCursorIndicator()
         {
             // Disable for now, use it when debugging
             return;
-            
+
             /* Disabled - enable when debugging
             if (_wheelContainer == null) return;
             
@@ -621,21 +621,21 @@ namespace EfDEnhanced.Utils.UI.Components
             cursorImage.raycastTarget = false;
             */
         }
-        
+
         private void RefreshItems()
         {
             for (int i = 0; i < Mathf.Min(_segments.Count, _items.Count); i++)
             {
                 PieSegment segment = _segments[i];
                 PieMenuItem item = _items[i];
-                
+
                 if (item.Icon != null)
                 {
                     segment.iconImage.sprite = item.Icon;
                     segment.iconImage.color = Color.white;
                     segment.iconImage.enabled = true;
                     segment.iconHolder.SetActive(true);
-                    
+
                     // Update count text
                     if (segment.countText != null)
                     {
@@ -656,13 +656,13 @@ namespace EfDEnhanced.Utils.UI.Components
                 }
             }
         }
-        
+
         private void UpdateSegmentVisuals()
         {
             for (int i = 0; i < _segments.Count; i++)
             {
                 PieSegment segment = _segments[i];
-                
+
                 if (i == _hoveredIndex)
                 {
                     segment.image.color = _hoverColor;
@@ -677,7 +677,7 @@ namespace EfDEnhanced.Utils.UI.Components
                 }
             }
         }
-        
+
         private class PieSegment
         {
             public int index;
@@ -688,7 +688,7 @@ namespace EfDEnhanced.Utils.UI.Components
             public Text? countText = null;
         }
     }
-    
+
     /// <summary>
     /// Configuration for pie menu
     /// </summary>
@@ -699,11 +699,11 @@ namespace EfDEnhanced.Utils.UI.Components
         public float InnerRadiusRatio;
         public float SegmentGapRatio;
         public float Scale;
-        
+
         public Color? NormalColor;
         public Color? HoverColor;
         public Color? SelectedColor;
-        
+
         public static PieMenuConfig Default => new PieMenuConfig
         {
             WheelRadius = 167f,
@@ -716,7 +716,7 @@ namespace EfDEnhanced.Utils.UI.Components
             SelectedColor = null
         };
     }
-    
+
     /// <summary>
     /// Item data for pie menu
     /// </summary>
@@ -725,7 +725,7 @@ namespace EfDEnhanced.Utils.UI.Components
         public string Id { get; set; } = "";
         public Sprite? Icon { get; set; }
         public int Count { get; set; } = 1;
-        
+
         public PieMenuItem(string id, Sprite? icon = null, int count = 1)
         {
             Id = id;

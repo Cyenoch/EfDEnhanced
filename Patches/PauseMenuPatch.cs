@@ -91,10 +91,10 @@ namespace EfDEnhanced.Patches
                 {
                     // Remove old listeners
                     modButton.onClick.RemoveAllListeners();
-                    
+
                     // Add new listener to open options panel with mod settings tab selected
                     modButton.onClick.AddListener(() => OpenModSettings());
-                    
+
                     ModLogger.Log("PauseMenuPatch", "Setup button click event");
                 }
 

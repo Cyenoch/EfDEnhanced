@@ -65,7 +65,7 @@ public class ActiveQuestTracker : MonoBehaviour
         {
             _instance = this;
             DontDestroyOnLoad(gameObject);
-            
+
             // 订阅追踪状态变化事件（始终订阅，无论是否在 Raid 中）
             QuestTrackingManager.OnTrackingChanged += OnQuestTrackingChanged;
             ModLogger.Log("QuestTracker", "Subscribed to tracking changes in Awake");
@@ -100,7 +100,7 @@ public class ActiveQuestTracker : MonoBehaviour
 
         // 取消订阅追踪状态变化事件
         QuestTrackingManager.OnTrackingChanged -= OnQuestTrackingChanged;
-        
+
         // 取消订阅所有事件
         UnregisterEvents();
     }
@@ -200,12 +200,12 @@ public class ActiveQuestTracker : MonoBehaviour
         try
         {
             _isCollapsed = !_isCollapsed;
-            
+
             if (_questListContainer != null)
             {
                 _questListContainer.SetActive(!_isCollapsed);
             }
-            
+
             ModLogger.Log("QuestTracker", $"Tracker {(_isCollapsed ? "collapsed" : "expanded")}");
         }
         catch (Exception ex)
@@ -267,10 +267,10 @@ public class ActiveQuestTracker : MonoBehaviour
     private System.Collections.IEnumerator DelayedRefreshQuestList()
     {
         ModLogger.Log("QuestTracker", "Waiting for inventory to load before refreshing quest list...");
-        
+
         // 等待 0.5 秒让背包和装备完全加载
         yield return new WaitForSeconds(0.5f);
-        
+
         ModLogger.Log("QuestTracker", "Inventory should be loaded, refreshing quest list now");
         RefreshQuestList();
     }
@@ -334,7 +334,7 @@ public class ActiveQuestTracker : MonoBehaviour
 
             // 玩家背包物品变化（用于更新提交物品类任务的持有数量）
             CharacterMainControl.OnMainCharacterInventoryChangedEvent = (Action<CharacterMainControl, Inventory, int>)Delegate.Combine(
-                CharacterMainControl.OnMainCharacterInventoryChangedEvent, 
+                CharacterMainControl.OnMainCharacterInventoryChangedEvent,
                 new Action<CharacterMainControl, Inventory, int>(OnInventoryChanged));
 
             // 仓库物品变化（用于更新提交物品类任务的持有数量）
@@ -365,7 +365,7 @@ public class ActiveQuestTracker : MonoBehaviour
 
             // 取消订阅物品变化事件
             CharacterMainControl.OnMainCharacterInventoryChangedEvent = (Action<CharacterMainControl, Inventory, int>)Delegate.Remove(
-                CharacterMainControl.OnMainCharacterInventoryChangedEvent, 
+                CharacterMainControl.OnMainCharacterInventoryChangedEvent,
                 new Action<CharacterMainControl, Inventory, int>(OnInventoryChanged));
             PlayerStorage.OnPlayerStorageChange -= OnStorageChanged;
 
@@ -764,7 +764,7 @@ public class ActiveQuestTracker : MonoBehaviour
             // 移除 _isActive 检查，因为玩家可能在局外勾选任务
             // 如果当前在 Raid 中，立即刷新列表；否则，下次进入 Raid 时会自动加载
             ModLogger.Log("QuestTracker", $"Quest {questId} tracking changed to {isTracked}, active={_isActive}");
-            
+
             if (_isActive)
             {
                 RefreshQuestList();
@@ -890,7 +890,7 @@ public class ActiveQuestTracker : MonoBehaviour
 
             // 获取变化的物品
             Item? changedItem = inventory?.GetItemAt(index);
-            
+
             if (changedItem != null)
             {
                 // 物品存在（添加或替换）：只更新该物品相关的任务
@@ -924,7 +924,7 @@ public class ActiveQuestTracker : MonoBehaviour
 
             // 获取变化的物品
             Item? changedItem = inventory?.GetItemAt(index);
-            
+
             if (changedItem != null)
             {
                 // 物品存在（添加或替换）：只更新该物品相关的任务
@@ -1308,8 +1308,8 @@ public class QuestEntryUI
             if (DescriptionObject != null)
             {
                 // 如果所有task完成，隐藏描述；否则根据设置决定
-                bool shouldShow = !allTasksFinished 
-                    && ModSettings.TrackerShowDescription.Value 
+                bool shouldShow = !allTasksFinished
+                    && ModSettings.TrackerShowDescription.Value
                     && !string.IsNullOrEmpty(quest.Description);
                 if (DescriptionObject.activeSelf != shouldShow)
                 {

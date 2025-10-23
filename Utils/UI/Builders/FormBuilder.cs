@@ -578,7 +578,7 @@ namespace EfDEnhanced.Utils.UI.Builders
         /// <summary>
         /// 添加按钮
         /// </summary>
-        public FormBuilder AddButton(string textLocalizationKey, System.Action onClick, 
+        public FormBuilder AddButton(string textLocalizationKey, System.Action onClick,
                                       UIStyles.ButtonStyle style = UIStyles.ButtonStyle.Primary)
         {
             var button = ModButton.Create(_parent, "Button")

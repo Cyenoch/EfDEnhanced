@@ -49,7 +49,7 @@ namespace EfDEnhanced.Patches
                 // Build detailed information string
                 var info = new StringBuilder();
                 info.AppendLine("\n========== ITEM DETAILS ==========");
-                
+
                 // Basic Information
                 info.AppendLine($"Display Name: {selectedItem.DisplayName}");
                 info.AppendLine($"Display Name (Raw Key): {selectedItem.DisplayNameRaw}");

@@ -140,7 +140,7 @@ namespace EfDEnhanced.Utils.Settings
             {
                 // 不允许空、未知或无效键
                 KeyCode.None => false,
-                
+
                 // 允许常见手柄按钮（JoystickButton0-19，对应Xbox/PlayStation等手柄）
                 >= KeyCode.JoystickButton0 and <= KeyCode.Joystick8Button19 => true,
 

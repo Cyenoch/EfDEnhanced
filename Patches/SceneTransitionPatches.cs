@@ -59,7 +59,7 @@ public class SceneTransitionPatches
                 // 不是场景加载交互，放行
                 return true;
             }
-            
+
             if (!RaidCheckUtility.ShouldCheckRaidMap(sceneId!))
             {
                 ModLogger.Log("SceneTransitionCheck", $"Target scene '{sceneId}' is not a Raid, allowing transition");
@@ -155,15 +155,15 @@ public class SceneTransitionPatches
                 if (_pendingInteractable != null)
                 {
                     ModLogger.Log("SceneTransitionCheck", "Re-setting interact target and starting action");
-                    
+
                     // 重新设置交互目标，确保不会因为玩家移动而丢失
                     interactAction.SetInteractableTarget(_pendingInteractable);
-                    
+
                     // 关键：在重新启动action之前，必须先重置等待标志和设置绕过标志
                     // 否则StartAction会立即调用OnStart，被我们的"Already waiting"检查阻止
                     _isWaitingForConfirmation = false;
                     _bypassCheck = true;
-                    
+
                     // 重新启动 CA_Interact action
                     // 这次会绕过我们的检查，直接执行原OnStart逻辑
                     var character = interactAction.characterController;
@@ -187,7 +187,7 @@ public class SceneTransitionPatches
                 ModLogger.Log("SceneTransitionCheck", "User cancelled transition");
                 // 用户取消，action已经在OnStart返回false时被阻止了
             }
-            
+
             // 清理保存的交互目标
             _pendingInteractable = null;
         }
