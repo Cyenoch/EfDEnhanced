@@ -140,16 +140,23 @@ public class ActiveQuestTracker : MonoBehaviour
             // 设置位置：左上角向右和向下偏移（负值）
             panelRect.anchoredPosition = new Vector2(-10, -10);
 
+            // 给主面板添加布局组件来管理子元素
+            VerticalLayoutGroup panelLayoutGroup = _questPanel.AddComponent<VerticalLayoutGroup>();
+            UIStyles.ConfigureVerticalLayout(panelLayoutGroup, 5, new RectOffset(0, 0, 0, 0));
+            
+            ContentSizeFitter panelSizeFitter = _questPanel.AddComponent<ContentSizeFitter>();
+            panelSizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            panelSizeFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+
             // 创建帮助文本（始终显示在顶部）
             _helpTextObject = new GameObject("HelpText");
             _helpTextObject.transform.SetParent(_questPanel.transform, false);
 
             RectTransform helpTextRect = _helpTextObject.AddComponent<RectTransform>();
-            helpTextRect.anchorMin = new Vector2(0, 1);
-            helpTextRect.anchorMax = new Vector2(1, 1);
-            helpTextRect.pivot = new Vector2(0.5f, 1);
-            helpTextRect.anchoredPosition = new Vector2(0, -5); // 距离顶部5px
-            helpTextRect.sizeDelta = new Vector2(-10, 0); // 左右各留5px边距
+            helpTextRect.anchorMin = Vector2.zero;
+            helpTextRect.anchorMax = Vector2.one;
+            helpTextRect.offsetMin = Vector2.zero;
+            helpTextRect.offsetMax = Vector2.zero;
 
             TextMeshProUGUI helpText = _helpTextObject.AddComponent<TextMeshProUGUI>();
             helpText.text = LocalizationHelper.Get("QuestTracker_HelpText");
@@ -173,11 +180,10 @@ public class ActiveQuestTracker : MonoBehaviour
             _questListContainer.transform.SetParent(_questPanel.transform, false);
 
             RectTransform contentRect = _questListContainer.AddComponent<RectTransform>();
-            contentRect.anchorMin = new Vector2(0, 1);
-            contentRect.anchorMax = new Vector2(1, 1);
-            contentRect.pivot = new Vector2(0.5f, 1);
-            contentRect.anchoredPosition = new Vector2(0, -20); // 距离顶部30px，留出帮助文本空间
-            contentRect.sizeDelta = new Vector2(-10, 0); // 左右各留5px边距
+            contentRect.anchorMin = Vector2.zero;
+            contentRect.anchorMax = Vector2.one;
+            contentRect.offsetMin = Vector2.zero;
+            contentRect.offsetMax = Vector2.zero;
 
             VerticalLayoutGroup layoutGroup = _questListContainer.AddComponent<VerticalLayoutGroup>();
             UIStyles.ConfigureVerticalLayout(layoutGroup, UIConstants.QUEST_ENTRY_SPACING,
@@ -202,19 +208,20 @@ public class ActiveQuestTracker : MonoBehaviour
     {
         try
         {
-            if (_helpTextObject != null)
+            if (_helpTextObject != null && _questPanel != null)
             {
                 // 如果用户已经使用过快捷键，则隐藏提示文本
                 bool shouldShow = !ModSettings.TrackerHotkeyUsed.Value;
                 _helpTextObject.SetActive(shouldShow);
                 
-                // 获取 LayoutElement 并设置 ignoreLayout
-                // 这样隐藏时就不会占据空间
-                LayoutElement? layoutElement = _helpTextObject.GetComponent<LayoutElement>();
-                if (layoutElement != null)
-                {
-                    layoutElement.ignoreLayout = !shouldShow;
-                }
+                // // 获取 LayoutElement 并设置 ignoreLayout
+                // // 这样隐藏时就不会占据空间
+                // LayoutElement? layoutElement = _helpTextObject.GetComponent<LayoutElement>();
+                // if (layoutElement != null)
+                // {
+                //     layoutElement.ignoreLayout = !shouldShow;
+                // }
+                
                 
                 ModLogger.Log("QuestTracker", $"Help text visibility: {shouldShow}, ignoreLayout: {!shouldShow}");
             }
@@ -1273,8 +1280,8 @@ public class ActiveQuestTracker : MonoBehaviour
             // 计算从屏幕顶部到 stormText 底部的距离
             float distanceFromTop = screenTop - stormTextBottom;
 
-            // 添加额外的边距（比如 20 像素）
-            float additionalMargin = 20f;
+            // 添加额外的边距（比如 14 像素）
+            float additionalMargin = 14f;
             float totalOffset = distanceFromTop + additionalMargin;
 
             ModLogger.Log("QuestTracker", $"TimeOfDayDisplay offset calculated: {totalOffset}px (stormText bottom: {stormTextBottom}, screen top: {screenTop}, margin: {additionalMargin})");

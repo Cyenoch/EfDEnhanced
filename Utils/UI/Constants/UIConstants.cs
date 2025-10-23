@@ -13,7 +13,7 @@ namespace EfDEnhanced.Utils.UI.Constants
         /// <summary>
         /// 任务追踪器面板宽度
         /// </summary>
-        public const int QUEST_PANEL_WIDTH = 280;
+        public const int QUEST_PANEL_WIDTH = 270;
 
         /// <summary>
         /// 任务追踪器最大高度占屏幕高度的比例
