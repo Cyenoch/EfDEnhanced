@@ -18,7 +18,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
             _sectionKey = sectionKey;
             SetupLayout();
             CreateSectionText(LocalizationHelper.Get(sectionKey));
-            
+
             // Subscribe to language changes
             // Unsubscribe first to prevent duplicate subscriptions if Initialize is called multiple times
             LocalizationHelper.OnLanguageChanged -= OnLanguageChanged;
@@ -77,7 +77,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
             textLayout.minHeight = 26; // Slightly larger for better readability
             textLayout.preferredHeight = 26;
         }
-        
+
         private void OnDestroy()
         {
             LocalizationHelper.OnLanguageChanged -= OnLanguageChanged;

@@ -16,7 +16,7 @@ public static class LocalizationHelper
 
     // 本地化文本数据
     private static readonly Dictionary<SystemLanguage, Dictionary<string, string>> LocalizationData = [];
-    
+
     /// <summary>
     /// 语言变更事件 - UI 组件可订阅此事件以在语言改变时刷新显示
     /// </summary>
@@ -83,7 +83,7 @@ public static class LocalizationHelper
         {
             ModLogger.Log("Localization", $"Language changed to: {newLanguage}");
             ApplyTranslations(newLanguage);
-            
+
             // 触发公共事件，通知所有订阅者
             OnLanguageChanged?.Invoke(newLanguage);
         }
@@ -582,9 +582,9 @@ public static class LocalizationHelper
     public static void SetLocalizedText(UnityEngine.UI.Text textComponent, string localizationKey)
     {
         if (textComponent == null) return;
-        
+
         textComponent.text = Get(localizationKey);
-        
+
         // 订阅语言变更事件，当语言改变时自动更新文本
         OnLanguageChanged += (lang) =>
         {
@@ -602,9 +602,9 @@ public static class LocalizationHelper
     public static void SetLocalizedText(TMPro.TextMeshProUGUI textComponent, string localizationKey)
     {
         if (textComponent == null) return;
-        
+
         textComponent.text = Get(localizationKey);
-        
+
         // 订阅语言变更事件，当语言改变时自动更新文本
         OnLanguageChanged += (lang) =>
         {

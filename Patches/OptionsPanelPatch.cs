@@ -191,7 +191,7 @@ namespace EfDEnhanced.Patches
                     buttonText.SetText(modSettingsText);
                     buttonText.ForceMeshUpdate();
                     ModLogger.Log("OptionsPanelPatch", $"Set button text to: {modSettingsText}");
-                    
+
                     // Subscribe to language changes to update button text
                     LocalizationHelper.OnLanguageChanged -= OnLanguageChanged;
                     LocalizationHelper.OnLanguageChanged += OnLanguageChanged;

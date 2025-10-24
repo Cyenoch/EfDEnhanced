@@ -402,7 +402,7 @@ namespace EfDEnhanced.Utils
         {
             // Use helper method to reset settings based on type
             ModLogger.Log("ModSettings", $"Starting reset of {_allSettings.Count} settings to defaults");
-            
+
             int resetCount = 0;
             int failureCount = 0;
 
@@ -412,10 +412,10 @@ namespace EfDEnhanced.Utils
                 {
                     var settingKey = setting.Key;
                     ModLogger.Log("ModSettings", $"[{resetCount + 1}/{_allSettings.Count}] Resetting setting: {settingKey}");
-                    
+
                     setting.Reset();
                     resetCount++;
-                    
+
                     ModLogger.Log("ModSettings", $"✓ Successfully reset: {settingKey}");
                 }
                 catch (Exception ex)

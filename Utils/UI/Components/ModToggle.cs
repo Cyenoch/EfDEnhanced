@@ -146,7 +146,7 @@ namespace EfDEnhanced.Utils.UI.Components
             {
                 _labelLocalizationKey = localizationKey;
                 _label.text = LocalizationHelper.Get(localizationKey);
-                
+
                 // Subscribe to language changes only once
                 if (!_isLocalizationSubscribed)
                 {

@@ -46,7 +46,7 @@ namespace EfDEnhanced.Utils.UI.Constants
             try
             {
                 var shadow = textObject.GetComponent<LeTai.TrueShadow.TrueShadow>() ?? textObject.AddComponent<LeTai.TrueShadow.TrueShadow>();
-                
+
                 if (shadow == null)
                 {
                     ModLogger.Log("UIStyles", "Failed to get or add TrueShadow component");
@@ -84,7 +84,7 @@ namespace EfDEnhanced.Utils.UI.Constants
         private static System.Collections.IEnumerator SetTrueShadowPropertiesDelayed(LeTai.TrueShadow.TrueShadow shadow, bool isTitle)
         {
             yield return null; // 等待一帧
-            
+
             if (shadow != null && shadow.gameObject.activeInHierarchy)
             {
                 SetTrueShadowProperties(shadow, isTitle);

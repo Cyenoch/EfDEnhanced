@@ -146,7 +146,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
                 _buttonText.text = KeyCodeSettingsEntry.GetKeyDisplayName(e.NewValue);
             }
         }
-        
+
         /// <summary>
         /// Handle language changes - update the "Press Any Key" text if currently listening
         /// </summary>
@@ -155,7 +155,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
             try
             {
                 base.OnLanguageChanged(newLanguage);
-                
+
                 // If currently listening, update the prompt text
                 if (_isListening && _buttonText != null)
                 {

@@ -200,7 +200,7 @@ namespace EfDEnhanced.Patches
 
                 // Execute sell as async task
                 shopView.Target.Sell(_currentHoveredDisplay.Target).Forget();
-                
+
                 // Play sound effect using the sound path directly
                 AudioManager.Post("UI/sell");
 

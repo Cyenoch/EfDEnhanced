@@ -57,6 +57,12 @@ namespace EfDEnhanced.Utils.UI.Components
     /// </summary>
     public class PieMenuComponent : MonoBehaviour
     {
+        private enum PieMenuInputMode
+        {
+            Mouse,
+            Gamepad
+        }
+
         // Events
         public event Action<string>? OnItemInvoked; // Triggered when an item is selected
         public event Action? OnMenuShown; // Triggered when menu is shown
@@ -79,6 +85,8 @@ namespace EfDEnhanced.Utils.UI.Components
         private Canvas? _canvas;
         private GameObject? _wheelContainer;
         private GameObject? _centerDot;
+        private GameObject? _labelContainer;
+        private Text? _labelText;
         private List<PieSegment> _segments = new List<PieSegment>();
 
         // State
@@ -87,6 +95,10 @@ namespace EfDEnhanced.Utils.UI.Components
         private Vector2 _virtualCursorPosition;
         private int _hoveredIndex = -1;
         private int _selectedIndex = -1;
+        private PieMenuInputMode _inputMode = PieMenuInputMode.Mouse;
+
+        private const float StickModeActivationThreshold = 0.25f;
+        private const float MouseSwitchSqrThreshold = 1f;
 
         // Items
         private List<PieMenuItem> _items = new List<PieMenuItem>();
@@ -125,6 +137,11 @@ namespace EfDEnhanced.Utils.UI.Components
         {
             _items = items;
 
+            if (_hoveredIndex >= _items.Count)
+            {
+                _hoveredIndex = -1;
+            }
+
             // Recreate segments to match item count
             if (_wheelContainer != null)
             {
@@ -151,6 +168,8 @@ namespace EfDEnhanced.Utils.UI.Components
                     RefreshItems();
                 }
             }
+
+            UpdateLabelDisplay();
         }
 
         /// <summary>
@@ -180,6 +199,7 @@ namespace EfDEnhanced.Utils.UI.Components
 
             // Reset virtual cursor
             _virtualCursorPosition = Vector2.zero;
+            _inputMode = PieMenuInputMode.Mouse;
 
             // Reset selection
             _selectedIndex = -1;
@@ -261,22 +281,83 @@ namespace EfDEnhanced.Utils.UI.Components
         {
             if (!_isOpen) return;
 
-            // Update virtual cursor position from mouse delta
-            if (Mouse.current != null)
+            if (!TryUpdateWithGamepad() || _inputMode == PieMenuInputMode.Mouse)
             {
-                Vector2 mouseDelta = Mouse.current.delta.ReadValue();
-                _virtualCursorPosition += mouseDelta;
+                UpdateVirtualCursorWithMouse();
             }
 
-            // Calculate hovered segment
+            UpdateHoveredSegment();
+            HandleInvokeAndCancelInputs();
+        }
+
+        private void UpdateVirtualCursorWithMouse()
+        {
+            if (Mouse.current == null) return;
+
+            Vector2 mouseDelta = Mouse.current.delta.ReadValue();
+            if (_inputMode == PieMenuInputMode.Gamepad && mouseDelta.sqrMagnitude > MouseSwitchSqrThreshold)
+            {
+                _inputMode = PieMenuInputMode.Mouse;
+            }
+
+            _virtualCursorPosition += mouseDelta;
+            ClampVirtualCursorToWheelRadius();
+        }
+
+        private bool TryUpdateWithGamepad()
+        {
+            if (Gamepad.current == null)
+            {
+                return false;
+            }
+
+            Vector2 stickInput = Gamepad.current.rightStick.ReadValue();
+            if (stickInput.sqrMagnitude < StickModeActivationThreshold * StickModeActivationThreshold)
+            {
+                return _inputMode == PieMenuInputMode.Gamepad;
+            }
+
+            _inputMode = PieMenuInputMode.Gamepad;
+            float magnitude = Mathf.Clamp01((stickInput.magnitude - StickModeActivationThreshold) / (1f - StickModeActivationThreshold));
+            Vector2 direction = stickInput.normalized;
+            _virtualCursorPosition = direction * (magnitude * ScaledWheelRadius);
+            return true;
+        }
+
+        private void ClampVirtualCursorToWheelRadius()
+        {
+            if (_virtualCursorPosition.sqrMagnitude > ScaledWheelRadius * ScaledWheelRadius)
+            {
+                _virtualCursorPosition = _virtualCursorPosition.normalized * ScaledWheelRadius;
+            }
+        }
+
+        private void UpdateHoveredSegment()
+        {
+            if (_items.Count == 0)
+            {
+                if (_hoveredIndex != -1)
+                {
+                    _hoveredIndex = -1;
+                    UpdateSegmentVisuals();
+                }
+                return;
+            }
+
             if (_virtualCursorPosition.magnitude > ScaledDeadZone)
             {
                 float angle = Mathf.Atan2(_virtualCursorPosition.x, _virtualCursorPosition.y) * Mathf.Rad2Deg;
-                if (angle < 0) angle += 360f;
+                if (angle < 0f)
+                {
+                    angle += 360f;
+                }
 
                 float angleStep = 360f / _items.Count;
                 float adjustedAngle = angle + (angleStep / 2f);
-                if (adjustedAngle >= 360f) adjustedAngle -= 360f;
+                if (adjustedAngle >= 360f)
+                {
+                    adjustedAngle -= 360f;
+                }
 
                 int segmentIndex = Mathf.FloorToInt(adjustedAngle / angleStep);
                 segmentIndex = Mathf.Clamp(segmentIndex, 0, _items.Count - 1);
@@ -287,36 +368,44 @@ namespace EfDEnhanced.Utils.UI.Components
                     UpdateSegmentVisuals();
                 }
             }
-            else
+            else if (_hoveredIndex != -1)
             {
-                if (_hoveredIndex != -1)
-                {
-                    _hoveredIndex = -1;
-                    UpdateSegmentVisuals();
-                }
+                _hoveredIndex = -1;
+                UpdateSegmentVisuals();
             }
+        }
 
-            // Handle input
-            // Left click: invoke if hovered, cancel if not
-            if (Input.GetMouseButtonDown(0))
+        private void HandleInvokeAndCancelInputs()
+        {
+            bool invokeRequested = Input.GetMouseButtonDown(0)
+                                   || (Gamepad.current != null && Gamepad.current.rightTrigger.wasPressedThisFrame);
+
+            if (invokeRequested)
             {
                 if (_hoveredIndex >= 0 && _hoveredIndex < _items.Count)
                 {
-                    // Invoke selected item
                     string itemId = _items[_hoveredIndex].Id;
                     OnItemInvoked?.Invoke(itemId);
-                    Cancel(); // Cancel after invoking (don't invoke again)
+                    Cancel();
                 }
                 else
                 {
-                    // No item selected, just cancel
                     Cancel();
                 }
             }
-            // Right click (press or release) or Escape: cancel menu
-            else if (Input.GetMouseButtonDown(1) || Input.GetMouseButtonUp(1) || Input.GetKeyDown(KeyCode.Escape))
+            else
             {
-                Cancel();
+                bool cancelRequested = Input.GetMouseButtonDown(1)
+                                       || Input.GetMouseButtonUp(1)
+                                       || Input.GetKeyDown(KeyCode.Escape)
+                                       || (Gamepad.current != null && (Gamepad.current.leftTrigger.wasPressedThisFrame
+                                                                       || Gamepad.current.buttonEast.wasPressedThisFrame
+                                                                       || Gamepad.current.buttonSouth.wasPressedThisFrame));
+
+                if (cancelRequested)
+                {
+                    Cancel();
+                }
             }
         }
 
@@ -350,6 +439,9 @@ namespace EfDEnhanced.Utils.UI.Components
             // Create center dot
             CreateCenterDot();
 
+            // Create label display
+            CreateLabelDisplay();
+
             gameObject.SetActive(false);
         }
 
@@ -379,6 +471,7 @@ namespace EfDEnhanced.Utils.UI.Components
 
             CreateWheelSegments();
             CreateCenterDot();
+            CreateLabelDisplay();
 
             if (_isOpen)
             {
@@ -390,7 +483,7 @@ namespace EfDEnhanced.Utils.UI.Components
         {
             if (_wheelContainer == null || _items.Count == 0) return;
 
-            float angleStep = 360f / _items.Count;
+            float angleStep = 360f / Mathf.Max(1, _items.Count);
             float startOffset = -angleStep / 2f;
 
             for (int i = 0; i < _items.Count; i++)
@@ -468,7 +561,7 @@ namespace EfDEnhanced.Utils.UI.Components
                 countTextRect.anchorMin = new Vector2(0.5f, 0.5f);
                 countTextRect.anchorMax = new Vector2(0.5f, 0.5f);
                 countTextRect.pivot = new Vector2(.5f, .5f);
-                
+
                 // Position count text closer to pie center using same angle but shorter distance
                 float countTextDistance = ScaledItemDistance * .7f;
                 Vector2 countTextPosition = new Vector2(
@@ -669,8 +762,57 @@ namespace EfDEnhanced.Utils.UI.Components
 
         private void CreateLabelDisplay()
         {
-            // This method is no longer needed as _labelDisplay and _labelText are removed.
-            // Keeping it for now to avoid breaking existing calls, but it will do nothing.
+            if (_labelContainer != null)
+            {
+                Destroy(_labelContainer);
+                _labelContainer = null;
+                _labelText = null;
+            }
+
+            _labelContainer = new GameObject("LabelContainer");
+            _labelContainer.transform.SetParent(transform, false);
+            _labelContainer.transform.SetAsLastSibling();
+
+            RectTransform labelRect = _labelContainer.AddComponent<RectTransform>();
+            labelRect.anchorMin = new Vector2(0.5f, 0.5f);
+            labelRect.anchorMax = new Vector2(0.5f, 0.5f);
+            labelRect.pivot = new Vector2(0.5f, 0f);
+            labelRect.anchoredPosition = new Vector2(0f, -(ScaledWheelRadius + (60f * _scale)));
+
+            HorizontalLayoutGroup layoutGroup = _labelContainer.AddComponent<HorizontalLayoutGroup>();
+            layoutGroup.padding = new RectOffset(18, 18, 12, 12);
+            layoutGroup.childAlignment = TextAnchor.MiddleCenter;
+            layoutGroup.spacing = 4f;
+            layoutGroup.childControlWidth = true;
+            layoutGroup.childControlHeight = true;
+            layoutGroup.childForceExpandWidth = false;
+            layoutGroup.childForceExpandHeight = false;
+
+            ContentSizeFitter fitter = _labelContainer.AddComponent<ContentSizeFitter>();
+            fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            GameObject textObject = new GameObject("LabelText");
+            textObject.transform.SetParent(_labelContainer.transform, false);
+
+            RectTransform textRect = textObject.AddComponent<RectTransform>();
+            textRect.anchorMin = new Vector2(0f, 0f);
+            textRect.anchorMax = new Vector2(1f, 1f);
+            textRect.offsetMin = Vector2.zero;
+            textRect.offsetMax = Vector2.zero;
+
+            _labelText = textObject.AddComponent<Text>();
+            _labelText.font = UIConstants.DefaultFont;
+            _labelText.fontSize = Mathf.RoundToInt(22f * _scale);
+            _labelText.alignment = TextAnchor.MiddleCenter;
+            _labelText.color = Color.white;
+            _labelText.raycastTarget = false;
+            _labelText.horizontalOverflow = HorizontalWrapMode.Overflow;
+            _labelText.verticalOverflow = VerticalWrapMode.Overflow;
+
+            UIStyles.ApplyStandardTextShadow(textObject);
+
+            _labelContainer.SetActive(false);
         }
 
         private void RefreshItems()
@@ -706,6 +848,8 @@ namespace EfDEnhanced.Utils.UI.Components
                     segment.iconHolder.SetActive(false);
                 }
             }
+
+            UpdateLabelDisplay();
         }
 
         private void UpdateSegmentVisuals()
@@ -727,12 +871,40 @@ namespace EfDEnhanced.Utils.UI.Components
                     segment.image.color = _normalColor;
                 }
             }
+
+            UpdateLabelDisplay();
         }
 
         private void UpdateLabelDisplay()
         {
-            // This method is no longer needed as _labelDisplay and _labelText are removed.
-            // Keeping it for now to avoid breaking existing calls, but it will do nothing.
+            if (_labelContainer == null || _labelText == null)
+            {
+                return;
+            }
+
+            if (!_isOpen || _items.Count == 0)
+            {
+                _labelContainer.SetActive(false);
+                return;
+            }
+
+            if (_hoveredIndex >= 0 && _hoveredIndex < _items.Count)
+            {
+                PieMenuItem hoveredItem = _items[_hoveredIndex];
+                string? label = hoveredItem.Label;
+
+                if (string.IsNullOrWhiteSpace(label))
+                {
+                    label = hoveredItem.Id;
+                }
+
+                _labelText.text = label;
+                _labelContainer.SetActive(true);
+            }
+            else
+            {
+                _labelContainer.SetActive(false);
+            }
         }
 
         private class PieSegment

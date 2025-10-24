@@ -81,7 +81,7 @@ namespace EfDEnhanced.Patches
                 {
                     UpdateButtonTextDisplay();
                     ModLogger.Log("PauseMenuPatch", $"Set button text to: {modButtonText.text}");
-                    
+
                     // Subscribe to language changes to update button text
                     // Unsubscribe first to prevent duplicate subscriptions
                     LocalizationHelper.OnLanguageChanged -= OnLanguageChanged;
@@ -109,7 +109,7 @@ namespace EfDEnhanced.Patches
                 ModLogger.LogError($"PauseMenuPatch.Show_Postfix failed: {ex}");
             }
         }
-        
+
         /// <summary>
         /// Handle language changes by updating button text
         /// </summary>
@@ -124,14 +124,14 @@ namespace EfDEnhanced.Patches
                 ModLogger.LogError($"PauseMenuPatch.OnLanguageChanged failed: {ex}");
             }
         }
-        
+
         /// <summary>
         /// Update the button text with the current language
         /// </summary>
         private static void UpdateButtonTextDisplay()
         {
             if (modButtonText == null) return;
-            
+
             string modSettingsText = LocalizationHelper.Get("Settings_ModSettings_Button");
             modButtonText.text = modSettingsText;
             modButtonText.SetText(modSettingsText);

@@ -42,7 +42,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
             try
             {
                 ModLogger.Log($"IndexedOptionsSettingsItem: Building content for {_optionsEntry.Key}");
-                
+
                 // Create label
                 CreateLabel();
 
@@ -304,13 +304,13 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
 
             var optionImage = optionObj.AddComponent<Image>();
             optionImage.color = new Color(0.2f, 0.2f, 0.2f, 1f);
-            
+
             // Store reference to the image for later color updates
             _optionImages.Add(optionImage);
 
             var optionButton = optionObj.AddComponent<Button>();
             optionButton.targetGraphic = optionImage;
-            
+
             int capturedIndex = index; // Capture for closure
             optionButton.onClick.AddListener(() => OnOptionSelected(capturedIndex));
 
@@ -343,7 +343,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
             text.enableWordWrapping = false;
             text.margin = new Vector4(0, 0, 0, 0);
             text.raycastTarget = false;
-            
+
             // Store reference to option text for language change updates
             _optionTexts.Add(text);
 
@@ -353,7 +353,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
                 optionImage.color = new Color(0.3f, 0.4f, 0.5f, 1f);
             }
         }
-        
+
         private void UpdateOptionColors()
         {
             try
@@ -363,7 +363,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
                     if (_optionImages[i] != null)
                     {
                         // Highlight the selected option, normal color for others
-                        _optionImages[i].color = (i == _optionsEntry.Value) 
+                        _optionImages[i].color = (i == _optionsEntry.Value)
                             ? new Color(0.3f, 0.4f, 0.5f, 1f)  // Selected color (blue-ish)
                             : new Color(0.2f, 0.2f, 0.2f, 1f);  // Normal color
                     }
@@ -441,7 +441,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
                 {
                     LayoutRebuilder.ForceRebuildLayoutImmediate(buttonParent);
                 }
-                
+
                 Canvas.ForceUpdateCanvases();
 
                 var canvasRect = _rootCanvasRect ?? _popupRoot.GetComponent<RectTransform>();
@@ -509,7 +509,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
             try
             {
                 ModLogger.Log($"IndexedOptionsSettingsItem: Option {index} selected for {_optionsEntry.Key}");
-                
+
                 if (index < 0 || index >= _optionsEntry.Options.Length)
                 {
                     ModLogger.LogError($"IndexedOptionsSettingsItem: Invalid option index {index}");
@@ -582,7 +582,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
                 ModLogger.LogError($"IndexedOptionsSettingsItem.OnLanguageChanged failed: {ex}");
             }
         }
-        
+
         /// <summary>
         /// Refresh all option text displays
         /// </summary>
@@ -598,7 +598,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
                         _optionTexts[i].text = _optionsEntry.Options[i];
                     }
                 }
-                
+
                 // Update button text
                 UpdateButtonText();
             }

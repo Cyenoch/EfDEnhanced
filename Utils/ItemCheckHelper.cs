@@ -64,7 +64,7 @@ public static class ItemCheckHelper
             var gunCaliber = ItemTypeChecker.GetCaliber(gun);
             if (string.IsNullOrEmpty(gunCaliber)) return;
 
-            int totalAmmoCount = InventoryHelper.CountAmmoByCaliber(gunCaliber, 
+            int totalAmmoCount = InventoryHelper.CountAmmoByCaliber(gunCaliber,
                 ItemSourceFilter.CharacterInventory | ItemSourceFilter.PetInventory | ItemSourceFilter.SlotCollection);
 
             if (totalAmmoCount < gunSetting.Capacity)
@@ -94,6 +94,6 @@ public class BasicEquipmentCheck
     public bool HasAmmo { get; set; }
     public bool HasMedicine { get; set; }
     public bool HasFood { get; set; }
-    
+
     public bool IsComplete => HasWeapon && HasAmmo && HasMedicine && HasFood;
 }

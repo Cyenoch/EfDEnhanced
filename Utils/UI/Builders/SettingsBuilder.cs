@@ -98,11 +98,12 @@ namespace EfDEnhanced.Utils.UI.Builders
 
             try
             {
-                if (visibilityCondition != null) {
+                if (visibilityCondition != null)
+                {
                     leftPadding += 16;
                 }
                 GameObject itemObj = CreateItemForEntry(entry, leftPadding);
-                
+
                 if (itemObj != null)
                 {
                     // Handle visibility condition

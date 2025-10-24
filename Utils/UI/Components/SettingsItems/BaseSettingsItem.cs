@@ -17,7 +17,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
         protected GameObject DescriptionObject { get; private set; } = null!;
         protected Text? DescriptionText { get; private set; }
         protected Text? LabelText { get; private set; }
-        
+
         private int _leftPadding;
         private Action<SystemLanguage>? _languageChangeHandler;
 
@@ -28,11 +28,11 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
         {
             SettingsEntry = entry ?? throw new ArgumentNullException(nameof(entry));
             _leftPadding = leftPadding;
-            
+
             SetupItemLayout();
             BuildContent();
             BuildDescription();
-            
+
             // Create and store the handler so we can properly unsubscribe later
             _languageChangeHandler = OnLanguageChanged;
             LocalizationHelper.OnLanguageChanged += _languageChangeHandler;
@@ -52,7 +52,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
                 ModLogger.LogError($"BaseSettingsItem.OnLanguageChanged failed: {ex}");
             }
         }
-        
+
         /// <summary>
         /// Refresh all localized text in this settings item
         /// Override in derived classes to refresh control-specific text
@@ -64,7 +64,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
             {
                 LabelText.text = SettingsEntry.Name;
             }
-            
+
             // Refresh description text
             if (DescriptionText != null)
             {
@@ -100,12 +100,12 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
             // Create content container (where the actual control goes)
             ContentContainer = new GameObject("Content");
             ContentContainer.transform.SetParent(transform, false);
-            
+
             var contentRect = ContentContainer.AddComponent<RectTransform>();
             contentRect.anchorMin = new Vector2(0, 1);
             contentRect.anchorMax = new Vector2(1, 1);
             contentRect.pivot = new Vector2(0.5f, 1);
-            
+
             var contentLayout = ContentContainer.AddComponent<HorizontalLayoutGroup>();
             contentLayout.childControlWidth = true;
             contentLayout.childControlHeight = true;
@@ -205,7 +205,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
                 LocalizationHelper.OnLanguageChanged -= _languageChangeHandler;
                 _languageChangeHandler = null;
             }
-            
+
             // Derived classes can override to unsubscribe from events
         }
     }

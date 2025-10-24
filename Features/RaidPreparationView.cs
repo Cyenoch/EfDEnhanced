@@ -169,7 +169,7 @@ public class RaidPreparationView : MonoBehaviour
         contentLayout.childForceExpandHeight = false;
         contentLayout.childForceExpandWidth = true;
         contentLayout.padding = new RectOffset(20, 20, 10, 10); // 内边距
-        
+
         // 添加 ContentSizeFitter 自动调整高度
         ContentSizeFitter contentFitter = content.AddComponent<ContentSizeFitter>();
         contentFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
@@ -187,7 +187,7 @@ public class RaidPreparationView : MonoBehaviour
         _warningText.color = Color.white;
         _warningText.enableWordWrapping = true; // 启用自动换行
         _warningText.overflowMode = TextOverflowModes.Overflow; // 允许扩展，由ContentSizeFitter控制
-        
+
         // 添加 ContentSizeFitter 让文本高度自适应
         ContentSizeFitter textFitter = warningObj.AddComponent<ContentSizeFitter>();
         textFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
@@ -254,21 +254,21 @@ public class RaidPreparationView : MonoBehaviour
 
             // 显示UI并禁用玩家输入
             _rootCanvas.SetActive(true);
-            
+
             // 等待一帧让 TextMeshPro 和 ContentSizeFitter 计算完成
             await UniTask.Yield();
-            
+
             // 强制重建布局
             Canvas.ForceUpdateCanvases();
             RectTransform? contentRect = _warningText.rectTransform.parent as RectTransform;
             if (contentRect != null)
             {
                 LayoutRebuilder.ForceRebuildLayoutImmediate(contentRect);
-                
+
                 // 调试信息
                 ModLogger.Log("RaidPreparationView", $"Content size: {contentRect.sizeDelta}, Text preferred height: {_warningText.preferredHeight}");
             }
-            
+
             InputManager.DisableInput(gameObject);
 
             ModLogger.Log("RaidPreparationView", "View opened, waiting for user input");

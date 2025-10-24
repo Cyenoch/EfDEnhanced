@@ -53,7 +53,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
             // Create slider (using ModSlider but extracting the actual slider component)
             var sliderObj = new GameObject("Slider");
             sliderObj.transform.SetParent(sliderContainer.transform, false);
-            
+
             var sliderRect = sliderObj.AddComponent<RectTransform>();
             _slider = sliderObj.AddComponent<Slider>();
             _slider.minValue = _floatEntry.MinValue;
@@ -70,7 +70,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
             sliderBgRect.anchorMax = new Vector2(1, 0.5f);
             sliderBgRect.pivot = new Vector2(0.5f, 0.5f);
             sliderBgRect.sizeDelta = new Vector2(0, 2);
-            
+
             var sliderBgImage = sliderBg.AddComponent<Image>();
             sliderBgImage.color = new Color(0.2f, 0.2f, 0.2f, 1f);
 
@@ -90,7 +90,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
             fillRect.anchorMax = new Vector2(0, 1);
             fillRect.pivot = new Vector2(0.5f, 0.5f);
             fillRect.sizeDelta = new Vector2(0, 0);
-            
+
             var fillImage = fill.AddComponent<Image>();
             fillImage.color = UIConstants.BUTTON_PRIMARY;
 
@@ -123,7 +123,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
             // Create value text
             var valueTextObj = new GameObject("Value");
             valueTextObj.transform.SetParent(sliderContainer.transform, false);
-            
+
             _valueText = valueTextObj.AddComponent<Text>();
             _valueText.font = UIConstants.DefaultFont;
             _valueText.fontSize = UIConstants.SETTINGS_FONT_SIZE;

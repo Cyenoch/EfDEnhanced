@@ -155,7 +155,7 @@ public class ActiveQuestTracker : MonoBehaviour
             // 给主面板添加布局组件来管理子元素
             VerticalLayoutGroup panelLayoutGroup = _questPanel.AddComponent<VerticalLayoutGroup>();
             UIStyles.ConfigureVerticalLayout(panelLayoutGroup, 5, new RectOffset(0, 0, 0, 0));
-            
+
             ContentSizeFitter panelSizeFitter = _questPanel.AddComponent<ContentSizeFitter>();
             panelSizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             panelSizeFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
@@ -225,7 +225,7 @@ public class ActiveQuestTracker : MonoBehaviour
                 // 如果用户已经使用过快捷键，则隐藏提示文本
                 bool shouldShow = !ModSettings.TrackerHotkeyUsed.Value;
                 _helpTextObject.SetActive(shouldShow);
-                
+
                 // // 获取 LayoutElement 并设置 ignoreLayout
                 // // 这样隐藏时就不会占据空间
                 // LayoutElement? layoutElement = _helpTextObject.GetComponent<LayoutElement>();
@@ -233,8 +233,8 @@ public class ActiveQuestTracker : MonoBehaviour
                 // {
                 //     layoutElement.ignoreLayout = !shouldShow;
                 // }
-                
-                
+
+
                 ModLogger.Log("QuestTracker", $"Help text visibility: {shouldShow}, ignoreLayout: {!shouldShow}");
             }
         }
@@ -1545,10 +1545,10 @@ public class QuestEntryUI
                     }
                     return;
                 }
-                
+
                 _lastTaskStatusChangeTime = currentTime;
                 _taskStatusChangePending = false;
-                
+
                 // 停止之前的延迟更新协程（如果有的话）
                 if (_debouncedUpdateCoroutine != null && ActiveQuestTracker.Instance != null)
                 {
@@ -1597,7 +1597,7 @@ public class QuestEntryUI
             _currentQuest = null;
             _lastTaskStatusChangeTime = -1f; // 重置防抖时间戳
             _taskStatusChangePending = false; // 清除待处理标志
-            
+
             // 停止任何正在运行的延迟更新协程
             if (_debouncedUpdateCoroutine != null && ActiveQuestTracker.Instance != null)
             {
