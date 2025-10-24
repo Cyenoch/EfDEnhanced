@@ -67,6 +67,7 @@ public static class MyPatch
 - 物品系统: `ItemStatsSystem`
 - 移动系统: `ECM2`
 - 本地化: `SodaLocalization`
+- UI系统: `UIPanel`, `UIComponent` (使用 `Utils/UI/` 提供的组件)
 
 ### 常用命令
 ```bash

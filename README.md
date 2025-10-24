@@ -410,13 +410,21 @@ EfDEnhanced/
         ├── Animations/
         │   └── UIAnimations.cs # UI animation utilities
         ├── Builders/
-        │   └── FormBuilder.cs  # Automatic form generation
+        │   └── SettingsBuilder.cs  # Automatic settings UI generation
         ├── Components/
         │   ├── ModButton.cs
         │   ├── ModKeybindingButton.cs  # Keybinding UI component
         │   ├── ModSlider.cs
         │   ├── ModToggle.cs
-        │   └── PieMenuComponent.cs # Reusable pie/radial menu component
+        │   ├── PieMenuComponent.cs # Reusable pie/radial menu component
+        │   └── SettingsItems/      # Auto-generated UI for settings
+        │       ├── BaseSettingsItem.cs
+        │       ├── BoolSettingsItem.cs
+        │       ├── RangedFloatSettingsItem.cs
+        │       ├── IndexedOptionsSettingsItem.cs
+        │       ├── KeyCodeSettingsItem.cs
+        │       ├── SectionHeaderItem.cs
+        │       └── SpacerItem.cs
         ├── Constants/
         │   ├── ColorPalette.cs
         │   └── UIConstants.cs

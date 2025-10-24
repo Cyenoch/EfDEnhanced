@@ -90,6 +90,28 @@ namespace EfDEnhanced.Utils
             )
         );
 
+        public static readonly BoolSettingsEntry CheckQuestItems = Register(
+            new BoolSettingsEntry(
+                PREFIX,
+                "CheckQuestItems",
+                "Settings_CheckQuestItems_Name",
+                true,
+                CATEGORY_RAID_CHECK,
+                "Settings_CheckQuestItems_Desc"
+            )
+        );
+
+        public static readonly BoolSettingsEntry CheckQuestWeapons = Register(
+            new BoolSettingsEntry(
+                PREFIX,
+                "CheckQuestWeapons",
+                "Settings_CheckQuestWeapons_Name",
+                true,
+                CATEGORY_RAID_CHECK,
+                "Settings_CheckQuestWeapons_Desc"
+            )
+        );
+
         #endregion
 
         #region Active Quest Tracker Settings
@@ -278,6 +300,28 @@ namespace EfDEnhanced.Utils
                 UnityEngine.KeyCode.G, // Default: G key
                 CATEGORY_UI,
                 "Settings_ThrowableWheelHotkey_Desc"
+            )
+        );
+
+        public static readonly BoolSettingsEntry FastBuyEnabled = Register(
+            new BoolSettingsEntry(
+                PREFIX,
+                "FastBuyEnabled",
+                "Settings_FastBuyEnabled_Name",
+                true,
+                CATEGORY_UI,
+                "Settings_FastBuyEnabled_Desc"
+            )
+        );
+
+        public static readonly BoolSettingsEntry FastSellEnabled = Register(
+            new BoolSettingsEntry(
+                PREFIX,
+                "FastSellEnabled",
+                "Settings_FastSellEnabled_Name",
+                false,
+                CATEGORY_UI,
+                "Settings_FastSellEnabled_Desc"
             )
         );
 

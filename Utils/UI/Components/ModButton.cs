@@ -81,7 +81,7 @@ namespace EfDEnhanced.Utils.UI.Components
 
             TextMeshProUGUI text = textObj.AddComponent<TextMeshProUGUI>();
             text.fontSize = UIConstants.BUTTON_TEXT_FONT_SIZE;
-            text.color = Color.white;
+            text.color = UIConstants.SETTINGS_LABEL_COLOR;
             text.alignment = TextAlignmentOptions.Center;
             text.fontStyle = FontStyles.Bold;
 

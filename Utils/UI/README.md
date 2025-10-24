@@ -23,9 +23,19 @@ Utils/UI/
 ├── Components/
 │   ├── ModButton.cs             # 标准化按钮组件
 │   ├── ModToggle.cs             # 标准化Toggle组件
-│   └── ModSlider.cs             # 标准化Slider组件
+│   ├── ModSlider.cs             # 标准化Slider组件
+│   ├── ModKeybindingButton.cs   # 按键绑定按钮组件
+│   ├── PieMenuComponent.cs      # 径向菜单组件
+│   └── SettingsItems/           # 设置项UI组件集合
+│       ├── BaseSettingsItem.cs  # 设置项基类
+│       ├── BoolSettingsItem.cs  # 布尔开关设置项
+│       ├── RangedFloatSettingsItem.cs  # 范围浮点设置项
+│       ├── IndexedOptionsSettingsItem.cs  # 选项列表设置项
+│       ├── KeyCodeSettingsItem.cs  # 按键绑定设置项
+│       ├── SectionHeaderItem.cs  # 分节标题项
+│       └── SpacerItem.cs        # 空白间隔项
 ├── Builders/
-│   └── FormBuilder.cs           # 表单构建器（自动生成设置UI）
+│   └── SettingsBuilder.cs       # 设置UI构建器（自动生成设置界面）
 ├── Animations/
 │   └── ModAnimations.cs         # DOTween动画预设
 ├── Constants/
@@ -38,7 +48,7 @@ Utils/UI/
 
 ## 快速开始
 
-### 1. 使用FormBuilder创建设置UI
+### 1. 使用SettingsBuilder创建设置UI
 
 **传统方式** (~600行代码):
 ```csharp
@@ -49,19 +59,20 @@ var layout = container.AddComponent<VerticalLayoutGroup>();
 // 手动配置布局属性...
 layout.spacing = 8;
 layout.padding = new RectOffset(15, 15, 15, 15);
-// ... 重复100次创建每个Toggle/Slider...
+// ... 重复100次创建每个设置项...
 ```
 
-**使用FormBuilder** (~20行代码):
+**使用SettingsBuilder** (~20行代码):
 ```csharp
-var form = new FormBuilder(parentTransform)
+var builder = new SettingsBuilder(parentTransform);
+builder
     .AddSection("Settings_Category_General")
-    .AddToggle("Settings_EnableFeature", ModSettings.EnableFeature)
-    .AddSlider("Settings_Volume", 0f, 1f, ModSettings.Volume)
+    .AddSetting(ModSettings.EnableFeature)
+    .AddSetting(ModSettings.Volume)
     .AddSpacer()
     .AddSection("Settings_Category_Advanced")
-    .AddToggle("Settings_DebugMode", ModSettings.DebugMode)
-    .Build();
+    .AddSetting(ModSettings.DebugMode)
+    .AddButton("Settings_SaveButton", OnSaveClicked);
 ```
 
 **优势**:
@@ -69,6 +80,7 @@ var form = new FormBuilder(parentTransform)
 - 自动本地化
 - 自动双向数据绑定
 - 统一样式和布局
+- 自动生成合适的UI组件（Toggle、Slider、Keybinding等）
 
 ### 2. 使用ModButton创建按钮
 
@@ -301,31 +313,24 @@ public class MyModSettingsPanel : UIPanel
         // 2. 创建ScrollView容器
         // ... (标准ScrollView创建代码)
         
-        // 3. 使用FormBuilder构建表单 - 核心部分！
-        var form = new FormBuilder(scrollContent.transform)
-            .AddSection("General Settings")
-            .AddToggle("Enable Mod", MySettings.EnableMod)
-            .AddToggle("Show Notifications", MySettings.ShowNotifications)
+        // 3. 使用SettingsBuilder构建表单 - 核心部分！
+        var builder = new SettingsBuilder(scrollContent.transform);
+        builder
+            .AddSection("Settings_Category_General")
+            .AddSetting(MySettings.EnableMod)
+            .AddSetting(MySettings.ShowNotifications)
             .AddSpacer()
             
-            .AddSection("Audio Settings")
-            .AddSlider("Master Volume", 0f, 1f, MySettings.MasterVolume)
-            .AddSlider("SFX Volume", 0f, 1f, MySettings.SfxVolume)
+            .AddSection("Settings_Category_Audio")
+            .AddSetting(MySettings.MasterVolume)
+            .AddSetting(MySettings.SfxVolume)
             .AddSpacer()
             
-            .AddSection("Advanced")
-            .AddToggle("Debug Mode", MySettings.DebugMode)
-            .AddDescription("Enable detailed logging for debugging")
-            
-            .Build();
+            .AddSection("Settings_Category_Advanced")
+            .AddSetting(MySettings.DebugMode)
+            .AddButton("Settings_SaveButton", SaveSettings);
         
-        // 4. 创建按钮
-        ModButton.Create(footerPanel.transform)
-            .SetText("Save")
-            .SetStyle(UIStyles.ButtonStyle.Success)
-            .OnClick(SaveSettings)
-            .Build();
-        
+        // 4. 关闭按钮
         ModButton.Create(footerPanel.transform)
             .SetText("Close")
             .SetStyle(UIStyles.ButtonStyle.Secondary)
@@ -443,19 +448,18 @@ _debugPanel = ModDebugPanel.Create();
 
 ## API参考
 
-### FormBuilder
+### SettingsBuilder
 
 #### 方法
 
 | 方法 | 说明 | 示例 |
 |-----|------|------|
-| `AddSection(titleKey)` | 添加分节标题 | `.AddSection("General Settings")` |
-| `AddToggle(labelKey, setting)` | 添加Toggle（自动绑定） | `.AddToggle("Enable", setting)` |
-| `AddSlider(labelKey, min, max, setting)` | 添加Slider（自动绑定） | `.AddSlider("Volume", 0f, 1f, setting)` |
+| `AddSection(sectionKey)` | 添加分节标题 | `.AddSection("Settings_Category_General")` |
+| `AddSetting(entry, visibilityCondition?, leftPadding?)` | 添加设置项（自动选择组件类型） | `.AddSetting(ModSettings.EnableFeature)` |
 | `AddSpacer(height)` | 添加空白间距 | `.AddSpacer(20f)` |
-| `AddDescription(textKey)` | 添加描述文本 | `.AddDescription("Help text")` |
-| `AddCustomElement(gameObject)` | 添加自定义元素 | `.AddCustomElement(myElement)` |
-| `Build()` | 完成构建 | `.Build()` |
+| `AddButton(labelKey, onClick, style)` | 添加按钮 | `.AddButton("Settings_SaveButton", SaveSettings)` |
+| `GetCreatedItems()` | 获取所有创建的项 | `builder.GetCreatedItems()` |
+| `Clear()` | 清空所有创建的项 | `builder.Clear()` |
 
 ### ModButton
 
@@ -518,17 +522,18 @@ _debugPanel = ModDebugPanel.Create();
 ### 案例1：ModSettingsPanel重构
 
 **重构前**: 890行代码，手动创建每个UI元素  
-**重构后**: 300行代码，使用FormBuilder
+**重构后**: 300行代码，使用SettingsBuilder + SettingsItems
 
 **代码对比**:
 
-见 `Features/ModSettingsPanel.cs` vs `Features/ModSettingsPanel.cs.backup`
+见 `Features/ModSettingsContent.cs`
 
 **成果**:
 - 代码量减少 66%
 - 维护成本大幅降低
 - 添加新设置项只需1行代码
 - 自动处理本地化和数据绑定
+- 自动根据设置类型选择合适UI组件
 
 ---
 
@@ -539,7 +544,25 @@ _debugPanel = ModDebugPanel.Create();
 1. 在 `Utils/UI/Components/` 创建新组件
 2. 继承适当的Unity UI组件
 3. 实现Builder模式接口
-4. 添加到FormBuilder支持
+4. 注册到使用处
+
+### 添加新设置项
+
+1. 在 `Utils/UI/Components/SettingsItems/` 创建新类
+2. 继承 `BaseSettingsItem` 抽象类
+3. 实现 `Initialize(ISettingsEntry, int)` 方法
+4. 在 `SettingsBuilder.CreateItemForEntry()` 中添加类型判断
+
+```csharp
+public class MyCustomSettingsItem : BaseSettingsItem
+{
+    public override void Initialize(ISettingsEntry entry, int leftPadding)
+    {
+        // 创建你的自定义UI组件
+        base.Initialize(entry, leftPadding);
+    }
+}
+```
 
 ### 添加新动画
 
@@ -578,23 +601,14 @@ A: IMGUI适合简单调试工具，但性能和样式定制能力有限。我们
 **Q: 为什么不引入外部UI库？**  
 A: 游戏已经加载了完善的UI框架。引入外部库会增加Mod体积和兼容性风险。
 
-**Q: FormBuilder性能如何？**  
+**Q: SettingsBuilder性能如何？**  
 A: 与手动创建相同，因为底层使用相同的Unity API。但减少了代码量和出错概率。
 
 **Q: 如何添加自定义样式？**  
 A: 在 `UIConstants.cs` 添加新颜色常量，在 `UIStyles.cs` 添加新样式方法。
 
----
-
-## 更新日志
-
-### v1.0 (2024-10-21)
-- ✅ 初始版本发布
-- ✅ 实现FormBuilder
-- ✅ 实现ModButton, ModToggle, ModSlider
-- ✅ 集成DOTween动画
-- ✅ 重构ModSettingsPanel（减少66%代码）
-- ✅ 添加IMGUI调试面板
+**Q: 如何使用SettingsBuilder创建自定义设置项？**  
+A: 在 `Utils/UI/Components/SettingsItems/` 创建新类继承 `BaseSettingsItem`，然后在 `SettingsBuilder.CreateItemForEntry()` 中添加支持。
 
 ---
 

@@ -79,9 +79,6 @@ namespace EfDEnhanced.Utils.UI.Components
         private Canvas? _canvas;
         private GameObject? _wheelContainer;
         private GameObject? _centerDot;
-        private GameObject? _virtualCursorIndicator;
-        private GameObject? _labelDisplay;
-        private Text? _labelText;
         private List<PieSegment> _segments = new List<PieSegment>();
 
         // State
@@ -271,16 +268,6 @@ namespace EfDEnhanced.Utils.UI.Components
                 _virtualCursorPosition += mouseDelta;
             }
 
-            // Update virtual cursor indicator position
-            if (_virtualCursorIndicator != null)
-            {
-                RectTransform cursorRect = _virtualCursorIndicator.GetComponent<RectTransform>();
-                if (cursorRect != null)
-                {
-                    cursorRect.anchoredPosition = _virtualCursorPosition;
-                }
-            }
-
             // Calculate hovered segment
             if (_virtualCursorPosition.magnitude > ScaledDeadZone)
             {
@@ -298,7 +285,6 @@ namespace EfDEnhanced.Utils.UI.Components
                 {
                     _hoveredIndex = segmentIndex;
                     UpdateSegmentVisuals();
-                    UpdateLabelDisplay();
                 }
             }
             else
@@ -307,7 +293,6 @@ namespace EfDEnhanced.Utils.UI.Components
                 {
                     _hoveredIndex = -1;
                     UpdateSegmentVisuals();
-                    UpdateLabelDisplay();
                 }
             }
 
@@ -365,12 +350,6 @@ namespace EfDEnhanced.Utils.UI.Components
             // Create center dot
             CreateCenterDot();
 
-            // Create virtual cursor indicator
-            CreateVirtualCursorIndicator();
-
-            // Create label display
-            CreateLabelDisplay();
-
             gameObject.SetActive(false);
         }
 
@@ -387,17 +366,6 @@ namespace EfDEnhanced.Utils.UI.Components
                 Destroy(_centerDot);
             }
 
-            if (_virtualCursorIndicator != null)
-            {
-                Destroy(_virtualCursorIndicator);
-            }
-
-            if (_labelDisplay != null)
-            {
-                Destroy(_labelDisplay);
-                _labelText = null;
-            }
-
             // Recreate
             _wheelContainer = new GameObject("WheelContainer");
             _wheelContainer.transform.SetParent(transform, false);
@@ -411,13 +379,10 @@ namespace EfDEnhanced.Utils.UI.Components
 
             CreateWheelSegments();
             CreateCenterDot();
-            CreateVirtualCursorIndicator();
-            CreateLabelDisplay(); // Recreate label display with proper settings
 
             if (_isOpen)
             {
                 RefreshItems();
-                UpdateLabelDisplay(); // Update label if menu is open
             }
         }
 
@@ -704,34 +669,8 @@ namespace EfDEnhanced.Utils.UI.Components
 
         private void CreateLabelDisplay()
         {
-            if (_wheelContainer == null) return;
-
-            _labelDisplay = new GameObject("LabelDisplay");
-            _labelDisplay.transform.SetParent(_wheelContainer.transform, false);
-            _labelDisplay.transform.SetAsLastSibling(); // Ensure it's rendered on top
-
-            RectTransform labelRect = _labelDisplay.AddComponent<RectTransform>();
-            labelRect.anchorMin = new Vector2(0.5f, 0.5f); // Changed from (0.5f, 0f) to center
-            labelRect.anchorMax = new Vector2(0.5f, 0.5f); // Changed from (0.5f, 0f) to center
-            labelRect.pivot = new Vector2(0.5f, 0.5f); // Changed from (0.5f, 0f) to center
-            labelRect.anchoredPosition = new Vector2(0f, -ScaledWheelRadius * 1.3f); // Position further below the wheel
-            labelRect.sizeDelta = new Vector2(ScaledWheelRadius * 3f, ScaledWheelRadius * 0.3f); // Larger size for better visibility
-
-            _labelText = _labelDisplay.AddComponent<Text>();
-            _labelText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
-            _labelText.fontSize = 28;
-            _labelText.fontStyle = FontStyle.Bold;
-            _labelText.color = Color.white;
-            _labelText.alignment = TextAnchor.MiddleCenter;
-            _labelText.raycastTarget = false;
-            _labelText.enabled = false;
-            _labelText.horizontalOverflow = HorizontalWrapMode.Overflow; // Prevent text wrapping
-
-            Outline outline = _labelDisplay.AddComponent<Outline>();
-            outline.effectColor = Color.black;
-            outline.effectDistance = new Vector2(2f, -2f); // Larger outline for better contrast
-
-            UIStyles.ApplyStandardTextShadow(_labelDisplay);
+            // This method is no longer needed as _labelDisplay and _labelText are removed.
+            // Keeping it for now to avoid breaking existing calls, but it will do nothing.
         }
 
         private void RefreshItems()
@@ -792,16 +731,8 @@ namespace EfDEnhanced.Utils.UI.Components
 
         private void UpdateLabelDisplay()
         {
-            if (_labelText == null || _hoveredIndex == -1 || _hoveredIndex >= _items.Count)
-            {
-                if (_labelText != null)
-                    _labelText.enabled = false;
-                return;
-            }
-
-            PieMenuItem item = _items[_hoveredIndex];
-            _labelText.text = item.Label ?? item.Id;
-            _labelText.enabled = true;
+            // This method is no longer needed as _labelDisplay and _labelText are removed.
+            // Keeping it for now to avoid breaking existing calls, but it will do nothing.
         }
 
         private class PieSegment

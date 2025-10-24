@@ -1,7 +1,6 @@
 using System;
 using EfDEnhanced.Utils;
 using EfDEnhanced.Utils.UI.Builders;
-using EfDEnhanced.Utils.UI.Components;
 using EfDEnhanced.Utils.UI.Constants;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,7 +13,7 @@ namespace EfDEnhanced.Features
     /// </summary>
     public class ModSettingsContent : MonoBehaviour
     {
-        private FormBuilder? _formBuilder;
+        private SettingsBuilder? _settingsBuilder;
         private bool _isBuilt = false;
 
         /// <summary>
@@ -61,8 +60,8 @@ namespace EfDEnhanced.Features
             layoutGroup.childControlHeight = false; // Let children control their own height
             layoutGroup.childForceExpandWidth = true;
             layoutGroup.childForceExpandHeight = false;
-            layoutGroup.spacing = UIConstants.SETTINGS_ENTRY_SPACING;
-            layoutGroup.padding = new RectOffset(20, 20, 20, 20); // Add padding on all sides
+            layoutGroup.spacing = 4;
+            layoutGroup.padding = new RectOffset(20, 20, 8, 20); // Add padding: left, right, top, bottom
 
             // Add ContentSizeFitter to automatically adjust content height (only if not already present)
             var sizeFitter = GetComponent<ContentSizeFitter>();
@@ -73,63 +72,64 @@ namespace EfDEnhanced.Features
             sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
             sizeFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
 
-            // Build form using FormBuilder directly on this GameObject
-            BuildFormWithFormBuilder(transform);
+            // Build form using SettingsBuilder directly on this GameObject
+            BuildFormWithSettingsBuilder(transform);
         }
 
         /// <summary>
-        /// Build the entire settings form using FormBuilder
+        /// Build the entire settings form using SettingsBuilder
         /// </summary>
-        private void BuildFormWithFormBuilder(Transform parent)
+        private void BuildFormWithSettingsBuilder(Transform parent)
         {
             try
             {
-                _formBuilder = new FormBuilder(parent);
+                _settingsBuilder = new SettingsBuilder(parent);
 
-                // Build the form using our elegant builder pattern
-                _formBuilder
+                // Build the form using our new builder pattern
+                _settingsBuilder
                     // UI Enhancement Section
                     .AddSection("Settings_Category_UI")
-                    .AddToggle("Settings_EnableWeaponComparison_Name", ModSettings.EnableWeaponComparison)
-                    .AddSlider("Settings_ItemWheelScale_Name", 0.5f, 2f, ModSettings.ItemWheelScale)
-                    .AddKeybinding(ModSettings.ItemWheelMenuHotkey)
-                    .AddKeybinding(ModSettings.ThrowableWheelHotkey)
-                    .AddSpacer()
+                    .AddSetting(ModSettings.EnableWeaponComparison)
+                    .AddSetting(ModSettings.FastBuyEnabled)
+                    .AddSetting(ModSettings.FastSellEnabled)
+                    .AddSetting(ModSettings.ItemWheelScale)
+                    .AddSetting(ModSettings.ItemWheelMenuHotkey)
+                    .AddSetting(ModSettings.ThrowableWheelHotkey)
 
                     // Pre-Raid Check Section
                     .AddSection("Settings_Category_PreRaidCheck")
-                    .AddToggle("Settings_EnableRaidCheck_Name", ModSettings.EnableRaidCheck)
-                    .AddToggle("Settings_CheckWeapon_Name", ModSettings.CheckWeapon, ModSettings.EnableRaidCheck, 30)
-                    .AddToggle("Settings_CheckAmmo_Name", ModSettings.CheckAmmo, ModSettings.EnableRaidCheck, 30)
-                    .AddToggle("Settings_CheckMeds_Name", ModSettings.CheckMeds, ModSettings.EnableRaidCheck, 30)
-                    .AddToggle("Settings_CheckFood_Name", ModSettings.CheckFood, ModSettings.EnableRaidCheck, 30)
-                    .AddToggle("Settings_CheckWeather_Name", ModSettings.CheckWeather, ModSettings.EnableRaidCheck, 30)
-                    .AddSpacer()
+                    .AddSetting(ModSettings.EnableRaidCheck)
+                    .AddSetting(ModSettings.CheckWeapon, ModSettings.EnableRaidCheck)
+                    .AddSetting(ModSettings.CheckAmmo, ModSettings.EnableRaidCheck)
+                    .AddSetting(ModSettings.CheckMeds, ModSettings.EnableRaidCheck)
+                    .AddSetting(ModSettings.CheckFood, ModSettings.EnableRaidCheck)
+                    .AddSetting(ModSettings.CheckQuestItems, ModSettings.EnableRaidCheck)
+                    .AddSetting(ModSettings.CheckQuestWeapons, ModSettings.EnableRaidCheck)
+                    .AddSetting(ModSettings.CheckWeather, ModSettings.EnableRaidCheck)
 
                     // Movement Enhancement Section
                     .AddSection("Settings_Category_Movement")
-                    .AddDropdown("Settings_MovementEnhancement_Name", ModSettings.MovementEnhancement)
-                    .AddSpacer()
+                    .AddSetting(ModSettings.MovementEnhancement)
 
                     // Quest Tracker Section
                     .AddSection("Settings_Category_QuestTracker")
-                    .AddToggle("Settings_EnableQuestTracker_Name", ModSettings.EnableQuestTracker)
-                    .AddToggle("Settings_TrackerShowDescription_Name", ModSettings.TrackerShowDescription, ModSettings.EnableQuestTracker, 30)
-                    .AddToggle("Settings_TrackerFilterByMap_Name", ModSettings.TrackerFilterByMap, ModSettings.EnableQuestTracker, 30)
-                    .AddKeybinding(ModSettings.TrackerToggleHotkey)
-                    .AddSlider("Settings_TrackerPositionX_Name", 0f, 1f, ModSettings.TrackerPositionX, visibilityCondition: ModSettings.EnableQuestTracker, leftPadding: 30)
-                    .AddSlider("Settings_TrackerPositionY_Name", 0f, 1f, ModSettings.TrackerPositionY, visibilityCondition: ModSettings.EnableQuestTracker, leftPadding: 30)
-                    .AddSlider("Settings_TrackerScale_Name", 0.5f, 2f, ModSettings.TrackerScale, visibilityCondition: ModSettings.EnableQuestTracker, leftPadding: 30)
-                    .AddSpacer()
+                    .AddSetting(ModSettings.EnableQuestTracker)
+                    .AddSetting(ModSettings.TrackerToggleHotkey, ModSettings.EnableQuestTracker)
+                    .AddSetting(ModSettings.AutoTrackNewQuests, ModSettings.EnableQuestTracker)
+                    .AddSetting(ModSettings.TrackerShowDescription, ModSettings.EnableQuestTracker)
+                    .AddSetting(ModSettings.TrackerFilterByMap, ModSettings.EnableQuestTracker)
+                    .AddSetting(ModSettings.TrackerPositionX, ModSettings.EnableQuestTracker)
+                    .AddSetting(ModSettings.TrackerPositionY, ModSettings.EnableQuestTracker)
+                    .AddSetting(ModSettings.TrackerScale, ModSettings.EnableQuestTracker)
 
                     // Reset button at the bottom
                     .AddButton("Settings_ResetButton", OnResetButtonClicked, UIStyles.ButtonStyle.Danger);
 
-                ModLogger.Log("ModSettingsContent", "Form built successfully with FormBuilder");
+                ModLogger.Log("ModSettingsContent", "Form built successfully with SettingsBuilder");
             }
             catch (Exception ex)
             {
-                ModLogger.LogError($"Failed to build form with FormBuilder: {ex}");
+                ModLogger.LogError($"Failed to build form with SettingsBuilder: {ex}");
             }
         }
 

@@ -101,14 +101,16 @@ ModKeybindingButton keybindingButton = ModKeybindingButton.Create(
 );
 ```
 
-### Using FormBuilder
+### Using SettingsBuilder
 
 ```csharp
 using EfDEnhanced.Utils.UI.Builders;
 
-var formBuilder = new FormBuilder(parentTransform);
-formBuilder.AddKeybinding(ModSettings.OpenMenuHotkey);
-formBuilder.Build();
+var builder = new SettingsBuilder(parentTransform);
+builder
+    .AddSection("Settings_Category_Keybindings")
+    .AddSetting(ModSettings.OpenMenuHotkey)
+    .Build();
 ```
 
 ### Checking Key Input
@@ -277,7 +279,7 @@ See `Features/ModSettingsContent.cs` and `Patches/ItemWheelMenuPatch.cs` for com
 
 2. Add UI in `ModSettingsContent.cs`:
    ```csharp
-   formBuilder.AddKeybinding(ModSettings.FeatureHotkey);
+   builder.AddSetting(ModSettings.FeatureHotkey);
    ```
 
 3. Check input in your feature:

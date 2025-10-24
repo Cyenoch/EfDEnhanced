@@ -144,6 +144,10 @@ public static class LocalizationHelper
             { "Settings_CheckFood_Desc", "未携带食物或水时警告" },
             { "Settings_CheckWeather_Name", "警告风暴天气" },
             { "Settings_CheckWeather_Desc", "检测到风暴天气时警告" },
+            { "Settings_CheckQuestItems_Name", "检查任务物品" },
+            { "Settings_CheckQuestItems_Desc", "检测任务所需物品数量是否足够" },
+            { "Settings_CheckQuestWeapons_Name", "检查任务武器" },
+            { "Settings_CheckQuestWeapons_Desc", "检测是否携带任务所需武器" },
 
             // Quest Tracker 设置
             { "Settings_EnableQuestTracker_Name", "启用任务追踪HUD" },
@@ -151,7 +155,7 @@ public static class LocalizationHelper
             { "Settings_TrackerPositionX_Name", "追踪器水平位置" },
             { "Settings_TrackerPositionX_Desc", "水平位置 (0=左, 1=右)" },
             { "Settings_TrackerPositionY_Name", "追踪器垂直位置" },
-            { "Settings_TrackerPositionY_Desc", "垂直位置 (0=底, 1=顶)" },
+            { "Settings_TrackerPositionY_Desc", "垂直位置 (0=顶, 1=底)" },
             { "Settings_TrackerScale_Name", "追踪器缩放" },
             { "Settings_TrackerScale_Desc", "UI缩放倍数" },
             { "Settings_TrackerShowDescription_Name", "显示任务描述" },
@@ -174,6 +178,10 @@ public static class LocalizationHelper
             // UI Enhancement Settings
             { "Settings_EnableWeaponComparison_Name", "启用武器对比" },
             { "Settings_EnableWeaponComparison_Desc", "在鼠标悬停时对比选中武器和悬停武器的属性，显示差异并用颜色标识优劣" },
+            { "Settings_FastBuyEnabled_Name", "启用快速购买" },
+            { "Settings_FastBuyEnabled_Desc", "在商店菜单中鼠标悬停物品并按F键快速购买物品" },
+            { "Settings_FastSellEnabled_Name", "启用快速贩卖" },
+            { "Settings_FastSellEnabled_Desc", "在商店菜单中鼠标悬停物品并按F键快速贩卖物品" },
             { "Settings_ItemWheelScale_Name", "轮盘菜单缩放" },
             { "Settings_ItemWheelScale_Desc", "调整所有轮盘菜单的显示大小（物品轮盘和投掷物轮盘）" },
             { "Settings_ItemWheelMenuHotkey_Name", "物品轮盘快捷键" },
@@ -240,6 +248,10 @@ public static class LocalizationHelper
             { "Settings_CheckFood_Desc", "未攜帶食物或水時警告" },
             { "Settings_CheckWeather_Name", "警告風暴天氣" },
             { "Settings_CheckWeather_Desc", "檢測到風暴天氣時警告" },
+            { "Settings_CheckQuestItems_Name", "檢查任務物品" },
+            { "Settings_CheckQuestItems_Desc", "檢測任務所需物品數量是否足夠" },
+            { "Settings_CheckQuestWeapons_Name", "檢查任務武器" },
+            { "Settings_CheckQuestWeapons_Desc", "檢測是否攜帶任務所需武器" },
 
             // Quest Tracker 設置
             { "Settings_EnableQuestTracker_Name", "啟用任務追蹤HUD" },
@@ -247,7 +259,7 @@ public static class LocalizationHelper
             { "Settings_TrackerPositionX_Name", "追蹤器水平位置" },
             { "Settings_TrackerPositionX_Desc", "水平位置 (0=左, 1=右)" },
             { "Settings_TrackerPositionY_Name", "追蹤器垂直位置" },
-            { "Settings_TrackerPositionY_Desc", "垂直位置 (0=底, 1=頂)" },
+            { "Settings_TrackerPositionY_Desc", "垂直位置 (0=頂, 1=底)" },
             { "Settings_TrackerScale_Name", "追蹤器縮放" },
             { "Settings_TrackerScale_Desc", "UI縮放倍數" },
             { "Settings_TrackerShowDescription_Name", "顯示任務描述" },
@@ -270,6 +282,10 @@ public static class LocalizationHelper
             // UI Enhancement Settings
             { "Settings_EnableWeaponComparison_Name", "啟用武器對比" },
             { "Settings_EnableWeaponComparison_Desc", "在鼠標懸停時對比選中武器和懸停武器的屬性，顯示差異並用顏色標識優劣" },
+            { "Settings_FastBuyEnabled_Name", "啟用快速購買" },
+            { "Settings_FastBuyEnabled_Desc", "在商店菜單中鼠標懸停物品並按F鍵快速購買物品" },
+            { "Settings_FastSellEnabled_Name", "啟用快速販賣" },
+            { "Settings_FastSellEnabled_Desc", "在商店菜單中鼠標懸停物品並按F鍵快速販賣物品" },
             { "Settings_ItemWheelScale_Name", "輪盤選單縮放" },
             { "Settings_ItemWheelScale_Desc", "調整所有輪盤選單的顯示大小（物品輪盤和投擲物輪盤）" },
             { "Settings_ItemWheelMenuHotkey_Name", "物品輪盤快捷鍵" },
@@ -336,6 +352,10 @@ public static class LocalizationHelper
             { "Settings_CheckFood_Desc", "Warn if no food or water is available" },
             { "Settings_CheckWeather_Name", "Warn Stormy Weather" },
             { "Settings_CheckWeather_Desc", "Warn about stormy weather conditions" },
+            { "Settings_CheckQuestItems_Name", "Check Quest Items" },
+            { "Settings_CheckQuestItems_Desc", "Check if required quest items are sufficient" },
+            { "Settings_CheckQuestWeapons_Name", "Check Quest Weapons" },
+            { "Settings_CheckQuestWeapons_Desc", "Check if quest-required weapons are equipped" },
 
             // Quest Tracker Settings
             { "Settings_EnableQuestTracker_Name", "Enable Quest Tracker HUD" },
@@ -343,7 +363,7 @@ public static class LocalizationHelper
             { "Settings_TrackerPositionX_Name", "Tracker Horizontal Position" },
             { "Settings_TrackerPositionX_Desc", "Horizontal position (0=left, 1=right)" },
             { "Settings_TrackerPositionY_Name", "Tracker Vertical Position" },
-            { "Settings_TrackerPositionY_Desc", "Vertical position (0=bottom, 1=top)" },
+            { "Settings_TrackerPositionY_Desc", "Vertical position (0=top, 1=bottom)" },
             { "Settings_TrackerScale_Name", "Tracker Scale" },
             { "Settings_TrackerScale_Desc", "UI scale multiplier" },
             { "Settings_TrackerShowDescription_Name", "Show Quest Descriptions" },
@@ -366,6 +386,10 @@ public static class LocalizationHelper
             // UI Enhancement Settings
             { "Settings_EnableWeaponComparison_Name", "Enable Weapon Comparison" },
             { "Settings_EnableWeaponComparison_Desc", "Compare selected weapon with hovered weapon in inventory, showing differences with color-coded indicators" },
+            { "Settings_FastBuyEnabled_Name", "Enable Fast Buy" },
+            { "Settings_FastBuyEnabled_Desc", "Quickly buy items by hovering over them in the shop menu and pressing F" },
+            { "Settings_FastSellEnabled_Name", "Enable Fast Sell" },
+            { "Settings_FastSellEnabled_Desc", "Quickly sell items by hovering over them in the shop menu and pressing F" },
             { "Settings_ItemWheelScale_Name", "Wheel Menu Scale" },
             { "Settings_ItemWheelScale_Desc", "Adjust the display size of all wheel menus (item wheel and throwable wheel)" },
             { "Settings_ItemWheelMenuHotkey_Name", "Item Wheel Hotkey" },
@@ -432,6 +456,10 @@ public static class LocalizationHelper
             { "Settings_CheckFood_Desc", "食料または水がない場合に警告" },
             { "Settings_CheckWeather_Name", "嵐の天候警告" },
             { "Settings_CheckWeather_Desc", "嵐の天候状態を警告" },
+            { "Settings_CheckQuestItems_Name", "クエストアイテムチェック" },
+            { "Settings_CheckQuestItems_Desc", "必要なクエストアイテムが十分かどうかをチェック" },
+            { "Settings_CheckQuestWeapons_Name", "クエスト武器チェック" },
+            { "Settings_CheckQuestWeapons_Desc", "クエスト必須武器を装備しているかどうかをチェック" },
 
             // Quest Tracker 設定
             { "Settings_EnableQuestTracker_Name", "クエストトラッカーHUDを有効化" },
@@ -439,7 +467,7 @@ public static class LocalizationHelper
             { "Settings_TrackerPositionX_Name", "トラッカー水平位置" },
             { "Settings_TrackerPositionX_Desc", "水平位置 (0=左, 1=右)" },
             { "Settings_TrackerPositionY_Name", "トラッカー垂直位置" },
-            { "Settings_TrackerPositionY_Desc", "垂直位置 (0=下, 1=上)" },
+            { "Settings_TrackerPositionY_Desc", "垂直位置 (0=上, 1=下)" },
             { "Settings_TrackerScale_Name", "トラッカースケール" },
             { "Settings_TrackerScale_Desc", "UIスケール倍率" },
             { "Settings_TrackerShowDescription_Name", "クエスト説明を表示" },
@@ -462,6 +490,10 @@ public static class LocalizationHelper
             // UI Enhancement Settings
             { "Settings_EnableWeaponComparison_Name", "武器比較を有効化" },
             { "Settings_EnableWeaponComparison_Desc", "インベントリで選択した武器とホバーした武器を比較し、差異を色付きインジケーターで表示" },
+            { "Settings_FastBuyEnabled_Name", "快速購買を有効化" },
+            { "Settings_FastBuyEnabled_Desc", "店舗メニューでアイテムをホバーしてFキーを押すと、アイテムを迅速に購入" },
+            { "Settings_FastSellEnabled_Name", "快速販賣を有効化" },
+            { "Settings_FastSellEnabled_Desc", "店舗メニューでアイテムをホバーしてFキーを押すと、アイテムを迅速に販売" },
             { "Settings_ItemWheelScale_Name", "ホイールメニュースケール" },
             { "Settings_ItemWheelScale_Desc", "すべてのホイールメニューの表示サイズを調整（アイテムホイールと投擲物ホイール）" },
             { "Settings_ItemWheelMenuHotkey_Name", "アイテムホイールホットキー" },

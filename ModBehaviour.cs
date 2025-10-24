@@ -42,6 +42,9 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour
         // Initialize quest tracking manager
         QuestTrackingManager.Initialize();
 
+        // Initialize patches that need early setup
+        Patches.FastBuySell.Initialize();
+
         _harmonyInstance = new Harmony(HARMONY_ID);
         _harmonyInstance.PatchAll();
 

@@ -50,12 +50,17 @@ namespace EfDEnhanced.Utils.UI.Components
             containerObj.transform.SetParent(parent, false);
 
             RectTransform containerRect = containerObj.AddComponent<RectTransform>();
-            containerRect.sizeDelta = new Vector2(0, 32);
+            containerRect.sizeDelta = new Vector2(0, 0);
+
+            // Add ContentSizeFitter to auto-size based on content
+            ContentSizeFitter sizeFitter = containerObj.AddComponent<ContentSizeFitter>();
+            sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            sizeFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
 
             // 添加水平布局
             HorizontalLayoutGroup layout = containerObj.AddComponent<HorizontalLayoutGroup>();
             UIStyles.ConfigureHorizontalLayout(layout, 10, TextAnchor.MiddleLeft);
-            layout.padding = new RectOffset(8, 8, 2, 2);
+            layout.padding = new RectOffset(0, 0, 0, 0); // Reduce vertical padding to minimize spacing
 
             // 创建复选框
             GameObject checkboxObj = new("Checkbox");
@@ -101,12 +106,13 @@ namespace EfDEnhanced.Utils.UI.Components
 
             LayoutElement labelLayout = labelObj.AddComponent<LayoutElement>();
             labelLayout.flexibleWidth = 1;
-            labelLayout.minHeight = UIConstants.CHECKBOX_SIZE;
+            labelLayout.minHeight = 0;
 
             TextMeshProUGUI labelText = labelObj.AddComponent<TextMeshProUGUI>();
             labelText.fontSize = UIConstants.SETTINGS_LABEL_FONT_SIZE;
-            labelText.color = Color.white;
+            labelText.color = UIConstants.SETTINGS_LABEL_COLOR;
             labelText.alignment = TextAlignmentOptions.MidlineLeft;
+            labelText.enableWordWrapping = false;
 
             // 添加ModToggle组件
             ModToggle modToggle = containerObj.AddComponent<ModToggle>();

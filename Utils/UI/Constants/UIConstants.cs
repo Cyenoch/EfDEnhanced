@@ -74,6 +74,40 @@ namespace EfDEnhanced.Utils.UI.Constants
         /// </summary>
         public const int SECTION_SPACING = 6;
 
+        /// <summary>
+        /// 设置项最小高度
+        /// </summary>
+        public const int SETTINGS_ITEM_MIN_HEIGHT = 36;
+
+        /// <summary>
+        /// 设置标签和控件之间的间距
+        /// </summary>
+        public const int SETTINGS_LABEL_SPACING = 10;
+
+        /// <summary>
+        /// 设置项描述文本与控件之间的间距
+        /// </summary>
+        public const int SETTINGS_DESCRIPTION_SPACING = 4;
+
+        /// <summary>
+        /// 设置标签宽度
+        /// </summary>
+        public const int SETTINGS_LABEL_WIDTH = 100;
+
+        /// <summary>
+        /// 设置控件最小宽度
+        /// </summary>
+        public const int SETTINGS_CONTROL_MIN_WIDTH = 40;
+
+        #endregion
+
+        #region Fonts
+
+        /// <summary>
+        /// Default font (Arial from Unity built-in resources)
+        /// </summary>
+        public static Font DefaultFont => Resources.GetBuiltinResource<Font>("Arial.ttf");
+
         #endregion
 
         #region Font Sizes
@@ -117,6 +151,11 @@ namespace EfDEnhanced.Utils.UI.Constants
         /// 设置普通文本字体大小
         /// </summary>
         public const int SETTINGS_FONT_SIZE = 16;
+
+        /// <summary>
+        /// 设置描述字体大小
+        /// </summary>
+        public const int SETTINGS_DESCRIPTION_FONT_SIZE = 14;
 
         /// <summary>
         /// 按钮文本字体大小
@@ -163,9 +202,19 @@ namespace EfDEnhanced.Utils.UI.Constants
         public static readonly Color QUEST_PROGRESS_COLOR = new(0.9f, 0.9f, 0.9f, 1f);
 
         /// <summary>
+        /// 设置标签文本颜色
+        /// </summary>
+        public static readonly Color SETTINGS_LABEL_COLOR = new(1f, 1f, 1f, 1f);
+
+        /// <summary>
         /// 设置文本颜色
         /// </summary>
         public static readonly Color SETTINGS_TEXT_COLOR = new(0.9f, 0.9f, 0.9f, 1f);
+
+        /// <summary>
+        /// 设置描述文本颜色（稍微暗一点）
+        /// </summary>
+        public static readonly Color SETTINGS_DESCRIPTION_COLOR = new(0.7f, 0.7f, 0.7f, 1f);
 
         /// <summary>
         /// 分隔线颜色
@@ -244,7 +293,7 @@ namespace EfDEnhanced.Utils.UI.Constants
         /// <summary>
         /// 复选框大小
         /// </summary>
-        public const int CHECKBOX_SIZE = 24;
+        public const int CHECKBOX_SIZE = 22;
 
         /// <summary>
         /// Raid检查按钮宽度

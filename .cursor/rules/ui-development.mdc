@@ -14,13 +14,22 @@ description: UI development guidelines using mod UI framework
 - [Utils/UI/Core/ModPanel.cs](mdc:Utils/UI/Core/ModPanel.cs) - 基础面板类
 
 #### 构建器
-- [Utils/UI/Builders/FormBuilder.cs](mdc:Utils/UI/Builders/FormBuilder.cs) - 表单构建器
+- [Utils/UI/Builders/SettingsBuilder.cs](mdc:Utils/UI/Builders/SettingsBuilder.cs) - 设置 UI 构建器
 
 #### UI 组件
 - [Utils/UI/Components/ModButton.cs](mdc:Utils/UI/Components/ModButton.cs) - 按钮组件
 - [Utils/UI/Components/ModToggle.cs](mdc:Utils/UI/Components/ModToggle.cs) - 开关组件
 - [Utils/UI/Components/ModSlider.cs](mdc:Utils/UI/Components/ModSlider.cs) - 滑块组件
 - [Utils/UI/Components/ModKeybindingButton.cs](mdc:Utils/UI/Components/ModKeybindingButton.cs) - 按键绑定组件
+- [Utils/UI/Components/PieMenuComponent.cs](mdc:Utils/UI/Components/PieMenuComponent.cs) - 径向菜单组件
+- [Utils/UI/Components/SettingsItems/](mdc:Utils/UI/Components/SettingsItems/) - 设置项组件集合
+  - BaseSettingsItem - 基类
+  - BoolSettingsItem - 布尔开关
+  - RangedFloatSettingsItem - 范围滑块
+  - IndexedOptionsSettingsItem - 选项列表
+  - KeyCodeSettingsItem - 按键绑定
+  - SectionHeaderItem - 分节标题
+  - SpacerItem - 空白间隔
 
 #### 常量和样式
 - [Utils/UI/Constants/UIConstants.cs](mdc:Utils/UI/Constants/UIConstants.cs) - UI 常量
@@ -58,36 +67,46 @@ public class MyCustomPanel : ModPanel
 }
 ```
 
-### 2. 使用表单构建器
+### 2. 使用设置构建器创建设置 UI
 
 ```csharp
 using EfDEnhanced.Utils.UI.Builders;
+using EfDEnhanced.Utils.Settings;
 
-var formBuilder = new FormBuilder(parentTransform);
-formBuilder
-    .AddToggle("启用功能", value => OnToggleChanged(value))
-    .AddSlider("强度", 0f, 100f, 50f, value => OnSliderChanged(value))
-    .AddButton("应用", OnButtonClicked)
-    .Build();
+var settingsBuilder = new SettingsBuilder(parentTransform);
+settingsBuilder
+    .AddSection("Settings_Category_General")
+    .AddSetting(ModSettings.EnableFeature)    // BoolSettingsEntry → BoolSettingsItem
+    .AddSetting(ModSettings.IntensityLevel)   // RangedFloatSettingsEntry → RangedFloatSettingsItem
+    .AddSetting(ModSettings.MenuHotkey)       // KeyCodeSettingsEntry → KeyCodeSettingsItem
+    .AddButton("Settings_ApplyButton", OnApplyClicked);
 ```
+
+**说明**:
+- `SettingsBuilder` 自动根据设置条目类型生成对应的 UI 组件
+- 每个 `ISettingsEntry` 会自动对应到合适的 SettingsItem 组件
+- 支持条件可见性和左内缩进参数
 
 ### 3. 使用独立组件
 
 ```csharp
-// 创建按钮
-var button = ModButton.Create(parentTransform, "按钮文本", () => {
-    // 点击回调
-});
+using EfDEnhanced.Utils.UI.Components;
 
-// 创建开关
-var toggle = ModToggle.Create(parentTransform, "开关标签", true, (value) => {
-    // 值变化回调
-});
+// 创建按钮
+var button = ModButton.Create(parentTransform)
+    .SetText("按钮文本")
+    .OnClick(() => { /* 点击回调 */ });
+
+// 创建 Toggle（需要通过 SettingsBuilder 或手动创建）
+var toggle = ModToggle.Create(parentTransform)
+    .SetLabel("标签")
+    .OnValueChanged(value => { /* 值变化回调 */ });
 
 // 创建滑块
-var slider = ModSlider.Create(parentTransform, "滑块标签", 0f, 100f, 50f, (value) => {
-    // 值变化回调
-});
+var slider = ModSlider.Create(parentTransform)
+    .SetLabel("强度")
+    .SetRange(0f, 100f)
+    .OnValueChanged(value => { /* 值变化回调 */ });
 
 // 创建按键绑定按钮
 var keybinding = ModKeybindingButton.Create(parentTransform, ModSettings.OpenMenuHotkey);
