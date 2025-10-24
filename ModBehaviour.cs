@@ -15,9 +15,6 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour
     private const string HARMONY_ID = "com.efdenhanced.mod";
     private static Harmony? _harmonyInstance;
 
-    private ActiveQuestTracker? _questTracker;
-    private bool _wasInRaid;
-
     public static ModBehaviour? Instance { get; private set; }
 
     void Awake()
@@ -46,8 +43,6 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour
         // Initialize quest tracking manager
         QuestTrackingManager.Initialize();
 
-        transform.AddComponent<DuckQuackFeature>();
-
         // Initialize patches that need early setup
         Patches.FastBuySell.Initialize();
 
@@ -62,21 +57,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour
             ModLogger.Log("Harmony", $"  - {method.DeclaringType?.Name}.{method.Name}");
         }
 
-        // Initialize quest tracker
-        InitializeQuestTracker();
-    }
-
-    void Update()
-    {
-        try
-        {
-            // Check if player entered or left raid
-            CheckRaidStatus();
-        }
-        catch (Exception ex)
-        {
-            ModLogger.LogError($"ModBehaviour.Update failed: {ex}");
-        }
+        transform.AddComponent<ActiveQuestTracker>();
+        transform.AddComponent<DuckQuackFeature>();
     }
 
     void OnDisable()
@@ -96,12 +78,16 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour
     {
         try
         {
-            // Unsubscribe from settings events
-            if (_questTracker != null)
+            var questTracker = transform.GetComponent<ActiveQuestTracker>();
+            if (questTracker != null)
             {
-                ModSettings.EnableQuestTracker.ValueChanged -= OnQuestTrackerEnabledChanged;
-                ModSettings.TrackerShowDescription.ValueChanged -= OnQuestTrackerShowDescriptionChanged;
-                ModLogger.Log("ModBehaviour", "Unsubscribed from quest tracker settings");
+                Destroy(questTracker);
+            }
+
+            var duckQuackFeature = transform.GetComponent<DuckQuackFeature>();
+            if (duckQuackFeature != null)
+            {
+                Destroy(duckQuackFeature);
             }
 
             // Clean up localization
@@ -115,117 +101,6 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour
         catch (Exception ex)
         {
             ModLogger.LogError($"CleanupResources failed: {ex}");
-        }
-    }
-
-    /// <summary>
-    /// 初始化任务追踪器
-    /// </summary>
-    private void InitializeQuestTracker()
-    {
-        try
-        {
-            _questTracker = ActiveQuestTracker.Create();
-
-            // Subscribe to EnableQuestTracker setting changes
-            ModSettings.EnableQuestTracker.ValueChanged += OnQuestTrackerEnabledChanged;
-
-            // Subscribe to show description setting changes (even outside of raid)
-            ModSettings.TrackerShowDescription.ValueChanged += OnQuestTrackerShowDescriptionChanged;
-
-            ModLogger.Log("ModBehaviour", "Quest tracker initialized with settings subscriptions");
-        }
-        catch (Exception ex)
-        {
-            ModLogger.LogError($"Failed to initialize quest tracker: {ex}");
-        }
-    }
-
-    /// <summary>
-    /// Handle quest tracker enabled setting changes
-    /// </summary>
-    private void OnQuestTrackerEnabledChanged(object? sender, SettingsValueChangedEventArgs<bool> args)
-    {
-        try
-        {
-            ModLogger.Log("ModBehaviour", $"Quest tracker enabled setting changed: {args.OldValue} -> {args.NewValue}");
-
-            // If we're in a raid, update the tracker state
-            if (_wasInRaid && _questTracker != null)
-            {
-                if (args.NewValue)
-                {
-                    // Enable the tracker if it wasn't enabled
-                    _questTracker.Enable();
-                }
-                else
-                {
-                    // Disable the tracker if it was enabled
-                    _questTracker.Disable();
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            ModLogger.LogError($"OnQuestTrackerEnabledChanged failed: {ex}");
-        }
-    }
-
-    /// <summary>
-    /// Handle quest tracker description setting changes
-    /// </summary>
-    private void OnQuestTrackerShowDescriptionChanged(object? sender, SettingsValueChangedEventArgs<bool> args)
-    {
-        try
-        {
-            ModLogger.Log("ModBehaviour", $"Quest tracker show description setting changed: {args.OldValue} -> {args.NewValue}");
-
-            // No need to do anything - the tracker itself subscribes to this when active
-            // But we log it here for debugging
-        }
-        catch (Exception ex)
-        {
-            ModLogger.LogError($"OnQuestTrackerShowDescriptionChanged failed: {ex}");
-        }
-    }
-
-    /// <summary>
-    /// 检查Raid状态并相应启用/禁用追踪器
-    /// </summary>
-    private void CheckRaidStatus()
-    {
-        try
-        {
-            if (LevelManager.Instance == null)
-            {
-                if (_wasInRaid)
-                {
-                    _wasInRaid = false;
-                    _questTracker?.Disable();
-                }
-                return;
-            }
-
-            bool isInRaid = LevelManager.Instance.IsRaidMap;
-
-            // 进入Raid
-            if (isInRaid && !_wasInRaid)
-            {
-                _wasInRaid = true;
-                _questTracker?.Enable();
-                ModLogger.Log("ModBehaviour", "Entered raid - quest tracker enabled");
-            }
-            // 离开Raid
-            else if (!isInRaid && _wasInRaid)
-            {
-                _wasInRaid = false;
-                _questTracker?.Disable();
-                ModLogger.Log("ModBehaviour", "Left raid - quest tracker disabled");
-            }
-        }
-        catch (Exception ex)
-        {
-            ModLogger.LogError($"CheckRaidStatus failed: {ex}");
         }
     }
 }

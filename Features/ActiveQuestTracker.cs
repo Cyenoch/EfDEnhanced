@@ -14,6 +14,7 @@ using LeTai.TrueShadow;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 namespace EfDEnhanced.Features;
 
@@ -22,7 +23,6 @@ namespace EfDEnhanced.Features;
 /// </summary>
 public class ActiveQuestTracker : MonoBehaviour
 {
-    private static ActiveQuestTracker? _instance;
 
     // UI元素
     private GameObject? _rootCanvas;
@@ -36,85 +36,35 @@ public class ActiveQuestTracker : MonoBehaviour
     private bool _isActive;
     private bool _isCollapsed = false; // 局部折叠状态，不影响设置
 
-    private Action<SystemLanguage>? _languageChangeHandler;
-
-    public static ActiveQuestTracker? Instance => _instance;
-
-    /// <summary>
-    /// 创建追踪器实例
-    /// </summary>
-    public static ActiveQuestTracker Create()
-    {
-        if (_instance != null)
-        {
-            return _instance;
-        }
-
-        GameObject trackerObject = new("ActiveQuestTracker");
-        DontDestroyOnLoad(trackerObject);
-
-        ActiveQuestTracker tracker = trackerObject.AddComponent<ActiveQuestTracker>();
-        tracker.BuildUI();
-
-        _instance = tracker;
-        ModLogger.Log("QuestTracker", "Quest tracker created successfully");
-
-        return tracker;
-    }
-
     private void Awake()
     {
-        if (_instance == null)
-        {
-            _instance = this;
-            DontDestroyOnLoad(gameObject);
+        BuildUI();
+        LevelManager.OnAfterLevelInitialized += OnAfterLevelInitialized;
+        SceneManager.activeSceneChanged += OnActiveSceneChanged;
+        ModSettings.EnableQuestTracker.ValueChanged += OnEnableQuestTrackerChanged;
+        QuestTrackingManager.OnTrackingChanged += OnQuestTrackingChanged;
+    }
 
-            // 订阅追踪状态变化事件（始终订阅，无论是否在 Raid 中）
-            QuestTrackingManager.OnTrackingChanged += OnQuestTrackingChanged;
-            ModLogger.Log("QuestTracker", "Subscribed to tracking changes in Awake");
-
-            _languageChangeHandler = OnLanguageChanged;
-            LocalizationHelper.OnLanguageChanged += _languageChangeHandler;
-        }
-        else if (_instance != this)
-        {
-            Destroy(gameObject);
-        }
+    private void OnDestroy()
+    {
+        LevelManager.OnAfterLevelInitialized -= OnAfterLevelInitialized;
+        SceneManager.activeSceneChanged -= OnActiveSceneChanged;
+        ModSettings.EnableQuestTracker.ValueChanged -= OnEnableQuestTrackerChanged;
+        QuestTrackingManager.OnTrackingChanged -= OnQuestTrackingChanged;
+        // 取消订阅所有事件
+        UnregisterEvents();
     }
 
     private void Update()
     {
         // 只在激活状态下监听快捷键
-        if (!_isActive)
-        {
-            return;
-        }
+        if (!_isActive) return;
 
         // 检查折叠/展开快捷键
         if (Input.GetKeyDown(ModSettings.TrackerToggleHotkey.Value))
         {
             ToggleCollapse();
         }
-    }
-
-    private void OnDestroy()
-    {
-        if (_instance == this)
-        {
-            _instance = null;
-        }
-
-        // 取消订阅追踪状态变化事件
-        QuestTrackingManager.OnTrackingChanged -= OnQuestTrackingChanged;
-
-        if (_languageChangeHandler != null)
-        {
-            LocalizationHelper.OnLanguageChanged -= _languageChangeHandler;
-            _languageChangeHandler = null;
-        }
-
-        // 取消订阅所有事件
-        UnregisterEvents();
     }
 
     /// <summary>
@@ -226,15 +176,6 @@ public class ActiveQuestTracker : MonoBehaviour
                 bool shouldShow = !ModSettings.TrackerHotkeyUsed.Value;
                 _helpTextObject.SetActive(shouldShow);
 
-                // // 获取 LayoutElement 并设置 ignoreLayout
-                // // 这样隐藏时就不会占据空间
-                // LayoutElement? layoutElement = _helpTextObject.GetComponent<LayoutElement>();
-                // if (layoutElement != null)
-                // {
-                //     layoutElement.ignoreLayout = !shouldShow;
-                // }
-
-
                 ModLogger.Log("QuestTracker", $"Help text visibility: {shouldShow}, ignoreLayout: {!shouldShow}");
             }
         }
@@ -266,7 +207,6 @@ public class ActiveQuestTracker : MonoBehaviour
     {
         try
         {
-
             _isCollapsed = !_isCollapsed;
 
             _questListContainer?.SetActive(!_isCollapsed);
@@ -284,23 +224,6 @@ public class ActiveQuestTracker : MonoBehaviour
         }
     }
 
-    private void OnLanguageChanged(SystemLanguage newLanguage)
-    {
-        try
-        {
-            RefreshHelpTextLocalizedText();
-
-            if (_isActive)
-            {
-                RefreshQuestList();
-            }
-        }
-        catch (Exception ex)
-        {
-            ModLogger.LogError($"QuestTracker.OnLanguageChanged failed: {ex}");
-        }
-    }
-
     /// <summary>
     /// 启用追踪器（进入Raid时调用）
     /// </summary>
@@ -308,16 +231,7 @@ public class ActiveQuestTracker : MonoBehaviour
     {
         try
         {
-            // 检查设置是否启用任务追踪器
-            if (!ModSettings.EnableQuestTracker.Value)
-            {
-                return;
-            }
-
-            if (_isActive || _rootCanvas == null)
-            {
-                return;
-            }
+            if (_isActive || _rootCanvas == null) return;
 
             _isActive = true;
 
@@ -330,14 +244,6 @@ public class ActiveQuestTracker : MonoBehaviour
 
             // 订阅所有事件
             RegisterEvents();
-
-            // 订阅设置变化事件以实时更新UI
-            ModSettings.TrackerPositionX.ValueChanged += OnTrackerPositionChanged;
-            ModSettings.TrackerPositionY.ValueChanged += OnTrackerPositionChanged;
-            ModSettings.TrackerScale.ValueChanged += OnTrackerScaleChanged;
-            ModSettings.TrackerShowDescription.ValueChanged += OnShowDescriptionChanged;
-            ModSettings.TrackerFilterByMap.ValueChanged += OnFilterByMapChanged;
-            ModSettings.TrackerHotkeyUsed.ValueChanged += OnHotkeyUsedChanged;
 
             // 延迟刷新任务列表，等待玩家背包/装备完全加载
             // 这样 SubmitItems 任务的持有数量才能正确显示
@@ -354,12 +260,7 @@ public class ActiveQuestTracker : MonoBehaviour
     /// </summary>
     private System.Collections.IEnumerator DelayedRefreshQuestList()
     {
-        ModLogger.Log("QuestTracker", "Waiting for inventory to load before refreshing quest list...");
-
-        // 等待 0.5 秒让背包和装备完全加载
         yield return new WaitForSeconds(0.5f);
-
-        ModLogger.Log("QuestTracker", "Inventory should be loaded, refreshing quest list now");
         RefreshQuestList();
     }
 
@@ -382,14 +283,6 @@ public class ActiveQuestTracker : MonoBehaviour
 
             // 取消订阅所有事件
             UnregisterEvents();
-
-            // 取消订阅设置变化事件
-            ModSettings.TrackerPositionX.ValueChanged -= OnTrackerPositionChanged;
-            ModSettings.TrackerPositionY.ValueChanged -= OnTrackerPositionChanged;
-            ModSettings.TrackerScale.ValueChanged -= OnTrackerScaleChanged;
-            ModSettings.TrackerShowDescription.ValueChanged -= OnShowDescriptionChanged;
-            ModSettings.TrackerFilterByMap.ValueChanged -= OnFilterByMapChanged;
-            ModSettings.TrackerHotkeyUsed.ValueChanged -= OnHotkeyUsedChanged;
         }
         catch (Exception ex)
         {
@@ -404,33 +297,28 @@ public class ActiveQuestTracker : MonoBehaviour
     {
         try
         {
-            // 注意：OnTrackingChanged 在 Awake 时已经订阅，这里不再重复订阅
-
-            // 任务列表变化（新任务、任务完成等）
             QuestManager.onQuestListsChanged += OnQuestListsChanged;
-
-            // 任务状态变化
             Quest.onQuestStatusChanged += OnQuestStatusChanged;
-
-            // 任务完成
             Quest.onQuestCompleted += OnQuestCompleted;
-
-            // 子任务完成
             QuestManager.OnTaskFinishedEvent += OnTaskFinished;
-
-            // UI状态变化（菜单打开/关闭时隐藏/显示追踪器）
             View.OnActiveViewChanged += OnUIStateChanged;
-
-            // 玩家背包物品变化（用于更新提交物品类任务的持有数量）
             CharacterMainControl.OnMainCharacterInventoryChangedEvent = (Action<CharacterMainControl, Inventory, int>)Delegate.Combine(
                 CharacterMainControl.OnMainCharacterInventoryChangedEvent,
                 new Action<CharacterMainControl, Inventory, int>(OnInventoryChanged));
-
-            // 仓库物品变化（用于更新提交物品类任务的持有数量）
             PlayerStorage.OnPlayerStorageChange += OnStorageChanged;
 
             // 金钱变化（用于更新提交金钱类任务的可交互状态）
             EconomyManager.OnMoneyChanged += OnMoneyChanged;
+
+            LocalizationHelper.OnLanguageChanged += OnLanguageChanged;
+
+            // 订阅设置变化事件以实时更新UI
+            ModSettings.TrackerPositionX.ValueChanged += OnTrackerPositionChanged;
+            ModSettings.TrackerPositionY.ValueChanged += OnTrackerPositionChanged;
+            ModSettings.TrackerScale.ValueChanged += OnTrackerScaleChanged;
+            ModSettings.TrackerShowDescription.ValueChanged += OnShowDescriptionChanged;
+            ModSettings.TrackerFilterByMap.ValueChanged += OnFilterByMapChanged;
+            ModSettings.TrackerHotkeyUsed.ValueChanged += OnHotkeyUsedChanged;
         }
         catch (Exception ex)
         {
@@ -445,14 +333,11 @@ public class ActiveQuestTracker : MonoBehaviour
     {
         try
         {
-            // 注意：OnTrackingChanged 在 OnDestroy 时取消订阅，这里不处理
             QuestManager.onQuestListsChanged -= OnQuestListsChanged;
             Quest.onQuestStatusChanged -= OnQuestStatusChanged;
             Quest.onQuestCompleted -= OnQuestCompleted;
             QuestManager.OnTaskFinishedEvent -= OnTaskFinished;
             View.OnActiveViewChanged -= OnUIStateChanged;
-
-            // 取消订阅物品变化事件
             CharacterMainControl.OnMainCharacterInventoryChangedEvent = (Action<CharacterMainControl, Inventory, int>)Delegate.Remove(
                 CharacterMainControl.OnMainCharacterInventoryChangedEvent,
                 new Action<CharacterMainControl, Inventory, int>(OnInventoryChanged));
@@ -460,10 +345,66 @@ public class ActiveQuestTracker : MonoBehaviour
 
             // 取消订阅金钱变化事件
             EconomyManager.OnMoneyChanged -= OnMoneyChanged;
+
+            LocalizationHelper.OnLanguageChanged -= OnLanguageChanged;
+
+            ModSettings.TrackerPositionX.ValueChanged -= OnTrackerPositionChanged;
+            ModSettings.TrackerPositionY.ValueChanged -= OnTrackerPositionChanged;
+            ModSettings.TrackerScale.ValueChanged -= OnTrackerScaleChanged;
+            ModSettings.TrackerShowDescription.ValueChanged -= OnShowDescriptionChanged;
+            ModSettings.TrackerFilterByMap.ValueChanged -= OnFilterByMapChanged;
+            ModSettings.TrackerHotkeyUsed.ValueChanged -= OnHotkeyUsedChanged;
         }
         catch (Exception ex)
         {
             ModLogger.LogError($"QuestTracker.UnregisterEvents failed: {ex}");
+        }
+    }
+
+    private void OnEnableQuestTrackerChanged(object? sender, SettingsValueChangedEventArgs<bool> args)
+    {
+        // 只在 Raid 中响应设置变化
+        if (LevelManager.Instance == null || !LevelManager.Instance.IsRaidMap)
+        {
+            return;
+        }
+
+        if (args.NewValue)
+        {
+            Enable();
+        }
+        else
+        {
+            Disable();
+        }
+    }
+
+    private void OnLanguageChanged(SystemLanguage newLanguage)
+    {
+        try
+        {
+            RefreshHelpTextLocalizedText();
+            if (_isActive) RefreshQuestList();
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestTracker.OnLanguageChanged failed: {ex}");
+        }
+    }
+
+
+    private void OnAfterLevelInitialized()
+    {
+        if (!ModSettings.EnableQuestTracker.Value) return;
+        var isRaidMap = LevelManager.Instance == null ? false : LevelManager.Instance.IsRaidMap;
+        ModLogger.Log("QuestTracker", $"OnAfterLevelInitialized: isRaidMap: {isRaidMap}");
+        if (isRaidMap)
+        {
+            Enable();
+        }
+        else
+        {
+            Disable();
         }
     }
 
@@ -835,7 +776,7 @@ public class ActiveQuestTracker : MonoBehaviour
             progressFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
             // 创建UI对象
-            var questEntry = new QuestEntryUI
+            var questEntry = new QuestEntryUI(this)
             {
                 QuestID = quest.ID,
                 GameObject = entryObj,
@@ -880,6 +821,16 @@ public class ActiveQuestTracker : MonoBehaviour
         {
             ModLogger.LogError($"QuestTracker.ClearQuestList failed: {ex}");
         }
+    }
+
+    private void OnActiveSceneChanged(Scene prevScene, Scene newScene)
+    {
+        ModLogger.Log("QuestTracker", $"OnActiveSceneChanged: {newScene.name}");
+        if (LevelManager.Instance == null || !LevelManager.Instance.IsRaidMap)
+        {
+            Disable();
+        }
+        // Enable candition in OnAfterLevelInitialized
     }
 
     /// <summary>
@@ -1213,36 +1164,16 @@ public class ActiveQuestTracker : MonoBehaviour
     }
 
     /// <summary>
-    /// 应用设置到UI（位置、缩放）- 延迟一帧执行以确保 UI 布局完全更新
+    /// 应用设置到UI（位置、缩放）
     /// </summary>
     private void ApplySettingsToUI()
     {
         try
         {
-            // 如果我们在设置面板中调整滑块时调用这个方法，需要延迟一帧
-            // 以确保 UI 布局系统已经完全更新
-            StartCoroutine(DelayedApplySettingsToUI());
-        }
-        catch (Exception ex)
-        {
-            ModLogger.LogError($"QuestTracker.ApplySettingsToUI failed: {ex}");
-        }
-    }
-
-    /// <summary>
-    /// 延迟应用UI设置（等待一帧以确保布局完成）
-    /// </summary>
-    private System.Collections.IEnumerator DelayedApplySettingsToUI()
-    {
-        // 等待一帧以确保 UI 布局完全更新
-        yield return null;
-
-        try
-        {
-            if (_questPanel == null) yield break;
+            if (_questPanel == null) return;
 
             RectTransform panelRect = _questPanel.GetComponent<RectTransform>();
-            if (panelRect == null) yield break;
+            if (panelRect == null) return;
 
             // 获取 Canvas 的虚拟分辨率（参考分辨率）
             // Canvas 使用 ScaleWithScreenSize，参考分辨率是 1920x1080
@@ -1253,7 +1184,7 @@ public class ActiveQuestTracker : MonoBehaviour
             // 获取 Canvas RectTransform 以确保它是活跃的
             Canvas? canvas = _rootCanvas?.GetComponent<Canvas>();
             RectTransform? canvasRect = _rootCanvas?.GetComponent<RectTransform>();
-            if (canvas == null || canvasRect == null) yield break;
+            if (canvas == null || canvasRect == null) return;
 
             // 将归一化坐标(0-1)转换为 Canvas 本地坐标
             // 由于 Quest Panel 的锚点在右上角 (1, 1)
@@ -1284,7 +1215,7 @@ public class ActiveQuestTracker : MonoBehaviour
         }
         catch (Exception ex)
         {
-            ModLogger.LogError($"QuestTracker.DelayedApplySettingsToUI failed: {ex}");
+            ModLogger.LogError($"QuestTracker.ApplySettingsToUI failed: {ex}");
         }
     }
 
@@ -1466,6 +1397,15 @@ public class QuestEntryUI
     private const float TASK_STATUS_DEBOUNCE_INTERVAL = 0.25f; // 防抖间隔（250ms）
     private bool _taskStatusChangePending = false; // 防抖：标记是否有待处理的任务状态变更
     private Coroutine? _debouncedUpdateCoroutine; // 防抖协程引用
+    private readonly MonoBehaviour _coroutineRunner; // 用于运行协程的 MonoBehaviour 引用
+
+    /// <summary>
+    /// 构造函数
+    /// </summary>
+    public QuestEntryUI(MonoBehaviour coroutineRunner)
+    {
+        _coroutineRunner = coroutineRunner;
+    }
 
     /// <summary>
     /// 订阅任务的Task事件
@@ -1539,9 +1479,9 @@ public class QuestEntryUI
                     // 标记为待处理，在防抖窗口结束后调用一次
                     _taskStatusChangePending = true;
                     // 如果还没有启动延迟更新协程，就启动一个
-                    if (_debouncedUpdateCoroutine == null && ActiveQuestTracker.Instance != null)
+                    if (_debouncedUpdateCoroutine == null && _coroutineRunner != null)
                     {
-                        _debouncedUpdateCoroutine = ActiveQuestTracker.Instance.StartCoroutine(DebouncedUpdateCoroutine());
+                        _debouncedUpdateCoroutine = _coroutineRunner.StartCoroutine(DebouncedUpdateCoroutine());
                     }
                     return;
                 }
@@ -1550,9 +1490,9 @@ public class QuestEntryUI
                 _taskStatusChangePending = false;
 
                 // 停止之前的延迟更新协程（如果有的话）
-                if (_debouncedUpdateCoroutine != null && ActiveQuestTracker.Instance != null)
+                if (_debouncedUpdateCoroutine != null && _coroutineRunner != null)
                 {
-                    ActiveQuestTracker.Instance.StopCoroutine(_debouncedUpdateCoroutine);
+                    _coroutineRunner.StopCoroutine(_debouncedUpdateCoroutine);
                     _debouncedUpdateCoroutine = null;
                 }
 
@@ -1599,9 +1539,9 @@ public class QuestEntryUI
             _taskStatusChangePending = false; // 清除待处理标志
 
             // 停止任何正在运行的延迟更新协程
-            if (_debouncedUpdateCoroutine != null && ActiveQuestTracker.Instance != null)
+            if (_debouncedUpdateCoroutine != null && _coroutineRunner != null && _coroutineRunner.gameObject.activeInHierarchy)
             {
-                ActiveQuestTracker.Instance.StopCoroutine(_debouncedUpdateCoroutine);
+                _coroutineRunner.StopCoroutine(_debouncedUpdateCoroutine);
                 _debouncedUpdateCoroutine = null;
             }
         }
