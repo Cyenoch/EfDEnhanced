@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
@@ -29,6 +29,7 @@
         <DuckovDataPath>$(DuckovPath)Duckov_Data/</DuckovDataPath>
         <DuckovModsPath>$(DuckovDataPath)Mods/</DuckovModsPath>
     </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
 
     <ItemGroup>
         <Reference Include="$(DuckovDataPath)\Managed\TeamSoda.*" />
@@ -48,8 +49,21 @@
             <PrivateAssets>none</PrivateAssets>
             <ExcludeAssets>none</ExcludeAssets>
         </PackageReference>
-    </ItemGroup>
 
+        <PackageReference Include="Krafs.Publicizer">
+            <Version>2.3.0</Version>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
+
+    </ItemGroup>
+    
+    <!--Publicize some private methods-->
+    <ItemGroup>
+        <Publicize Include="TeamSoda.Duckov.Core" MemberPattern="^Duckov.Economy.UI\.StockShopView\..*" />
+        <Publicize Include="TeamSoda.Duckov.Core:Duckov.Economy.StockShop.Sell" />
+    </ItemGroup>
+    
     <!-- Post-build: Copy mod files to game's Mods folder -->
     <Target Name="CopyModFiles" AfterTargets="Build">
         <PropertyGroup>
