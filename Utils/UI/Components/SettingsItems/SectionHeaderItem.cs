@@ -1,3 +1,4 @@
+using EfDEnhanced.Utils;
 using EfDEnhanced.Utils.UI.Constants;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,10 +10,27 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
     /// </summary>
     public class SectionHeaderItem : MonoBehaviour
     {
-        public void Initialize(string sectionText)
+        private string _sectionKey = "";
+        private Text? _textComponent;
+
+        public void Initialize(string sectionKey)
         {
+            _sectionKey = sectionKey;
             SetupLayout();
-            CreateSectionText(sectionText);
+            CreateSectionText(LocalizationHelper.Get(sectionKey));
+            
+            // Subscribe to language changes
+            // Unsubscribe first to prevent duplicate subscriptions if Initialize is called multiple times
+            LocalizationHelper.OnLanguageChanged -= OnLanguageChanged;
+            LocalizationHelper.OnLanguageChanged += OnLanguageChanged;
+        }
+
+        private void OnLanguageChanged(SystemLanguage newLanguage)
+        {
+            if (_textComponent != null && !string.IsNullOrEmpty(_sectionKey))
+            {
+                _textComponent.text = LocalizationHelper.Get(_sectionKey);
+            }
         }
 
         private void SetupLayout()
@@ -46,18 +64,23 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
             textRect.anchorMax = new Vector2(1, 1);
             textRect.sizeDelta = Vector2.zero;
 
-            var textComponent = textObj.AddComponent<Text>();
-            textComponent.text = text;
-            textComponent.font = UIConstants.DefaultFont;
-            textComponent.fontSize = UIConstants.SETTINGS_SECTION_FONT_SIZE;
-            textComponent.color = UIConstants.QUEST_TITLE_COLOR; // Use golden color for section headers
-            textComponent.alignment = TextAnchor.MiddleLeft;
-            textComponent.fontStyle = FontStyle.Bold;
+            _textComponent = textObj.AddComponent<Text>();
+            _textComponent.text = text;
+            _textComponent.font = UIConstants.DefaultFont;
+            _textComponent.fontSize = UIConstants.SETTINGS_SECTION_FONT_SIZE;
+            _textComponent.color = UIConstants.QUEST_TITLE_COLOR; // Use golden color for section headers
+            _textComponent.alignment = TextAnchor.MiddleLeft;
+            _textComponent.fontStyle = FontStyle.Bold;
 
             // Add LayoutElement to control text height
             var textLayout = textObj.AddComponent<LayoutElement>();
             textLayout.minHeight = 26; // Slightly larger for better readability
             textLayout.preferredHeight = 26;
+        }
+        
+        private void OnDestroy()
+        {
+            LocalizationHelper.OnLanguageChanged -= OnLanguageChanged;
         }
     }
 }

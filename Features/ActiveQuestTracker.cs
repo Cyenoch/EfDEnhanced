@@ -1186,7 +1186,7 @@ public class ActiveQuestTracker : MonoBehaviour
     }
 
     /// <summary>
-    /// 延迟一帧后应用设置到UI
+    /// 延迟应用UI设置（等待一帧以确保布局完成）
     /// </summary>
     private System.Collections.IEnumerator DelayedApplySettingsToUI()
     {
@@ -1200,24 +1200,30 @@ public class ActiveQuestTracker : MonoBehaviour
             RectTransform panelRect = _questPanel.GetComponent<RectTransform>();
             if (panelRect == null) yield break;
 
-            // 应用位置设置
-            float screenWidth = Screen.width;
-            float screenHeight = Screen.height;
+            // 获取 Canvas 的虚拟分辨率（参考分辨率）
+            // Canvas 使用 ScaleWithScreenSize，参考分辨率是 1920x1080
+            // 所有位置计算都应该基于这个虚拟分辨率
+            float referenceWidth = 1920f;
+            float referenceHeight = 1080f;
 
-            // 将归一化坐标(0-1)转换为屏幕坐标
-            // Since we're using right-top anchored position, we use negative X (right to left)
-            // but positive Y (top to bottom) would be incorrect - it should be negative too
-            float xPos = ModSettings.TrackerPositionX.Value * screenWidth;
-            float yPos = -ModSettings.TrackerPositionY.Value * screenHeight;
+            // 获取 Canvas RectTransform 以确保它是活跃的
+            Canvas? canvas = _rootCanvas?.GetComponent<Canvas>();
+            RectTransform? canvasRect = _rootCanvas?.GetComponent<RectTransform>();
+            if (canvas == null || canvasRect == null) yield break;
+
+            // 将归一化坐标(0-1)转换为 Canvas 本地坐标
+            // 由于 Quest Panel 的锚点在右上角 (1, 1)
+            // X 坐标：正值向右，从中心点计算需要转换
+            // Y 坐标：从顶部开始向下计算，应该是负值
+            float xPos = ModSettings.TrackerPositionX.Value * referenceWidth;
+            float yPos = -ModSettings.TrackerPositionY.Value * referenceHeight;
 
             if (!ModSettings.TrackerPositionY.WasModifiedByUser)
             {
-
                 // 计算 TimeOfDayDisplay 的偏移量以避免重叠
                 float timeDisplayOffset = CalculateTimeOfDayDisplayOffset();
-                yPos -= timeDisplayOffset;
-                ModLogger.Log("QuestTracker", $"Position calculation: X={ModSettings.TrackerPositionX.Value} * {screenWidth} = {xPos}, Y={ModSettings.TrackerPositionY.Value} * {screenHeight} = {yPos}, TimeDisplay offset: {timeDisplayOffset}");
-
+                yPos = -timeDisplayOffset;
+                ModLogger.Log("QuestTracker", $"Position calculation: X={ModSettings.TrackerPositionX.Value} * {referenceWidth} = {xPos}, TimeDisplay offset: {timeDisplayOffset}");
             }
             else
             {
@@ -1267,24 +1273,70 @@ public class ActiveQuestTracker : MonoBehaviour
                 return 0f;
             }
 
-            // 获取 stormTitleText 在屏幕空间中的位置
-            // 由于它是左上角锚点，我们需要计算它的底部位置
+            // 获取 Canvas 和 CanvasScaler 信息
+            Canvas? questCanvas = _rootCanvas?.GetComponent<Canvas>();
+            CanvasScaler? scaler = _rootCanvas?.GetComponent<CanvasScaler>();
+
+            if (questCanvas == null || scaler == null)
+            {
+                ModLogger.Log("QuestTracker", "Canvas or CanvasScaler not found");
+                return 0f;
+            }
+
+            // 获取 stormTitleText 所在的 Canvas（通常是游戏主 Canvas）
+            Canvas? stormTextCanvas = stormTextRect.GetComponentInParent<Canvas>();
+            if (stormTextCanvas == null)
+            {
+                ModLogger.Log("QuestTracker", "Canvas parent not found for stormTitleText");
+                return 0f;
+            }
+
+            // 获取世界坐标的四个角
             Vector3[] worldCorners = new Vector3[4];
             stormTextRect.GetWorldCorners(worldCorners);
+            // worldCorners[0] = 左下角, worldCorners[1] = 左上角, worldCorners[2] = 右上角, worldCorners[3] = 右下角
 
-            // worldCorners[0] 是左下角，worldCorners[1] 是左上角
-            // 我们需要知道从屏幕顶部到 stormTitleText 底部的距离
-            float screenTop = Screen.height;
-            float stormTextBottom = worldCorners[0].y;
+            // 获取 Quest Panel 的 RectTransform
+            RectTransform? questPanelRect = _questPanel?.GetComponent<RectTransform>();
+            if (questPanelRect == null)
+            {
+                ModLogger.Log("QuestTracker", "Quest panel RectTransform not found");
+                return 0f;
+            }
 
-            // 计算从屏幕顶部到 stormText 底部的距离
-            float distanceFromTop = screenTop - stormTextBottom;
+            // 将 stormTitleText 的左下角世界坐标转换为 Quest Canvas 的本地坐标
+            Vector2 stormTextBottomInCanvasLocal = RectTransformUtility.WorldToScreenPoint(questCanvas.worldCamera, worldCorners[0]);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(
+                questCanvas.GetComponent<RectTransform>(),
+                stormTextBottomInCanvasLocal,
+                questCanvas.worldCamera,
+                out Vector2 stormTextLocalPos
+            );
 
-            // 添加额外的边距（比如 14 像素）
+            // 获取 Quest Canvas 的尺寸
+            RectTransform? questCanvasRect = questCanvas.GetComponent<RectTransform>();
+            if (questCanvasRect == null)
+            {
+                ModLogger.Log("QuestTracker", "Quest canvas RectTransform not found");
+                return 0f;
+            }
+
+            Vector2 questCanvasSize = questCanvasRect.rect.size;
+
+            // stormTitleText 的本地Y坐标（Canvas 内）
+            // 在 Canvas 中，Y 轴向上为正，所以我们需要从 Canvas 顶部计算距离
+            // Canvas 顶部在本地坐标中是 +questCanvasSize.y / 2
+            float canvasTopY = questCanvasSize.y / 2f;
+            float stormTextBottomY = stormTextLocalPos.y;
+
+            // 计算从 Canvas 顶部到 stormText 底部的距离（向下为正）
+            float distanceFromCanvasTop = canvasTopY - stormTextBottomY;
+
+            // 添加额外的边距
             float additionalMargin = 14f;
-            float totalOffset = distanceFromTop + additionalMargin;
+            float totalOffset = distanceFromCanvasTop + additionalMargin;
 
-            ModLogger.Log("QuestTracker", $"TimeOfDayDisplay offset calculated: {totalOffset}px (stormText bottom: {stormTextBottom}, screen top: {screenTop}, margin: {additionalMargin})");
+            ModLogger.Log("QuestTracker", $"TimeOfDayDisplay offset calculated: {totalOffset}px in Canvas space (stormText bottom Y: {stormTextBottomY}, canvas top Y: {canvasTopY}, margin: {additionalMargin})");
 
             return totalOffset;
         }

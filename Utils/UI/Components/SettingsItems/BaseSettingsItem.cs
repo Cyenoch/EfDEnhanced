@@ -15,8 +15,11 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
         protected ISettingsEntry SettingsEntry { get; private set; } = null!;
         protected GameObject ContentContainer { get; private set; } = null!;
         protected GameObject DescriptionObject { get; private set; } = null!;
+        protected Text? DescriptionText { get; private set; }
+        protected Text? LabelText { get; private set; }
         
         private int _leftPadding;
+        private Action<SystemLanguage>? _languageChangeHandler;
 
         /// <summary>
         /// Initialize the settings item with a settings entry
@@ -29,6 +32,44 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
             SetupItemLayout();
             BuildContent();
             BuildDescription();
+            
+            // Create and store the handler so we can properly unsubscribe later
+            _languageChangeHandler = OnLanguageChanged;
+            LocalizationHelper.OnLanguageChanged += _languageChangeHandler;
+        }
+
+        /// <summary>
+        /// Handle language changes by refreshing all localized text
+        /// </summary>
+        protected virtual void OnLanguageChanged(SystemLanguage newLanguage)
+        {
+            try
+            {
+                RefreshLocalizedText();
+            }
+            catch (Exception ex)
+            {
+                ModLogger.LogError($"BaseSettingsItem.OnLanguageChanged failed: {ex}");
+            }
+        }
+        
+        /// <summary>
+        /// Refresh all localized text in this settings item
+        /// Override in derived classes to refresh control-specific text
+        /// </summary>
+        protected virtual void RefreshLocalizedText()
+        {
+            // Refresh label text
+            if (LabelText != null)
+            {
+                LabelText.text = SettingsEntry.Name;
+            }
+            
+            // Refresh description text
+            if (DescriptionText != null)
+            {
+                DescriptionText.text = SettingsEntry.Description;
+            }
         }
 
         /// <summary>
@@ -106,14 +147,14 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
             descRect.anchorMax = new Vector2(1, 1);
             descRect.pivot = new Vector2(0.5f, 1);
 
-            var descText = DescriptionObject.AddComponent<Text>();
-            descText.text = SettingsEntry.Description;
-            descText.font = UIConstants.DefaultFont;
-            descText.fontSize = UIConstants.SETTINGS_DESCRIPTION_FONT_SIZE;
-            descText.color = UIConstants.SETTINGS_DESCRIPTION_COLOR;
-            descText.alignment = TextAnchor.UpperLeft;
-            descText.horizontalOverflow = HorizontalWrapMode.Wrap;
-            descText.verticalOverflow = VerticalWrapMode.Truncate;
+            DescriptionText = DescriptionObject.AddComponent<Text>();
+            DescriptionText.text = SettingsEntry.Description;
+            DescriptionText.font = UIConstants.DefaultFont;
+            DescriptionText.fontSize = UIConstants.SETTINGS_DESCRIPTION_FONT_SIZE;
+            DescriptionText.color = UIConstants.SETTINGS_DESCRIPTION_COLOR;
+            DescriptionText.alignment = TextAnchor.UpperLeft;
+            DescriptionText.horizontalOverflow = HorizontalWrapMode.Wrap;
+            DescriptionText.verticalOverflow = VerticalWrapMode.Truncate;
 
             // Add ContentSizeFitter for auto-sizing
             var descSizeFitter = DescriptionObject.AddComponent<ContentSizeFitter>();
@@ -138,12 +179,12 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
             labelRect.anchorMax = new Vector2(0, 0.5f);
             labelRect.pivot = new Vector2(0, 0.5f);
 
-            var labelText = labelObj.AddComponent<Text>();
-            labelText.text = SettingsEntry.Name;
-            labelText.font = UIConstants.DefaultFont;
-            labelText.fontSize = UIConstants.SETTINGS_LABEL_FONT_SIZE;
-            labelText.color = UIConstants.SETTINGS_LABEL_COLOR;
-            labelText.alignment = TextAnchor.MiddleLeft;
+            LabelText = labelObj.AddComponent<Text>();
+            LabelText.text = SettingsEntry.Name;
+            LabelText.font = UIConstants.DefaultFont;
+            LabelText.fontSize = UIConstants.SETTINGS_LABEL_FONT_SIZE;
+            LabelText.color = UIConstants.SETTINGS_LABEL_COLOR;
+            LabelText.alignment = TextAnchor.MiddleLeft;
 
             // Set label to take up a reasonable amount of space
             var labelLayout = labelObj.AddComponent<LayoutElement>();
@@ -158,6 +199,13 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
         /// </summary>
         protected virtual void OnDestroy()
         {
+            // Unsubscribe from language changes
+            if (_languageChangeHandler != null)
+            {
+                LocalizationHelper.OnLanguageChanged -= _languageChangeHandler;
+                _languageChangeHandler = null;
+            }
+            
             // Derived classes can override to unsubscribe from events
         }
     }

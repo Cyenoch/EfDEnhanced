@@ -145,11 +145,12 @@ namespace EfDEnhanced.Utils
                 PREFIX,
                 "TrackerPosY",
                 "Settings_TrackerPositionY_Name",
-                0.07f,
+                0f,
                 0f,
                 1f,
                 CATEGORY_QUEST_TRACKER,
-                "Settings_TrackerPositionY_Desc"
+                "Settings_TrackerPositionY_Desc",
+                version: 2
             )
         );
 
@@ -321,7 +322,8 @@ namespace EfDEnhanced.Utils
                 "Settings_FastSellEnabled_Name",
                 false,
                 CATEGORY_UI,
-                "Settings_FastSellEnabled_Desc"
+                "Settings_FastSellEnabled_Desc",
+                version: 2
             )
         );
 

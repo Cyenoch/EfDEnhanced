@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using SodaCraft.Localizations;
 using UnityEngine;
@@ -15,6 +16,11 @@ public static class LocalizationHelper
 
     // 本地化文本数据
     private static readonly Dictionary<SystemLanguage, Dictionary<string, string>> LocalizationData = [];
+    
+    /// <summary>
+    /// 语言变更事件 - UI 组件可订阅此事件以在语言改变时刷新显示
+    /// </summary>
+    public static event Action<SystemLanguage>? OnLanguageChanged;
 
     /// <summary>
     /// 初始化本地化系统
@@ -26,7 +32,7 @@ public static class LocalizationHelper
             ModLogger.Log("Localization", "Initializing localization system...");
 
             // 注册语言切换事件
-            LocalizationManager.OnSetLanguage += OnLanguageChanged;
+            LocalizationManager.OnSetLanguage += LanguageChangedHandler;
 
             // 加载所有语言的翻译
             LoadTranslations();
@@ -49,7 +55,7 @@ public static class LocalizationHelper
     {
         try
         {
-            LocalizationManager.OnSetLanguage -= OnLanguageChanged;
+            LocalizationManager.OnSetLanguage -= LanguageChangedHandler;
 
             // 移除所有覆盖的文本
             foreach (var langData in LocalizationData.Values)
@@ -69,14 +75,17 @@ public static class LocalizationHelper
     }
 
     /// <summary>
-    /// 语言切换事件处理
+    /// 语言切换事件处理 - 同时触发公共事件供 UI 组件订阅
     /// </summary>
-    private static void OnLanguageChanged(SystemLanguage newLanguage)
+    private static void LanguageChangedHandler(SystemLanguage newLanguage)
     {
         try
         {
             ModLogger.Log("Localization", $"Language changed to: {newLanguage}");
             ApplyTranslations(newLanguage);
+            
+            // 触发公共事件，通知所有订阅者
+            OnLanguageChanged?.Invoke(newLanguage);
         }
         catch (System.Exception ex)
         {
@@ -564,6 +573,46 @@ public static class LocalizationHelper
             ModLogger.LogError($"Failed to format localization string '{key}': {ex.Message}");
             return text;
         }
+    }
+
+    /// <summary>
+    /// 为 Text 组件自动更新本地化文本
+    /// 使用方式: LocalizationHelper.SetLocalizedText(textComponent, "localization_key");
+    /// </summary>
+    public static void SetLocalizedText(UnityEngine.UI.Text textComponent, string localizationKey)
+    {
+        if (textComponent == null) return;
+        
+        textComponent.text = Get(localizationKey);
+        
+        // 订阅语言变更事件，当语言改变时自动更新文本
+        OnLanguageChanged += (lang) =>
+        {
+            if (textComponent != null && !string.IsNullOrEmpty(localizationKey))
+            {
+                textComponent.text = Get(localizationKey);
+            }
+        };
+    }
+
+    /// <summary>
+    /// 为 TextMeshProUGUI 组件自动更新本地化文本
+    /// 使用方式: LocalizationHelper.SetLocalizedText(tmpText, "localization_key");
+    /// </summary>
+    public static void SetLocalizedText(TMPro.TextMeshProUGUI textComponent, string localizationKey)
+    {
+        if (textComponent == null) return;
+        
+        textComponent.text = Get(localizationKey);
+        
+        // 订阅语言变更事件，当语言改变时自动更新文本
+        OnLanguageChanged += (lang) =>
+        {
+            if (textComponent != null && !string.IsNullOrEmpty(localizationKey))
+            {
+                textComponent.text = Get(localizationKey);
+            }
+        };
     }
 }
 

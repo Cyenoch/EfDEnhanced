@@ -29,6 +29,7 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
         private List<Image> _optionImages = new List<Image>();
         private Canvas? _rootCanvas;
         private RectTransform? _rootCanvasRect;
+        private List<TextMeshProUGUI> _optionTexts = new List<TextMeshProUGUI>();
 
         public override void Initialize(ISettingsEntry entry, int leftPadding = 0)
         {
@@ -342,6 +343,9 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
             text.enableWordWrapping = false;
             text.margin = new Vector4(0, 0, 0, 0);
             text.raycastTarget = false;
+            
+            // Store reference to option text for language change updates
+            _optionTexts.Add(text);
 
             // Highlight current selection
             if (index == _optionsEntry.Value)
@@ -563,6 +567,47 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
             }
         }
 
+        /// <summary>
+        /// Handle language changes by refreshing all option texts
+        /// </summary>
+        protected override void OnLanguageChanged(SystemLanguage newLanguage)
+        {
+            try
+            {
+                base.OnLanguageChanged(newLanguage);
+                RefreshOptionTexts();
+            }
+            catch (Exception ex)
+            {
+                ModLogger.LogError($"IndexedOptionsSettingsItem.OnLanguageChanged failed: {ex}");
+            }
+        }
+        
+        /// <summary>
+        /// Refresh all option text displays
+        /// </summary>
+        private void RefreshOptionTexts()
+        {
+            try
+            {
+                // Update option texts
+                for (int i = 0; i < _optionTexts.Count && i < _optionsEntry.Options.Length; i++)
+                {
+                    if (_optionTexts[i] != null)
+                    {
+                        _optionTexts[i].text = _optionsEntry.Options[i];
+                    }
+                }
+                
+                // Update button text
+                UpdateButtonText();
+            }
+            catch (Exception ex)
+            {
+                ModLogger.LogError($"IndexedOptionsSettingsItem.RefreshOptionTexts failed: {ex}");
+            }
+        }
+
         protected override void OnDestroy()
         {
             if (_optionsEntry != null)
@@ -586,6 +631,8 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
                 Destroy(_popupRoot);
             }
             _optionImages.Clear();
+            _optionTexts.Clear();
+            LocalizationHelper.OnLanguageChanged -= OnLanguageChanged;
             base.OnDestroy();
         }
     }

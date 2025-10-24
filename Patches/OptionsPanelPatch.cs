@@ -18,6 +18,7 @@ namespace EfDEnhanced.Patches
     public class OptionsPanelPatch
     {
         private static ModSettingsContent? modSettingsContent;
+        private static TextMeshProUGUI? modTabButtonText;
 
         /// <summary>
         /// Flag to indicate if mod settings tab should be selected when panel opens
@@ -183,12 +184,17 @@ namespace EfDEnhanced.Patches
                 TextMeshProUGUI? buttonText = modTabButtonObj.GetComponentInChildren<TextMeshProUGUI>();
                 if (buttonText != null)
                 {
+                    modTabButtonText = buttonText;
                     string modSettingsText = LocalizationHelper.Get("Settings_ModSettings_Button");
                     buttonText.text = modSettingsText;
                     // Force the text to update and not be linked to the original
                     buttonText.SetText(modSettingsText);
                     buttonText.ForceMeshUpdate();
                     ModLogger.Log("OptionsPanelPatch", $"Set button text to: {modSettingsText}");
+                    
+                    // Subscribe to language changes to update button text
+                    LocalizationHelper.OnLanguageChanged -= OnLanguageChanged;
+                    LocalizationHelper.OnLanguageChanged += OnLanguageChanged;
                 }
                 else
                 {
@@ -382,6 +388,27 @@ namespace EfDEnhanced.Patches
             }
         }
 
+        /// <summary>
+        /// Handle language changes by updating the mod settings tab button text
+        /// </summary>
+        private static void OnLanguageChanged(SystemLanguage newLanguage)
+        {
+            try
+            {
+                if (modTabButtonText != null)
+                {
+                    string modSettingsText = LocalizationHelper.Get("Settings_ModSettings_Button");
+                    modTabButtonText.text = modSettingsText;
+                    modTabButtonText.SetText(modSettingsText);
+                    modTabButtonText.ForceMeshUpdate();
+                    ModLogger.Log("OptionsPanelPatch", $"Updated mod settings button text on language change: {modSettingsText}");
+                }
+            }
+            catch (Exception ex)
+            {
+                ModLogger.LogError($"OptionsPanelPatch.OnLanguageChanged failed: {ex}");
+            }
+        }
     }
 }
 

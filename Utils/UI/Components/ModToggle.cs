@@ -4,6 +4,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using System;
 
 namespace EfDEnhanced.Utils.UI.Components
 {
@@ -19,6 +20,8 @@ namespace EfDEnhanced.Utils.UI.Components
         private Outline? _outline;
         private TextMeshProUGUI? _label;
         private BoolSettingsEntry? _boundSetting;
+        private string? _labelLocalizationKey;
+        private bool _isLocalizationSubscribed = false;
 
         /// <summary>
         /// Toggle组件
@@ -141,7 +144,15 @@ namespace EfDEnhanced.Utils.UI.Components
         {
             if (_label != null)
             {
+                _labelLocalizationKey = localizationKey;
                 _label.text = LocalizationHelper.Get(localizationKey);
+                
+                // Subscribe to language changes only once
+                if (!_isLocalizationSubscribed)
+                {
+                    LocalizationHelper.OnLanguageChanged += OnLanguageChanged;
+                    _isLocalizationSubscribed = true;
+                }
             }
             return this;
         }
@@ -241,9 +252,28 @@ namespace EfDEnhanced.Utils.UI.Components
             return gameObject;
         }
 
+        /// <summary>
+        /// Handle language changes by updating the label text
+        /// </summary>
+        private void OnLanguageChanged(SystemLanguage newLanguage)
+        {
+            try
+            {
+                if (_label != null && !string.IsNullOrEmpty(_labelLocalizationKey))
+                {
+                    _label.text = LocalizationHelper.Get(_labelLocalizationKey);
+                }
+            }
+            catch (Exception ex)
+            {
+                ModLogger.LogError($"ModToggle.OnLanguageChanged failed: {ex}");
+            }
+        }
+
         private void OnDestroy()
         {
             _toggle?.onValueChanged.RemoveAllListeners();
+            LocalizationHelper.OnLanguageChanged -= OnLanguageChanged;
         }
     }
 }

@@ -26,6 +26,8 @@ namespace EfDEnhanced.Utils.UI.Components
 
         private Tween? _currentTween;
         private UIStyles.ButtonStyle _currentStyle = UIStyles.ButtonStyle.Secondary;
+        private string? _localizationKey;
+        private bool _isLocalizationSubscribed = false;
 
         /// <summary>
         /// 按钮的Button组件
@@ -104,7 +106,15 @@ namespace EfDEnhanced.Utils.UI.Components
         {
             if (_text != null)
             {
+                _localizationKey = localizationKey;
                 _text.text = LocalizationHelper.Get(localizationKey);
+                
+                // Subscribe to language changes only once
+                if (!_isLocalizationSubscribed)
+                {
+                    LocalizationHelper.OnLanguageChanged += OnLanguageChanged;
+                    _isLocalizationSubscribed = true;
+                }
             }
             return this;
         }
@@ -246,10 +256,29 @@ namespace EfDEnhanced.Utils.UI.Components
 
         #endregion
 
+        /// <summary>
+        /// Handle language changes by updating the button text
+        /// </summary>
+        private void OnLanguageChanged(SystemLanguage newLanguage)
+        {
+            try
+            {
+                if (_text != null && !string.IsNullOrEmpty(_localizationKey))
+                {
+                    _text.text = LocalizationHelper.Get(_localizationKey);
+                }
+            }
+            catch (Exception ex)
+            {
+                ModLogger.LogError($"ModButton.OnLanguageChanged failed: {ex}");
+            }
+        }
+
         private void OnDestroy()
         {
             _currentTween?.Kill();
             _button?.onClick.RemoveAllListeners();
+            LocalizationHelper.OnLanguageChanged -= OnLanguageChanged;
         }
     }
 }

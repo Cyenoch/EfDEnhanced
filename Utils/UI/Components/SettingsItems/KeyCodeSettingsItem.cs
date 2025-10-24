@@ -146,6 +146,27 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
                 _buttonText.text = KeyCodeSettingsEntry.GetKeyDisplayName(e.NewValue);
             }
         }
+        
+        /// <summary>
+        /// Handle language changes - update the "Press Any Key" text if currently listening
+        /// </summary>
+        protected override void OnLanguageChanged(SystemLanguage newLanguage)
+        {
+            try
+            {
+                base.OnLanguageChanged(newLanguage);
+                
+                // If currently listening, update the prompt text
+                if (_isListening && _buttonText != null)
+                {
+                    _buttonText.text = LocalizationHelper.Get("Settings_PressAnyKey");
+                }
+            }
+            catch (Exception ex)
+            {
+                ModLogger.LogError($"KeyCodeSettingsItem.OnLanguageChanged failed: {ex}");
+            }
+        }
 
         protected override void OnDestroy()
         {

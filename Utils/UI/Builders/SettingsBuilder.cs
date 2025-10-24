@@ -32,7 +32,7 @@ namespace EfDEnhanced.Utils.UI.Builders
             sectionObj.transform.SetParent(_parentTransform, false);
 
             var sectionItem = sectionObj.AddComponent<SectionHeaderItem>();
-            sectionItem.Initialize(LocalizationHelper.Get(sectionKey));
+            sectionItem.Initialize(sectionKey);
 
             _createdItems.Add(sectionObj);
             return this;
