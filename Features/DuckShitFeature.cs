@@ -173,6 +173,7 @@ public class DuckShitFeature : MonoBehaviour
 
     private void Update()
     {
+        if (!ModSettings.EnableDuckShit.Value) return;
         TickVariables(Time.deltaTime, 1f);
     }
 }

@@ -126,6 +126,7 @@ namespace EfDEnhanced.Features
                     .AddSection("Settings_Category_FunFeatures")
                     .AddSetting(ModSettings.EnableDuckQuack)
                     .AddSetting(ModSettings.DuckQuackHotkey, ModSettings.EnableDuckQuack)
+                    .AddSetting(ModSettings.EnableDuckShit)
 
                     // Reset button at the bottom
                     .AddButton("Settings_ResetButton", OnResetButtonClicked, UIStyles.ButtonStyle.Danger);

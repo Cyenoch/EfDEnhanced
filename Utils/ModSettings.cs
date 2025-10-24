@@ -18,7 +18,7 @@ namespace EfDEnhanced.Utils
         private const string CATEGORY_QUEST_TRACKER = "Settings_Category_QuestTracker";
         private const string CATEGORY_MOVEMENT = "Settings_Category_Movement";
         private const string CATEGORY_UI = "Settings_Category_UI";
-        private const string CATEGORY_AUDIO = "Settings_Category_Audio";
+        private const string CATEGORY_FUN_FEATURE = "Settings_Category_FunFeature";
 
         // All settings entries
         private static readonly List<ISettingsEntry> _allSettings = [];
@@ -334,7 +334,7 @@ namespace EfDEnhanced.Utils
                 "EnableDuckQuack",
                 "Settings_EnableDuckQuack_Name",
                 true,
-                CATEGORY_AUDIO,
+                CATEGORY_FUN_FEATURE,
                 "Settings_EnableDuckQuack_Desc"
             )
         );
@@ -345,8 +345,19 @@ namespace EfDEnhanced.Utils
                 "DuckQuackHotkey",
                 "Settings_DuckQuackHotkey_Name",
                 UnityEngine.KeyCode.Mouse2,
-                CATEGORY_AUDIO,
+                CATEGORY_FUN_FEATURE,
                 "Settings_DuckQuackHotkey_Desc"
+            )
+        );
+
+        public static readonly BoolSettingsEntry EnableDuckShit = Register(
+            new BoolSettingsEntry(
+                PREFIX,
+                "EnableDuckShit",
+                "Settings_EnableDuckShit_Name",
+                true,
+                CATEGORY_FUN_FEATURE,
+                "Settings_EnableDuckShit_Desc"
             )
         );
 

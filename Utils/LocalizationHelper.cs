@@ -208,6 +208,8 @@ public static class LocalizationHelper
 
             { "Settings_AutoTrackNewQuests_Name", "自动追踪新接受的任务" },
             { "Settings_AutoTrackNewQuests_Desc", "新接受任务时自动将其添加到局内追踪列表" },
+            { "Settings_EnableDuckShit_Name", "启用鸭子排便" },
+            { "Settings_EnableDuckShit_Desc", "启用鸭子会根据能量和水分消耗自动排便的功能" },
         };
 
         // 繁体中文
@@ -317,6 +319,8 @@ public static class LocalizationHelper
 
             { "Settings_AutoTrackNewQuests_Name", "自動追蹤新接受任務" },
             { "Settings_AutoTrackNewQuests_Desc", "新接受任務時自動將其添加到局內追蹤列表" },
+            { "Settings_EnableDuckShit_Name", "啟用鴨子排便" },
+            { "Settings_EnableDuckShit_Desc", "啟用鴨子會根據能量和水分消耗自動排便的功能" },
         };
 
         // 英语
@@ -426,6 +430,8 @@ public static class LocalizationHelper
 
             { "Settings_AutoTrackNewQuests_Name", "Auto-track new accepted quests" },
             { "Settings_AutoTrackNewQuests_Desc", "Automatically add new accepted quests to the in-raid tracker" },
+            { "Settings_EnableDuckShit_Name", "Enable Duck Shit" },
+            { "Settings_EnableDuckShit_Desc", "Enable the feature where ducks automatically defecate based on energy and water consumption" },
         };
 
         // 日语
@@ -535,6 +541,8 @@ public static class LocalizationHelper
 
             { "Settings_AutoTrackNewQuests_Name", "新規クエストを自動追跡" },
             { "Settings_AutoTrackNewQuests_Desc", "新規クエストを受けた際に自動的に局内追跡リストに追加" },
+            { "Settings_EnableDuckShit_Name", "アヒルの排便を有効化" },
+            { "Settings_EnableDuckShit_Desc", "アヒルがエネルギーと水分消費に基づいて自動的に排便する機能を有効化" },
         };
 
         ModLogger.Log("Localization", $"Loaded translations for {LocalizationData.Count} languages");
