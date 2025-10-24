@@ -71,7 +71,7 @@ public class DuckShitFeature : MonoBehaviour
         }
     }
 
-    private void PlayRandomFart(float volume = 0.8f)
+    private void PlayRandomFart(float volume = 0.75f)
     {
         try
         {
@@ -136,7 +136,7 @@ public class DuckShitFeature : MonoBehaviour
             // ModLogger.Log("DuckShit", $"Energy consumed: {energyIncrease}, Hydration consumed: {hydrationIncrease}");
         }
 
-        if (totalEnergyConsumed >= 1 || totalHydrationConsumed >= 1)
+        if (totalEnergyConsumed >= 60 || totalHydrationConsumed >= 60)
         {
             // ModLogger.Log("DuckShit", "Threshold reached, triggering poop/quack event.");
             totalEnergyConsumed = 0;
