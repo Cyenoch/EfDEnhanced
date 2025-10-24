@@ -44,7 +44,7 @@ namespace EfDEnhanced.Features
             try
             {
                 // Create pie menu GameObject
-                GameObject pieMenuObj = new GameObject("PieMenu");
+                GameObject pieMenuObj = new("PieMenu");
                 pieMenuObj.transform.SetParent(transform, false);
 
                 PieMenu = pieMenuObj.AddComponent<PieMenuComponent>();

@@ -90,7 +90,7 @@ namespace EfDEnhanced.Patches
                     return;
                 }
 
-                GameObject menuObj = new GameObject("EfDEnhanced_ThrowableWheelMenu");
+                GameObject menuObj = new("EfDEnhanced_ThrowableWheelMenu");
                 _wheelMenu = menuObj.AddComponent<ThrowableWheelMenu>();
 
                 // Initialize event listeners

@@ -20,14 +20,14 @@ namespace EfDEnhanced.Features
         private static ThrowableWheelMenu? _instance;
 
         // State
-        private List<Item> _throwableItems = new List<Item>();
-        private List<ThrowableStack> _throwableStacks = new List<ThrowableStack>();
+        private List<Item> _throwableItems = [];
+        private List<ThrowableStack> _throwableStacks = [];
 
         // Helper class to store stacked items
         private class ThrowableStack
         {
             public string TypeID { get; set; } = "";
-            public List<Item> Items { get; set; } = new List<Item>();
+            public List<Item> Items { get; set; } = [];
             public Sprite? Icon { get; set; }
             public string DisplayName { get; set; } = "";
 
@@ -133,7 +133,7 @@ namespace EfDEnhanced.Features
             {
                 _throwableItems.Clear();
                 _throwableStacks.Clear();
-                List<PieMenuItem> menuItems = new List<PieMenuItem>();
+                List<PieMenuItem> menuItems = [];
 
                 // 使用 InventoryHelper 获取角色背包中的所有物品（包括嵌套物品）
                 var allItems = InventoryHelper.GetPlayerItems(ItemSourceFilter.CharacterInventory);
@@ -145,7 +145,7 @@ namespace EfDEnhanced.Features
                 }
 
                 // Dictionary to group items by TypeID
-                Dictionary<int, ThrowableStack> stacksByTypeID = new Dictionary<int, ThrowableStack>();
+                Dictionary<int, ThrowableStack> stacksByTypeID = [];
 
                 // Filter throwable items
                 foreach (Item item in allItems)

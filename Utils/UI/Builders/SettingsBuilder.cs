@@ -16,7 +16,7 @@ namespace EfDEnhanced.Utils.UI.Builders
     public class SettingsBuilder
     {
         private readonly Transform _parentTransform;
-        private readonly List<GameObject> _createdItems = new();
+        private readonly List<GameObject> _createdItems = [];
 
         public SettingsBuilder(Transform parent)
         {

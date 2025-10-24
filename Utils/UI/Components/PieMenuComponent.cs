@@ -77,9 +77,9 @@ namespace EfDEnhanced.Utils.UI.Components
         private float _scale = 1.0f;
 
         // Colors
-        private Color _normalColor = new Color(0.2f, 0.2f, 0.2f, 0.5f);
-        private Color _hoverColor = new Color(0.5f, 0.6f, 0.75f, 0.95f);
-        private Color _selectedColor = new Color(0.35f, 0.4f, 0.5f, 0.9f);
+        private Color _normalColor = new(0.2f, 0.2f, 0.2f, 0.5f);
+        private Color _hoverColor = new(0.5f, 0.6f, 0.75f, 0.95f);
+        private Color _selectedColor = new(0.35f, 0.4f, 0.5f, 0.9f);
 
         // UI Components
         private Canvas? _canvas;
@@ -87,7 +87,7 @@ namespace EfDEnhanced.Utils.UI.Components
         private GameObject? _centerDot;
         private GameObject? _labelContainer;
         private Text? _labelText;
-        private List<PieSegment> _segments = new List<PieSegment>();
+        private List<PieSegment> _segments = [];
 
         // State
         private bool _isOpen = false;
@@ -101,7 +101,7 @@ namespace EfDEnhanced.Utils.UI.Components
         private const float MouseSwitchSqrThreshold = 1f;
 
         // Items
-        private List<PieMenuItem> _items = new List<PieMenuItem>();
+        private List<PieMenuItem> _items = [];
 
         // Calculated properties
         private float ScaledWheelRadius => _wheelRadius * _scale;
@@ -493,7 +493,7 @@ namespace EfDEnhanced.Utils.UI.Components
                 float angleRad = itemAngle * Mathf.Deg2Rad;
 
                 // Create background segment
-                GameObject segmentObj = new GameObject($"Segment_{i}");
+                GameObject segmentObj = new($"Segment_{i}");
                 segmentObj.transform.SetParent(_wheelContainer.transform, false);
 
                 RectTransform segmentRect = segmentObj.AddComponent<RectTransform>();
@@ -524,7 +524,7 @@ namespace EfDEnhanced.Utils.UI.Components
                 segmentImage.sprite = sprite;
 
                 // Create item icon
-                GameObject iconHolder = new GameObject($"Item_{i}");
+                GameObject iconHolder = new($"Item_{i}");
                 iconHolder.transform.SetParent(_wheelContainer.transform, false);
 
                 RectTransform iconRect = iconHolder.AddComponent<RectTransform>();
@@ -533,14 +533,14 @@ namespace EfDEnhanced.Utils.UI.Components
                 iconRect.pivot = new Vector2(0.5f, 0.5f);
                 iconRect.sizeDelta = new Vector2(ScaledIconSize, ScaledIconSize);
 
-                Vector2 itemPosition = new Vector2(
+                Vector2 itemPosition = new(
                     Mathf.Sin(angleRad) * ScaledItemDistance,
                     Mathf.Cos(angleRad) * ScaledItemDistance
                 );
                 iconRect.anchoredPosition = itemPosition;
 
                 // Create icon image
-                GameObject iconObj = new GameObject("Icon");
+                GameObject iconObj = new("Icon");
                 iconObj.transform.SetParent(iconHolder.transform, false);
 
                 RectTransform iconImageRect = iconObj.AddComponent<RectTransform>();
@@ -554,7 +554,7 @@ namespace EfDEnhanced.Utils.UI.Components
                 iconImage.enabled = false;
 
                 // Create count text (bottom right corner)
-                GameObject countTextObj = new GameObject("CountText");
+                GameObject countTextObj = new("CountText");
                 countTextObj.transform.SetParent(_wheelContainer.transform, false);
 
                 RectTransform countTextRect = countTextObj.AddComponent<RectTransform>();
@@ -564,7 +564,7 @@ namespace EfDEnhanced.Utils.UI.Components
 
                 // Position count text closer to pie center using same angle but shorter distance
                 float countTextDistance = ScaledItemDistance * .7f;
-                Vector2 countTextPosition = new Vector2(
+                Vector2 countTextPosition = new(
                     Mathf.Sin(angleRad) * countTextDistance,
                     Mathf.Cos(angleRad) * countTextDistance
                 );
@@ -588,7 +588,7 @@ namespace EfDEnhanced.Utils.UI.Components
                 // Apply standard text shadow for better visibility
                 UIStyles.ApplyStandardTextShadow(countTextObj);
 
-                PieSegment segment = new PieSegment
+                PieSegment segment = new()
                 {
                     index = i,
                     segmentObject = segmentObj,
@@ -605,10 +605,10 @@ namespace EfDEnhanced.Utils.UI.Components
         private Texture2D CreateRingTexture()
         {
             int size = 256;
-            Texture2D texture = new Texture2D(size, size);
+            Texture2D texture = new(size, size);
             Color[] pixels = new Color[size * size];
 
-            Vector2 center = new Vector2(size / 2f, size / 2f);
+            Vector2 center = new(size / 2f, size / 2f);
             float outerRadius = size / 2f;
             float innerRadius = outerRadius * _innerRadiusRatio;
 
@@ -661,9 +661,9 @@ namespace EfDEnhanced.Utils.UI.Components
             Image dotImage = _centerDot.AddComponent<Image>();
             dotImage.color = new Color(1f, 1f, 1f, 0.8f);
 
-            Texture2D dotTexture = new Texture2D(32, 32);
+            Texture2D dotTexture = new(32, 32);
             Color[] pixels = new Color[32 * 32];
-            Vector2 center = new Vector2(16, 16);
+            Vector2 center = new(16, 16);
 
             for (int y = 0; y < 32; y++)
             {
@@ -792,7 +792,7 @@ namespace EfDEnhanced.Utils.UI.Components
             fitter.horizontalFit = ContentSizeFitter.FitMode.PreferredSize;
             fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
-            GameObject textObject = new GameObject("LabelText");
+            GameObject textObject = new("LabelText");
             textObject.transform.SetParent(_labelContainer.transform, false);
 
             RectTransform textRect = textObject.AddComponent<RectTransform>();
@@ -933,7 +933,7 @@ namespace EfDEnhanced.Utils.UI.Components
         public Color? HoverColor;
         public Color? SelectedColor;
 
-        public static PieMenuConfig Default => new PieMenuConfig
+        public static PieMenuConfig Default => new()
         {
             WheelRadius = 167f,
             IconSize = 62f,

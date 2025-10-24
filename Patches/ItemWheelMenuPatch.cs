@@ -84,7 +84,7 @@ namespace EfDEnhanced.Patches
                     return;
                 }
 
-                GameObject menuObj = new GameObject("EfDEnhanced_ItemWheelMenu");
+                GameObject menuObj = new("EfDEnhanced_ItemWheelMenu");
                 _wheelMenu = menuObj.AddComponent<ItemWheelMenu>();
 
                 // Initialize event listeners

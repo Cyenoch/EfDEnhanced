@@ -232,7 +232,7 @@ namespace EfDEnhanced.Patches
                 ModLogger.Log("OptionsPanelPatch", $"Tab content parent: {tabContentParent.name}");
 
                 // Create our mod settings tab content as a sibling to Common, Audio, Graphics, etc.
-                GameObject modTabContent = new GameObject("ModSettings");
+                GameObject modTabContent = new("ModSettings");
                 modTabContent.transform.SetParent(tabContentParent, false);
 
                 // Copy RectTransform settings from original tab

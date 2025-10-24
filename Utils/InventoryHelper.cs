@@ -100,7 +100,7 @@ public static class InventoryHelper
         if (inventoryData == null)
         {
             ModLogger.LogWarning("InventoryHelper", "Failed to get player inventory data");
-            return new List<Item>();
+            return [];
         }
 
         var (inventory, petInventory, slotCollection, storageInventory) = inventoryData.Value;
@@ -146,14 +146,14 @@ public static class InventoryHelper
     public static List<Item> GetAllNestedItems(Item item, HashSet<Item>? visitedItems = null)
     {
         if (item == null)
-            return new List<Item>();
+            return [];
 
         if (visitedItems == null)
-            visitedItems = new HashSet<Item>();
+            visitedItems = [];
 
         // 防止无限循环
         if (visitedItems.Contains(item))
-            return new List<Item>();
+            return [];
 
         visitedItems.Add(item);
 
@@ -284,32 +284,8 @@ public static class InventoryHelper
     {
         if (item == null) return false;
 
-        var inventoryData = GetPlayerInventoryAndCharacter();
-        if (inventoryData == null) return false;
-
-        var (inventory, petInventory, slotCollection, storageInventory) = inventoryData.Value;
-
-        if (filter.HasFlag(ItemSourceFilter.CharacterInventory) && inventory != null)
-        {
-            if (inventory.Content.Any(i => i.TypeID == item.TypeID)) return true;
-        }
-
-        if (filter.HasFlag(ItemSourceFilter.PetInventory) && petInventory != null)
-        {
-            if (petInventory.Content.Any(i => i.TypeID == item.TypeID)) return true;
-        }
-
-        if (filter.HasFlag(ItemSourceFilter.SlotCollection) && slotCollection != null)
-        {
-            if (slotCollection.list.Any(slot => slot.Content != null && slot.Content.TypeID == item.TypeID)) return true;
-        }
-
-        if (filter.HasFlag(ItemSourceFilter.StorageInventory) && storageInventory != null)
-        {
-            if (storageInventory.Content.Any(i => i.TypeID == item.TypeID)) return true;
-        }
-
-        return false;
+        var items = GetPlayerItems(filter);
+        return items.Any(i => i.TypeID == item.TypeID);
     }
 
     /// <summary>

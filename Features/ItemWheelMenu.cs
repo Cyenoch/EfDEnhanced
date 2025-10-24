@@ -69,7 +69,7 @@ namespace EfDEnhanced.Features
         {
             try
             {
-                List<PieMenuItem> items = new List<PieMenuItem>();
+                List<PieMenuItem> items = [];
 
                 for (int i = 0; i < ITEM_COUNT; i++)
                 {

@@ -97,7 +97,7 @@ public static class ItemUsageHelper
             if (containerItem == null)
             {
                 ModLogger.LogWarning("ItemUsageHelper", "Container item is null");
-                return new System.Collections.Generic.List<Item>();
+                return [];
             }
 
             if (!IsContainer(containerItem))
@@ -138,7 +138,7 @@ public static class ItemUsageHelper
         catch (Exception ex)
         {
             ModLogger.LogError($"ItemUsageHelper: Failed to get container items: {ex}");
-            return new System.Collections.Generic.List<Item>();
+            return [];
         }
     }
 }

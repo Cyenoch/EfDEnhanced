@@ -48,7 +48,7 @@ public static class ItemCheckHelper
             }
 
             return warnings;
-        }, "CheckAmmoSufficiency", new List<LowAmmoWarning>());
+        }, "CheckAmmoSufficiency", []);
     }
 
     /// <summary>

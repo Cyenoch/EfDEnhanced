@@ -26,10 +26,10 @@ namespace EfDEnhanced.Utils.UI.Components.SettingsItems
         private GameObject _blocker = null!;
         private RectTransform _blockerRect = null!;
         private bool _isPopupOpen = false;
-        private List<Image> _optionImages = new List<Image>();
+        private List<Image> _optionImages = [];
         private Canvas? _rootCanvas;
         private RectTransform? _rootCanvasRect;
-        private List<TextMeshProUGUI> _optionTexts = new List<TextMeshProUGUI>();
+        private List<TextMeshProUGUI> _optionTexts = [];
 
         public override void Initialize(ISettingsEntry entry, int leftPadding = 0)
         {

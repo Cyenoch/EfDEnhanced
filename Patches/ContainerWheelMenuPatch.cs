@@ -49,7 +49,7 @@ namespace EfDEnhanced.Patches
                     return;
                 }
 
-                GameObject menuObj = new GameObject("EfDEnhanced_ContainerWheelMenu");
+                GameObject menuObj = new("EfDEnhanced_ContainerWheelMenu");
                 _containerWheelMenu = menuObj.AddComponent<ContainerWheelMenu>();
 
                 _containerWheelMenuInitialized = true;

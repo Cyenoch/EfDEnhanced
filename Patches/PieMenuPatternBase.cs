@@ -45,7 +45,7 @@ namespace EfDEnhanced.Patches
                 var mousePosField = AccessTools.Field(typeof(CharacterInputControl), "mousePos");
                 if (mousePosField != null)
                 {
-                    Vector2 currentMousePos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
+                    Vector2 currentMousePos = new(Input.mousePosition.x, Input.mousePosition.y);
                     mousePosField.SetValue(_inputControl, currentMousePos);
                     ModLogger.Log(nameof(PieMenuPatternBase), "Reset mousePos to current cursor position");
                 }
