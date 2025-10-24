@@ -18,8 +18,10 @@
 [*]实时切换，无需重启
 [/list]
 [h3]🎡 物品轮盘菜单[/h3]
-快速访问物品栏的径向菜单。
-[b]使用方法：[/b]按住热键（默认 ~）→ 鼠标选择 → 释放使用
+快速访问物品栏的圆圈菜单。
+[b]使用方法：[/b]
+按住热键（默认 ~）→ 鼠标选择 → 释放使用
+将物品比如药剂针包放到物品栏，然后按下对应快捷键比如3呼出
 [list]
 [*]单手操作，无需离开游戏视角
 [*]菜单打开时自动屏蔽射击和视角旋转
@@ -87,7 +89,9 @@ Adjusts character movement response. 4 levels: Disabled/Light/Medium/Heavy.
 [/list]
 [h3]🎡 Item Wheel Menu[/h3]
 Radial menu for quick item bar access.
-[b]Usage:[/b] Hold hotkey (default ~) → Move mouse → Release to use
+[b]Usage:[/b]
+Hold the hotkey (default ~) → Move mouse to select → Release to use
+Place items like medkits or injectors in the item bar, then press the corresponding shortcut key (e.g., 3) to open the menu
 [list]
 [*]One-handed operation without leaving game view
 [*]Auto-blocks shooting and camera rotation while open

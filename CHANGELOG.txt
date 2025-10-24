@@ -23,6 +23,29 @@
 [*]修复了 FastSellEnabled 设置版本，确保设置兼容性
 [/list]
 [hr][/hr]
+[h1]Update Log[/h1]
+[h3]Feature Updates[/h3]
+[list]
+[*][b]Quick Container Wheel Input[/b] - When selecting container items with shortcut keys, the container wheel menu now opens automatically for a smoother interaction experience.
+[*][b]Dynamic Localization Text Update[/b] - Improved localization handling: UI texts update in real time when the language changes, so users no longer need to restart the game.
+[*][b]Code Quality Improvements[/b] - Adopted modern C# syntax and object initializer patterns to enhance code readability.
+[/list]
+[h3]Technical Improvements[/h3]
+[list]
+[*]ContainerWheelMenuPatch - Added ShortCutInput patch to display the container wheel on shortcut input.
+[*]ActiveQuestTracker - Improved localization; help text now supports dynamic language switching.
+[*]LocalizationHelper - Added a public language change event, allowing UI components to subscribe and respond to language changes.
+[*]BaseSettingsItem - Implemented real-time UI text refresh on language change.
+[*]ModButton & ModToggle - Automatically update button and toggle labels when language changes.
+[*]SectionHeaderItem - Supports dynamic localization text updates.
+[*]Code formatting - Unified whitespace handling across the project for more consistent code style.
+[/list]
+[h3]Fixes[/h3]
+[list]
+[*]Fixed the TrackerPositionY settings version so users' previous tracker positions can migrate correctly.
+[*]Fixed the FastSellEnabled settings version to ensure compatibility.
+[/list]
+[hr][/hr]
 
 # 202510232323
 
