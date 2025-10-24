@@ -46,15 +46,21 @@ namespace EfDEnhanced.Features
                     return;
                 }
 
-                bool randomValue = UnityEngine.Random.value < 0.5f;
-
-                AudioManager.Post("Char/Voice/vo_" + AudioManager.VoiceType.Duck.ToString().ToLower() + "_" + (randomValue ? "surprise" : "normal"));
-                ModLogger.Log("DuckQuack", "Quack triggered");
+                Quack();
             }
             catch (Exception ex)
             {
                 ModLogger.LogError($"DuckQuackFeature.Update failed: {ex}");
             }
         }
+
+
+        public static void Quack()
+        {
+            bool randomValue = UnityEngine.Random.value < 0.5f;
+            AudioManager.Post("Char/Voice/vo_" + AudioManager.VoiceType.Duck.ToString().ToLower() + "_" + (randomValue ? "surprise" : "normal"));
+            ModLogger.Log("DuckQuack", "Quack triggered");
+        }
+
     }
 }

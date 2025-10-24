@@ -59,6 +59,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour
 
         transform.AddComponent<ActiveQuestTracker>();
         transform.AddComponent<DuckQuackFeature>();
+        transform.AddComponent<DuckShitFeature>();
     }
 
     void OnDisable()
