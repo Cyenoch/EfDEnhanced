@@ -11,6 +11,7 @@
 
     <!-- Windows paths -->
     <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+        <DuckovPath>C:/Program Files (x86)/Steam/steamapps/common/Escape from Duckov/</DuckovPath>
         <DuckovDataPath>$(DuckovPath)Duckov_Data/</DuckovDataPath>
         <DuckovModsPath>$(DuckovDataPath)Mods/</DuckovModsPath>
     </PropertyGroup>
