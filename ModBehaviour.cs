@@ -31,6 +31,9 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour
         }
         Instance = this;
 
+        // Persist across scene changes
+        DontDestroyOnLoad(gameObject);
+
         ModLogger.Log("=== EfDEnhanced Mod Loading ===");
         ModLogger.Log("Version: 2510202100");
 
