@@ -93,9 +93,6 @@ namespace EfDEnhanced.Patches
                 GameObject menuObj = new("EfDEnhanced_ThrowableWheelMenu");
                 _wheelMenu = menuObj.AddComponent<ThrowableWheelMenu>();
 
-                // Initialize event listeners
-                InitializeEventListeners();
-
                 _wheelMenuInitialized = true;
                 ModLogger.Log("ThrowableWheelMenuPatch", "Throwable wheel menu initialized successfully");
             }
@@ -116,35 +113,6 @@ namespace EfDEnhanced.Patches
             HandlePauseMenuShow(_wheelMenu);
         }
 
-        /// <summary>
-        /// Initialize event listeners for closing the wheel menu
-        /// </summary>
-        private static void InitializeEventListeners()
-        {
-            // Subscribe to view change events
-            Duckov.UI.View.OnActiveViewChanged += OnActiveViewChanged;
-
-            // Subscribe to menu opened event to clear input state
-            ThrowableWheelMenu.OnMenuOpened += OnWheelMenuOpened;
-
-            ModLogger.Log("ThrowableWheelMenuPatch", "Subscribed to view change and menu opened events");
-        }
-
-        /// <summary>
-        /// Called when wheel menu is opened - clears accumulated input state
-        /// </summary>
-        private static void OnWheelMenuOpened()
-        {
-            ClearInputState();
-        }
-
-        /// <summary>
-        /// Called when active view changes (inventory, map, etc.)
-        /// </summary>
-        private static void OnActiveViewChanged()
-        {
-            HandleActiveViewChanged(_wheelMenu);
-        }
     }
 }
 

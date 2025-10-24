@@ -87,9 +87,6 @@ namespace EfDEnhanced.Patches
                 GameObject menuObj = new("EfDEnhanced_ItemWheelMenu");
                 _wheelMenu = menuObj.AddComponent<ItemWheelMenu>();
 
-                // Initialize event listeners
-                InitializeEventListeners();
-
                 _wheelMenuInitialized = true;
                 ModLogger.Log("ItemWheelMenuPatch", "Item wheel menu initialized successfully");
             }
@@ -99,47 +96,6 @@ namespace EfDEnhanced.Patches
                 _wheelMenuInitialized = false;
             }
         }
-
-        /// <summary>
-        /// Patch to cancel wheel menu when game is paused
-        /// </summary>
-        [HarmonyPatch(typeof(PauseMenu), "Show")]
-        [HarmonyPostfix]
-        public static void CancelWheelMenuOnPause()
-        {
-            HandlePauseMenuShow(_wheelMenu);
-        }
-
-        /// <summary>
-        /// Initialize event listeners for closing the wheel menu
-        /// </summary>
-        private static void InitializeEventListeners()
-        {
-            // Subscribe to view change events
-            Duckov.UI.View.OnActiveViewChanged += OnActiveViewChanged;
-
-            // Subscribe to menu opened event to clear input state
-            ItemWheelMenu.OnMenuOpened += OnWheelMenuOpened;
-
-            ModLogger.Log("ItemWheelMenuPatch", "Subscribed to view change and menu opened events");
-        }
-
-        /// <summary>
-        /// Called when wheel menu is opened - clears accumulated input state
-        /// </summary>
-        private static void OnWheelMenuOpened()
-        {
-            ClearInputState();
-        }
-
-        /// <summary>
-        /// Called when active view changes (inventory, map, etc.)
-        /// </summary>
-        private static void OnActiveViewChanged()
-        {
-            HandleActiveViewChanged(_wheelMenu);
-        }
-
     }
 }
 

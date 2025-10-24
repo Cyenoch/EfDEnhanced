@@ -19,46 +19,46 @@ namespace EfDEnhanced.Patches
         /// Clear accumulated mouse input state when menu is opened
         /// Uses reflection to reset mouseDelta and mousePos fields
         /// </summary>
-        protected static void ClearInputState()
-        {
-            try
-            {
-                if (_inputControl == null)
-                {
-                    ModLogger.LogWarning($"{nameof(PieMenuPatternBase)}: Cannot clear input - InputControl is null");
-                    return;
-                }
+        // protected static void ClearInputState()
+        // {
+        //     try
+        //     {
+        //         if (_inputControl == null)
+        //         {
+        //             ModLogger.LogWarning($"{nameof(PieMenuPatternBase)}: Cannot clear input - InputControl is null");
+        //             return;
+        //         }
 
-                // Clear mouseDelta field to prevent accumulated mouse movement from affecting camera
-                var mouseDeltaField = AccessTools.Field(typeof(CharacterInputControl), "mouseDelta");
-                if (mouseDeltaField != null)
-                {
-                    mouseDeltaField.SetValue(_inputControl, Vector2.zero);
-                    ModLogger.Log(nameof(PieMenuPatternBase), "Cleared mouseDelta input state");
-                }
-                else
-                {
-                    ModLogger.LogWarning($"{nameof(PieMenuPatternBase)}: mouseDelta field not found");
-                }
+        //         // Clear mouseDelta field to prevent accumulated mouse movement from affecting camera
+        //         var mouseDeltaField = AccessTools.Field(typeof(CharacterInputControl), "mouseDelta");
+        //         if (mouseDeltaField != null)
+        //         {
+        //             mouseDeltaField.SetValue(_inputControl, Vector2.zero);
+        //             ModLogger.Log(nameof(PieMenuPatternBase), "Cleared mouseDelta input state");
+        //         }
+        //         else
+        //         {
+        //             ModLogger.LogWarning($"{nameof(PieMenuPatternBase)}: mouseDelta field not found");
+        //         }
 
-                // Reset mousePos field to current cursor position
-                var mousePosField = AccessTools.Field(typeof(CharacterInputControl), "mousePos");
-                if (mousePosField != null)
-                {
-                    Vector2 currentMousePos = new(Input.mousePosition.x, Input.mousePosition.y);
-                    mousePosField.SetValue(_inputControl, currentMousePos);
-                    ModLogger.Log(nameof(PieMenuPatternBase), "Reset mousePos to current cursor position");
-                }
-                else
-                {
-                    ModLogger.LogWarning($"{nameof(PieMenuPatternBase)}: mousePos field not found");
-                }
-            }
-            catch (Exception ex)
-            {
-                ExceptionHelper.LogDetailedException(ex, $"{nameof(PieMenuPatternBase)}.ClearInputState");
-            }
-        }
+        //         // Reset mousePos field to current cursor position
+        //         var mousePosField = AccessTools.Field(typeof(CharacterInputControl), "mousePos");
+        //         if (mousePosField != null)
+        //         {
+        //             Vector2 currentMousePos = new(Input.mousePosition.x, Input.mousePosition.y);
+        //             mousePosField.SetValue(_inputControl, currentMousePos);
+        //             ModLogger.Log(nameof(PieMenuPatternBase), "Reset mousePos to current cursor position");
+        //         }
+        //         else
+        //         {
+        //             ModLogger.LogWarning($"{nameof(PieMenuPatternBase)}: mousePos field not found");
+        //         }
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         ExceptionHelper.LogDetailedException(ex, $"{nameof(PieMenuPatternBase)}.ClearInputState");
+        //     }
+        // }
 
         /// <summary>
         /// Cancel the menu when active view changes (inventory, map, etc.)

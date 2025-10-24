@@ -30,6 +30,8 @@ namespace EfDEnhanced.Features
             // Subscribe to settings changes
             ModSettings.ItemWheelScale.ValueChanged += OnScaleChanged;
 
+            // Subscribe to view change events to cancel menu when UI opens
+            Duckov.UI.View.OnActiveViewChanged += OnActiveViewChanged;
         }
 
         protected virtual void OnDestroy()
@@ -37,6 +39,8 @@ namespace EfDEnhanced.Features
             // Unsubscribe from settings changes
             ModSettings.ItemWheelScale.ValueChanged -= OnScaleChanged;
 
+            // Unsubscribe from view change events
+            Duckov.UI.View.OnActiveViewChanged -= OnActiveViewChanged;
         }
 
         private void InitializePieMenu()
@@ -73,6 +77,27 @@ namespace EfDEnhanced.Features
             {
                 PieMenu.SetScale(e.NewValue);
                 ModLogger.Log(GetType().Name, $"Scale changed to {e.NewValue:F2}");
+            }
+        }
+
+        /// <summary>
+        /// Called when active view changes (inventory, map, etc.)
+        /// Cancels the menu if a view is opened
+        /// </summary>
+        private void OnActiveViewChanged()
+        {
+            try
+            {
+                // Cancel menu if a view is opened
+                if (Duckov.UI.View.ActiveView != null && IsOpen)
+                {
+                    Cancel();
+                    ModLogger.Log(GetType().Name, "Menu cancelled due to active view change");
+                }
+            }
+            catch (Exception ex)
+            {
+                ModLogger.LogError($"{GetType().Name}: Error handling view change: {ex}");
             }
         }
 

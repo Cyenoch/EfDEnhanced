@@ -2,6 +2,7 @@ using System;
 using HarmonyLib;
 using EfDEnhanced.Utils;
 using EfDEnhanced.Utils.UI.Components;
+using UnityEngine;
 
 namespace EfDEnhanced.Patches
 {
@@ -15,15 +16,25 @@ namespace EfDEnhanced.Patches
     {
         /// <summary>
         /// Block mouse delta (camera rotation) when any pie menu is open
+        /// Also resets the accumulated mouseDelta field to prevent continuous movement
+        /// This fixes the bug where crosshair continues moving after opening menu with mouse input
         /// </summary>
         [HarmonyPatch(typeof(CharacterInputControl), "OnPlayerMouseDelta")]
         [HarmonyPrefix]
-        public static bool BlockMouseDeltaWhenMenuOpen()
+        public static bool BlockMouseDeltaWhenMenuOpen(CharacterInputControl __instance)
         {
             try
             {
                 if (PieMenuManager.ActiveMenu != null && PieMenuManager.ActiveMenu.IsOpen)
                 {
+                    // Use reflection to reset the private mouseDelta field to prevent accumulated input
+                    var mouseDeltaField = AccessTools.Field(typeof(CharacterInputControl), "mouseDelta");
+                    var mouseDelta = (Vector2)mouseDeltaField.GetValue(__instance);
+                    if (mouseDeltaField != null && mouseDelta != Vector2.zero)
+                    {
+                        mouseDeltaField.SetValue(__instance, Vector2.zero);
+                    }
+
                     // Block mouse delta to prevent camera rotation
                     return false;
                 }
@@ -79,6 +90,20 @@ namespace EfDEnhanced.Patches
             {
                 ExceptionHelper.LogDetailedException(ex, "PieMenuInputBlockingPatch.BlockTriggerWhenMenuOpen");
                 return true;
+            }
+        }
+
+
+        /// <summary>
+        /// Patch to cancel wheel menu when game is paused
+        /// </summary>
+        [HarmonyPatch(typeof(PauseMenu), "Show")]
+        [HarmonyPostfix]
+        public static void CancelWheelMenuOnPause()
+        {
+            if (PieMenuManager.ActiveMenu != null && PieMenuManager.ActiveMenu.IsOpen)
+            {
+                PieMenuManager.ActiveMenu.Cancel();
             }
         }
     }

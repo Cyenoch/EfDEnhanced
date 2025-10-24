@@ -187,6 +187,8 @@ namespace EfDEnhanced.Utils.UI.Components
         public void Show()
         {
             if (_isOpen) return;
+            if (GameManager.Paused) return;
+            if (Duckov.UI.View.ActiveView != null) return;
 
             // Register this menu as active, cancelling any other open menu
             PieMenuManager.RegisterActiveMenu(this);
