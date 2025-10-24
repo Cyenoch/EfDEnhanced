@@ -127,6 +127,27 @@ Dedicated radial menu for quick throwable (grenades, etc.) selection.
 
 ---
 
+### 🎁 容器轮盘菜单 | Container Wheel Menu
+
+快速打开和管理背包中的容器物品（背包、弹药箱等）的径向菜单。
+
+Quick radial menu for opening and managing container items (backpacks, ammo boxes, etc.) in your inventory.
+
+**特性 | Features:**
+- **快速打开** | Quick Open - 使用快捷键快速打开/管理容器
+- **整合交互** | Integrated Interaction - 与物品轮盘菜单无缝整合
+- **视觉反馈** | Visual Feedback - 容器物品在菜单中清晰显示
+- **输入屏蔽** | Input Blocking - 菜单打开时自动屏蔽游戏操作，防止误操作
+- **可自定义** | Customizable - 支持自定义热键和菜单缩放
+- **自动取消** | Auto Cancel - 打开其他界面或游戏暂停时自动取消
+
+**使用方法 | How to use:**
+1. **通过物品轮盘** 快捷键（默认 `~` 键）选择一个容器物品 | **Select** a container item via item wheel hotkey (default `~`)
+2. **容器菜单自动打开** | The container menu opens automatically
+3. **浏览和选择** 容器内的物品 | **Browse and select** items inside the container
+
+---
+
 ### 🔫 武器对比 | Weapon Comparison
 
 在库存中选中武器后，悬停到其他武器会自动显示属性对比。支持枪支和近战武器。

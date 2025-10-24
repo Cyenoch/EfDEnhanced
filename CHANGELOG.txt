@@ -1,3 +1,29 @@
+# 202510241516
+
+[h1]更新日志[/h1]
+[h3]功能更新[/h3]
+[list]
+[*][b]容器菜单快捷输入[/b] - 现在通过快捷键选择容器物品时，将自动打开容器轮盘菜单，提升交互体验
+[*][b]本地化文本动态更新[/b] - 改进本地化处理，UI 文本在语言变更时会实时刷新，用户不需要重启游戏
+[*][b]代码质量改进[/b] - 采用现代 C# 语法，使用初始化器简化对象创建，提升代码可读性
+[/list]
+[h3]技术改进[/h3]
+[list]
+[*]ContainerWheelMenuPatch - 添加 ShortCutInput 补丁以在快捷键输入时显示容器菜单
+[*]ActiveQuestTracker - 改进本地化支持，帮助文本现在支持动态语言切换
+[*]LocalizationHelper - 添加公共语言变更事件，允许 UI 组件订阅并响应语言变更
+[*]BaseSettingsItem - 实现语言变更时的文本刷新机制
+[*]ModButton & ModToggle - 支持语言变更时自动更新按钮和开关标签
+[*]SectionHeaderItem - 支持动态本地化文本更新
+[*]代码格式化 - 统一整个项目的空白符处理，提升代码风格一致性
+[/list]
+[h3]修复[/h3]
+[list]
+[*]修复了 TrackerPositionY 设置版本，使用户之前的位置设置能够正确迁移
+[*]修复了 FastSellEnabled 设置版本，确保设置兼容性
+[/list]
+[hr][/hr]
+
 # 202510232323
 
 [h1]更新日志[/h1]
@@ -47,20 +73,23 @@
 [h1]Update Log[/h1]
 [h3]Features Update[/h3]
 [list]
-[*][b]Quest Tracker Hotkey[/b] - Added a hotkey (default .) for quick collapse/expand of the tracker
-[*][b]Smart Help Text[/b] - Shows tip on first raid, auto hides after use
-[*][b]Settings Panel Enhancement[/b] - Added option for tracker hotkey customization in mod settings
-[/list]
-[h3]Documentation[/h3]
-[list]
-[*]README updated with hotkey usage
-[*]Steam page synced with latest features
+[*][b]Container Wheel Menu Hotkey[/b] - Container wheel menu now automatically opens when a container item is selected via hotkey, improving user interaction
+[*][b]Dynamic Localization Updates[/b] - Enhanced localization handling with real-time UI text refresh on language changes - no restart needed
+[*][b]Code Quality Improvements[/b] - Modernized C# syntax using initializers for cleaner object creation and improved readability
 [/list]
 [h3]Technical[/h3]
 [list]
-[*]ActiveQuestTracker - Hotkey toggle & help text logic
-[*]RaidPreparationView - UI interaction improvements
-[*]ModSettings - TrackerToggleHotkey & TrackerHotkeyUsed added
-[*]LocalizationHelper - Full multi-language support
-[*]Utility class optimizations
+[*]ContainerWheelMenuPatch - Added ShortCutInput patch to display container menu when using hotkey shortcuts
+[*]ActiveQuestTracker - Improved localization support with dynamic help text language switching
+[*]LocalizationHelper - Added public language change event for UI components to subscribe and respond
+[*]BaseSettingsItem - Implemented language change handler for text refresh
+[*]ModButton & ModToggle - Added language change support with automatic label updates
+[*]SectionHeaderItem - Dynamic localization text updating
+[*]Code Formatting - Unified whitespace handling across the entire project for consistent style
 [/list]
+[h3]Fixes[/h3]
+[list]
+[*]Fixed TrackerPositionY setting version migration for proper user setting preservation
+[*]Fixed FastSellEnabled setting version compatibility
+[/list]
+[hr][/hr]

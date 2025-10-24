@@ -124,6 +124,106 @@ if (!LocalizationData.ContainsKey(language))
 3. 应用新语言的翻译
 4. 已显示的UI会通过游戏的 `TextLocalizor` 组件自动刷新
 
+## UI 组件的动态本地化更新
+
+### LocalizationHelper 公共事件
+
+从最新版本开始，`LocalizationHelper` 提供了一个公共事件供 UI 组件订阅：
+
+```csharp
+// 订阅语言变更事件
+LocalizationHelper.OnLanguageChanged += (newLanguage) =>
+{
+    // 在这里更新 UI 文本
+    UpdateMyUIText();
+};
+
+// 取消订阅
+LocalizationHelper.OnLanguageChanged -= UpdateMyUIText;
+```
+
+### UI 组件集成
+
+以下 UI 组件已支持语言变更时的动态文本更新：
+
+#### ModButton
+```csharp
+var button = new ModButton()
+    .SetText(localizationKey); // 语言变更时自动更新文本
+
+// 在 OnDestroy 时自动取消订阅
+```
+
+#### ModToggle
+```csharp
+var toggle = new ModToggle()
+    .SetLabel(localizationKey); // 语言变更时自动更新标签
+```
+
+#### BaseSettingsItem 及其子类
+所有设置项都支持语言变更时的文本刷新：
+
+```csharp
+// 自动处理标签和描述的本地化
+var settingsItem = new YourSettingsItem();
+settingsItem.Initialize(settingsEntry);
+// 语言变更时自动刷新标签和描述文本
+```
+
+#### SectionHeaderItem
+```csharp
+var header = sectionObj.AddComponent<SectionHeaderItem>();
+header.Initialize(localizationKey); // 语言变更时自动刷新
+```
+
+### 为自定义组件添加语言变更支持
+
+如果你创建了自己的 UI 组件，可以这样添加语言变更支持：
+
+```csharp
+public class MyCustomComponent : MonoBehaviour
+{
+    private TextMeshProUGUI _myText;
+    private string _localizationKey;
+    private Action<SystemLanguage>? _languageChangeHandler;
+
+    public void Initialize(string localizationKey)
+    {
+        _localizationKey = localizationKey;
+        
+        // 初始化文本
+        _myText.text = LocalizationHelper.Get(localizationKey);
+        
+        // 订阅语言变更事件
+        _languageChangeHandler = OnLanguageChanged;
+        LocalizationHelper.OnLanguageChanged += _languageChangeHandler;
+    }
+
+    private void OnLanguageChanged(SystemLanguage newLanguage)
+    {
+        if (_myText != null && !string.IsNullOrEmpty(_localizationKey))
+        {
+            _myText.text = LocalizationHelper.Get(_localizationKey);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        // 重要：取消订阅以防内存泄漏
+        if (_languageChangeHandler != null)
+        {
+            LocalizationHelper.OnLanguageChanged -= _languageChangeHandler;
+        }
+    }
+}
+```
+
+### 重要事项
+
+1. **始终取消订阅** - 在 `OnDestroy()` 中取消语言变更事件的订阅，防止内存泄漏
+2. **保存键值** - 保存本地化键以便在语言变更时重新查询
+3. **错误处理** - 在事件处理中添加 try-catch 以确保稳定性
+
 ## 最佳实践
 
 ### 1. 统一管理
