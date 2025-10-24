@@ -48,32 +48,31 @@ namespace EfDEnhanced.Patches
         }
 
 
-        [HarmonyPostfix]
+        [HarmonyPrefix]
         static void StockShopView_OnInteractionButtonClicked(StockShopView __instance)
         {
             if (!Enabled) return;
             if (__instance.Selection) return;
-            if (_current != null)
+            if (_current == null) return;
+
+            if (_current.IsStockshopSample)
             {
-                if (_current.IsStockshopSample)
+                VerboseLog(COMPONENTNAME, $"Buying {_current.Target.DisplayName}");
+
+                int itemTypeID = _current.Target.TypeID;
+                if (EconomyManager.IsWaitingForUnlockConfirm(itemTypeID))
                 {
-                    VerboseLog(COMPONENTNAME, $"Buying {_current.Target.DisplayName}");
-
-                    int itemTypeID = _current.Target.TypeID;
-                    if (EconomyManager.IsWaitingForUnlockConfirm(itemTypeID))
-                    {
-                        EconomyManager.ConfirmUnlock(itemTypeID);
-                    }
-                    __instance.BuyTask(itemTypeID).Forget();
-                    return;
+                    EconomyManager.ConfirmUnlock(itemTypeID);
                 }
-                VerboseLog(COMPONENTNAME, $"Selling {_current.Target.DisplayName}");
-
-                __instance.Target.Sell(_current.Target).Forget();
-                AudioManager.Post(__instance.sfx_Sell);
-                ItemUIUtilities.Select(null);
-                __instance.OnSelectionChanged();
+                __instance.BuyTask(itemTypeID).Forget();
+                return;
             }
+            VerboseLog(COMPONENTNAME, $"Selling {_current.Target.DisplayName}");
+
+            __instance.Target.Sell(_current.Target).Forget();
+            AudioManager.Post(__instance.sfx_Sell);
+            ItemUIUtilities.Select(null);
+            __instance.OnSelectionChanged();
 
 
         }
