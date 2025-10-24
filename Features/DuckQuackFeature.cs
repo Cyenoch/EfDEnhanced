@@ -10,8 +10,6 @@ namespace EfDEnhanced.Features
     /// </summary>
     public class DuckQuackFeature : MonoBehaviour
     {
-        private CharacterMainControl? _player;
-
         private void Awake()
         {
             ModLogger.Log("DuckQuack", "Duck quack feature initialized");
@@ -31,8 +29,9 @@ namespace EfDEnhanced.Features
                     return;
                 }
 
-                _player ??= CharacterMainControl.Main;
-                if (_player == null)
+                // Re-fetch player reference each frame to handle scene changes
+                var player = CharacterMainControl.Main;
+                if (player == null)
                 {
                     return;
                 }
