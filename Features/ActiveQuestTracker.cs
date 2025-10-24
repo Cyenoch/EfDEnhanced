@@ -29,11 +29,14 @@ public class ActiveQuestTracker : MonoBehaviour
     private GameObject? _questPanel;
     private GameObject? _questListContainer;
     private GameObject? _helpTextObject;
+    private TextMeshProUGUI? _helpTextComponent;
     private readonly List<QuestEntryUI> _questEntries = [];
 
     // 配置
     private bool _isActive;
     private bool _isCollapsed = false; // 局部折叠状态，不影响设置
+
+    private Action<SystemLanguage>? _languageChangeHandler;
 
     public static ActiveQuestTracker? Instance => _instance;
 
@@ -69,6 +72,9 @@ public class ActiveQuestTracker : MonoBehaviour
             // 订阅追踪状态变化事件（始终订阅，无论是否在 Raid 中）
             QuestTrackingManager.OnTrackingChanged += OnQuestTrackingChanged;
             ModLogger.Log("QuestTracker", "Subscribed to tracking changes in Awake");
+
+            _languageChangeHandler = OnLanguageChanged;
+            LocalizationHelper.OnLanguageChanged += _languageChangeHandler;
         }
         else if (_instance != this)
         {
@@ -100,6 +106,12 @@ public class ActiveQuestTracker : MonoBehaviour
 
         // 取消订阅追踪状态变化事件
         QuestTrackingManager.OnTrackingChanged -= OnQuestTrackingChanged;
+
+        if (_languageChangeHandler != null)
+        {
+            LocalizationHelper.OnLanguageChanged -= _languageChangeHandler;
+            _languageChangeHandler = null;
+        }
 
         // 取消订阅所有事件
         UnregisterEvents();
@@ -158,13 +170,12 @@ public class ActiveQuestTracker : MonoBehaviour
             helpTextRect.offsetMin = Vector2.zero;
             helpTextRect.offsetMax = Vector2.zero;
 
-            TextMeshProUGUI helpText = _helpTextObject.AddComponent<TextMeshProUGUI>();
-            helpText.text = LocalizationHelper.Get("QuestTracker_HelpText");
-            helpText.fontSize = UIConstants.QUEST_DESC_FONT_SIZE;
-            helpText.fontStyle = FontStyles.Italic;
-            helpText.color = new Color(0.7f, 0.7f, 0.7f, 0.8f); // 灰色半透明
-            helpText.alignment = TextAlignmentOptions.Center;
-            helpText.enableWordWrapping = true;
+            _helpTextComponent = _helpTextObject.AddComponent<TextMeshProUGUI>();
+            _helpTextComponent.fontSize = UIConstants.QUEST_DESC_FONT_SIZE;
+            _helpTextComponent.fontStyle = FontStyles.Italic;
+            _helpTextComponent.color = new Color(0.7f, 0.7f, 0.7f, 0.8f); // 灰色半透明
+            _helpTextComponent.alignment = TextAlignmentOptions.Center;
+            _helpTextComponent.enableWordWrapping = true;
 
             // 使用TrueShadow
             UIStyles.ApplyStandardTextShadow(_helpTextObject, isTitle: false);
@@ -174,6 +185,7 @@ public class ActiveQuestTracker : MonoBehaviour
 
             // 根据是否首次使用来设置提示文本的初始可见性
             UpdateHelpTextVisibility();
+            RefreshHelpTextLocalizedText();
 
             // 直接创建任务列表容器（不使用ScrollRect）
             _questListContainer = new GameObject("QuestListContainer");
@@ -232,6 +244,21 @@ public class ActiveQuestTracker : MonoBehaviour
         }
     }
 
+    private void RefreshHelpTextLocalizedText()
+    {
+        try
+        {
+            if (_helpTextComponent != null)
+            {
+                _helpTextComponent.text = LocalizationHelper.Get("QuestTracker_HelpText");
+            }
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestTracker.RefreshHelpTextLocalizedText failed: {ex}");
+        }
+    }
+
     /// <summary>
     /// 切换折叠/展开状态
     /// </summary>
@@ -254,6 +281,23 @@ public class ActiveQuestTracker : MonoBehaviour
         catch (Exception ex)
         {
             ModLogger.LogError($"QuestTracker.ToggleCollapse failed: {ex}");
+        }
+    }
+
+    private void OnLanguageChanged(SystemLanguage newLanguage)
+    {
+        try
+        {
+            RefreshHelpTextLocalizedText();
+
+            if (_isActive)
+            {
+                RefreshQuestList();
+            }
+        }
+        catch (Exception ex)
+        {
+            ModLogger.LogError($"QuestTracker.OnLanguageChanged failed: {ex}");
         }
     }
 
@@ -1592,6 +1636,7 @@ public class QuestEntryUI
             if (TitleText != null)
             {
                 TitleText.color = allTasksFinished ? UIConstants.QUEST_COMPLETE_COLOR : UIConstants.QUEST_TITLE_COLOR;
+                TitleText.text = quest.DisplayName;
             }
 
             // 更新描述显示/隐藏状态
