@@ -5,6 +5,7 @@ using EfDEnhanced.Features;
 using EfDEnhanced.Utils;
 using EfDEnhanced.Utils.Settings;
 using HarmonyLib;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace EfDEnhanced;
@@ -41,6 +42,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour
 
         // Initialize quest tracking manager
         QuestTrackingManager.Initialize();
+
+        transform.AddComponent<DuckQuackFeature>();
 
         // Initialize patches that need early setup
         Patches.FastBuySell.Initialize();

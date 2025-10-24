@@ -105,6 +105,9 @@ namespace EfDEnhanced.Utils.Settings
                 KeyCode.F10 => "F10",
                 KeyCode.F11 => "F11",
                 KeyCode.F12 => "F12",
+                KeyCode.Mouse0 => "Mouse Left",
+                KeyCode.Mouse1 => "Mouse Right",
+                KeyCode.Mouse2 => "Mouse Middle",
                 // Joystick/Gamepad buttons (common names)
                 KeyCode.JoystickButton0 => "A (Gamepad)",
                 KeyCode.JoystickButton1 => "B (Gamepad)",

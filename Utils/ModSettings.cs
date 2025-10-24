@@ -18,6 +18,7 @@ namespace EfDEnhanced.Utils
         private const string CATEGORY_QUEST_TRACKER = "Settings_Category_QuestTracker";
         private const string CATEGORY_MOVEMENT = "Settings_Category_Movement";
         private const string CATEGORY_UI = "Settings_Category_UI";
+        private const string CATEGORY_AUDIO = "Settings_Category_Audio";
 
         // All settings entries
         private static readonly List<ISettingsEntry> _allSettings = [];
@@ -324,6 +325,28 @@ namespace EfDEnhanced.Utils
                 CATEGORY_UI,
                 "Settings_FastSellEnabled_Desc",
                 version: 2
+            )
+        );
+
+        public static readonly BoolSettingsEntry EnableDuckQuack = Register(
+            new BoolSettingsEntry(
+                PREFIX,
+                "EnableDuckQuack",
+                "Settings_EnableDuckQuack_Name",
+                true,
+                CATEGORY_AUDIO,
+                "Settings_EnableDuckQuack_Desc"
+            )
+        );
+
+        public static readonly KeyCodeSettingsEntry DuckQuackHotkey = Register(
+            new KeyCodeSettingsEntry(
+                PREFIX,
+                "DuckQuackHotkey",
+                "Settings_DuckQuackHotkey_Name",
+                UnityEngine.KeyCode.Mouse2,
+                CATEGORY_AUDIO,
+                "Settings_DuckQuackHotkey_Desc"
             )
         );
 

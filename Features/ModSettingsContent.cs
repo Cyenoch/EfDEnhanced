@@ -122,6 +122,11 @@ namespace EfDEnhanced.Features
                     .AddSetting(ModSettings.TrackerPositionY, ModSettings.EnableQuestTracker)
                     .AddSetting(ModSettings.TrackerScale, ModSettings.EnableQuestTracker)
 
+                    // Fun Features Section
+                    .AddSection("Settings_Category_FunFeatures")
+                    .AddSetting(ModSettings.EnableDuckQuack)
+                    .AddSetting(ModSettings.DuckQuackHotkey, ModSettings.EnableDuckQuack)
+
                     // Reset button at the bottom
                     .AddButton("Settings_ResetButton", OnResetButtonClicked, UIStyles.ButtonStyle.Danger);
 
