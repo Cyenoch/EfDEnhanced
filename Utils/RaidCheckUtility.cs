@@ -302,9 +302,9 @@ public static class RaidCheckUtility
             HasFood = !ModSettings.CheckFood.Value || basicEquipment.HasFood,
             IsWeatherSafe = !ModSettings.CheckWeather.Value || IsWeatherSafe(),
             IsStormComing = ModSettings.CheckWeather.Value && IsStormComingSoon(),
-            QuestItems = CheckQuestItems(targetSceneID),
+            QuestItems = ModSettings.CheckQuestItems.Value ? CheckQuestItems(targetSceneID) : [],
             LowAmmoWarnings = ModSettings.CheckAmmo.Value ? ItemCheckHelper.CheckAmmoSufficiency() : [],
-            QuestWeapons = CheckKillTaskWeaponRequirements(targetSceneID)
+            QuestWeapons = ModSettings.CheckQuestWeapons.Value ? CheckKillTaskWeaponRequirements(targetSceneID) : []
         };
     }
 
