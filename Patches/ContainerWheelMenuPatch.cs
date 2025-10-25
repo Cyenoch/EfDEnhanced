@@ -5,6 +5,7 @@ using ItemStatsSystem;
 using EfDEnhanced.Features;
 using EfDEnhanced.Utils;
 using Duckov;
+using Duckov.UI;
 
 namespace EfDEnhanced.Patches
 {
@@ -49,8 +50,18 @@ namespace EfDEnhanced.Patches
         {
             try
             {
+                // If an item is selected, skip custom logic and use the original method
+                if (ItemUIUtilities.SelectedItem != null)
+                {
+                    return true; // Continue with original method
+                }
+                if (View.ActiveView != null)
+                {
+                    return true;
+                }
+
                 Item item = ItemShortcut.Get(index - 3);
-                
+
                 // Check if item is a container
                 if (item != null && ItemUsageHelper.IsContainer(item))
                 {
@@ -62,9 +73,9 @@ namespace EfDEnhanced.Patches
 
                     if (_containerWheelMenu != null)
                     {
-                        _containerWheelMenu.Show(item);
+                        var shown = _containerWheelMenu.Show(item);
                         ModLogger.Log("ContainerWheelMenuPatch", $"Showing container wheel menu for: {item.DisplayName}");
-                        return false; // Skip the original method
+                        return !shown; // skip the original method if the container menu is shown
                     }
                 }
             }

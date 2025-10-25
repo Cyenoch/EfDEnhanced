@@ -181,6 +181,7 @@ namespace EfDEnhanced.Features
 
                     // Create menu item with icon and count
                     menuItems.Add(new PieMenuItem(
+                        // Use the current stack index as the menu item ID
                         (_throwableStacks.Count - 1).ToString(),
                         stack.Icon,
                         stack.TotalCount,

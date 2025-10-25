@@ -82,11 +82,12 @@ public static class ItemUsageHelper
     /// <returns>True if the item is a container, false otherwise</returns>
     public static bool IsContainer(Item item)
     {
-        return item != null && (item.Tags.Contains("Container") || item.Tags.Contains("Continer"));
+        return item != null && (item.Tags.Contains("Container") || item.Tags.Contains("Continer") || GetContainerItems(item).Count > 0);
     }
 
     /// <summary>
     /// Get items from a container
+    /// 注意，Slot是没有返回index的
     /// </summary>
     /// <param name="containerItem">The container item</param>
     /// <returns>List of items in the container inventory, or empty list if container has no inventory</returns>

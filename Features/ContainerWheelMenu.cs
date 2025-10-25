@@ -4,6 +4,7 @@ using ItemStatsSystem;
 using UnityEngine;
 using EfDEnhanced.Utils;
 using EfDEnhanced.Utils.UI.Components;
+using System.Linq;
 
 namespace EfDEnhanced.Features
 {
@@ -11,7 +12,7 @@ namespace EfDEnhanced.Features
     /// Container wheel menu that displays when a container item is invoked
     /// Shows items from container inventory in a radial pie menu
     /// </summary>
-    public class ContainerWheelMenu : GenericWheelMenuBase<int>
+    public class ContainerWheelMenu : GenericWheelMenuBase<string>
     {
         private static ContainerWheelMenu? _instance;
 
@@ -51,11 +52,19 @@ namespace EfDEnhanced.Features
             _currentContainer = null;
         }
 
-        protected override void OnItemInvoked(int itemIndex)
+        protected override void OnItemInvoked(string key)
         {
+            if (string.IsNullOrEmpty(key)) return;
             try
             {
-                UseContainerItem(itemIndex);
+                if (key.StartsWith("idx:"))
+                {
+                    UseSlotItem(int.Parse(key[4..]));
+                }
+                else if (key.StartsWith("id:"))
+                {
+                    UseContainerItem(key[3..]);
+                }
             }
             catch (Exception ex)
             {
@@ -63,16 +72,26 @@ namespace EfDEnhanced.Features
             }
         }
 
-        public void Show(Item container)
+        public bool Show(Item container)
         {
-            if (PieMenu == null) return;
+            if (PieMenu == null) return false;
 
             try
             {
                 if (!ItemUsageHelper.IsContainer(container))
                 {
                     ModLogger.LogWarning($"ContainerWheelMenu: Item {container.DisplayName} is not a container");
-                    return;
+                    return false;
+                }
+
+                // Check if container is empty
+                var containerItems = ItemUsageHelper.GetContainerItems(container);
+
+                // If container is empty, don't open the menu
+                if (containerItems.Count == 0)
+                {
+                    ModLogger.Log("ContainerWheelMenu", $"Container {container.DisplayName} is empty, skipping menu");
+                    return false;
                 }
 
                 _currentContainer = container;
@@ -80,10 +99,12 @@ namespace EfDEnhanced.Features
                 PieMenu.Show();
 
                 ModLogger.Log("ContainerWheelMenu", $"Showing container menu for: {container.DisplayName}");
+                return true;
             }
             catch (Exception ex)
             {
                 ModLogger.LogError($"ContainerWheelMenu: Failed to show container menu: {ex}");
+                return false;
             }
         }
 
@@ -94,37 +115,35 @@ namespace EfDEnhanced.Features
             try
             {
                 List<PieMenuItem> items = [];
-                var containerItems = ItemUsageHelper.GetContainerItems(_currentContainer);
 
-                for (int i = 0; i < containerItems.Count; i++)
+                if (_currentContainer.Slots != null && _currentContainer.Slots.Count > 0)
                 {
-                    Item? item = containerItems[i];
-
-                    if (item != null && item.Icon != null)
+                    foreach (var slot in _currentContainer.Slots)
                     {
-                        items.Add(new PieMenuItem(i.ToString(), item.Icon, item.StackCount, item.DisplayName));
-                        ModLogger.Log("ContainerWheelMenu", $"Item {i}: {item.DisplayName}");
+                        var item = slot.Content;
+                        var index = _currentContainer.Slots.list.IndexOf(slot);
+                        if (item != null)
+                        {
+                            items.Add(new PieMenuItem($"idx:{index}", item.Icon, item.StackCount, item.DisplayName));
+                            ModLogger.Log("ContainerWheelMenu", $"Item idx:{index}: {item.DisplayName}");
+                        }
+                        else
+                        {
+                            items.Add(new PieMenuItem($"", null, 1, "Empty"));
+                            ModLogger.Log("ContainerWheelMenu", $"Slot {slot.Key}: {slot.DisplayName}");
+                        }
+                    }
+                }
+                else
+                {
+                    var containerItems = ItemUsageHelper.GetContainerItems(_currentContainer);
+                    foreach (var item in containerItems)
+                    {
+                        items.Add(new PieMenuItem($"id:{item.TypeID}", item.Icon, item.StackCount, item.DisplayName));
+                        ModLogger.Log("ContainerWheelMenu", $"Item id:{item.TypeID}: {item.DisplayName}");
                     }
                 }
 
-                for (int i = 0; i < _currentContainer.Slots.Count; i++)
-                {
-                    var slot = _currentContainer.Slots[i];
-                    if (slot != null && slot.Content != null)
-                    {
-                        items.Add(new PieMenuItem(i.ToString(), slot.Content.Icon, slot.Content.StackCount, slot.Content.DisplayName));
-                        ModLogger.Log("ContainerWheelMenu", $"Slot {i}: {slot.Content.DisplayName}");
-                    }
-                }
-
-                // If container is empty, add one empty slot to show something
-                if (items.Count == 0)
-                {
-                    items.Add(new PieMenuItem("0", null, 1, "Empty"));
-                    ModLogger.Log("ContainerWheelMenu", "Container is empty");
-                }
-
-                // 限制菜单显示的最大物品数量（例如最多12个）
                 const int MAX_ITEMS = 12;
                 if (items.Count > MAX_ITEMS)
                 {
@@ -139,7 +158,38 @@ namespace EfDEnhanced.Features
             }
         }
 
-        private void UseContainerItem(int itemIndex)
+        private void UseSlotItem(int slotIndex)
+        {
+            try
+            {
+                if (Character == null)
+                {
+                    ModLogger.LogWarning("ContainerWheelMenu: Character is null, cannot use item");
+                }
+                if (_currentContainer == null)
+                {
+                    ModLogger.LogWarning("ContainerWheelMenu: No container is currently open");
+                    return;
+                }
+
+                var slot = _currentContainer.Slots[slotIndex];
+                var item = slot.Content;
+                if (item != null)
+                {
+                    ItemUsageHelper.UseItem(item);
+                }
+                else
+                {
+                    ModLogger.LogWarning($"ContainerWheelMenu: No item at slot {slotIndex}");
+                }
+            }
+            catch (Exception ex)
+            {
+                ModLogger.LogError($"ContainerWheelMenu: Failed to use slot item {slotIndex}: {ex}");
+            }
+        }
+
+        private void UseContainerItem(string typeID)
         {
             try
             {
@@ -157,26 +207,18 @@ namespace EfDEnhanced.Features
 
                 var containerItems = ItemUsageHelper.GetContainerItems(_currentContainer);
 
-                if (itemIndex < 0 || itemIndex >= containerItems.Count)
-                {
-                    ModLogger.LogWarning($"ContainerWheelMenu: Item index {itemIndex} is out of range");
-                    return;
-                }
-
-                Item? item = containerItems[itemIndex];
-
+                var item = containerItems.First(i => i.TypeID.ToString() == typeID);
                 if (item == null)
                 {
-                    ModLogger.LogWarning($"ContainerWheelMenu: No item at index {itemIndex}");
+                    ModLogger.LogWarning($"ContainerWheelMenu: No item with typeID {typeID}");
                     return;
                 }
-
                 // Use the item helper to handle the item
                 ItemUsageHelper.UseItem(item);
             }
             catch (Exception ex)
             {
-                ModLogger.LogError($"ContainerWheelMenu: Failed to use item: {ex}");
+                ModLogger.LogError($"ContainerWheelMenu: Failed to use item {typeID}: {ex}");
             }
         }
     }
