@@ -35,6 +35,7 @@ bld/
 
 # Build artifacts
 *.dll
+!/Managed/*.dll
 *.exe
 *.pdb
 *.cache

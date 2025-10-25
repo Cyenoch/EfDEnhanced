@@ -1,0 +1,106 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+        env:
+          # 设置环境变量以使用 Managed 目录中的 DLL
+          DuckovDataPath: ${{ github.workspace }}/Managed/
+
+      - name: Package mod
+        shell: pwsh
+        run: |
+          # 创建发布目录
+          $releaseDir = "EfDEnhanced"
+          New-Item -ItemType Directory -Force -Path $releaseDir
+
+          # 复制编译的 DLL
+          Copy-Item -Path "bin/Release/netstandard2.1/EfDEnhanced.dll" -Destination $releaseDir/
+
+          # 复制 Harmony DLL (从 NuGet 包)
+          $harmonyPath = Get-ChildItem -Path "$env:USERPROFILE/.nuget/packages/lib.harmony/2.4.1/lib/net48/0Harmony.dll" -ErrorAction SilentlyContinue
+          if ($harmonyPath) {
+            Copy-Item -Path $harmonyPath -Destination $releaseDir/
+          }
+
+          # 复制 info.ini
+          Copy-Item -Path "info.ini" -Destination $releaseDir/
+
+          # 复制 preview.png (如果存在)
+          if (Test-Path "preview.png") {
+            Copy-Item -Path "preview.png" -Destination $releaseDir/
+          }
+
+          # 复制 Assets 文件夹
+          if (Test-Path "Assets") {
+            Copy-Item -Path "Assets" -Destination $releaseDir/ -Recurse
+          }
+
+          # 创建 ZIP 文件
+          $timestamp = Get-Date -Format "yyMMddHHmm"
+          $zipName = "EfDEnhanced-$timestamp.zip"
+          Compress-Archive -Path $releaseDir -DestinationPath $zipName
+
+          # 输出版本信息供后续步骤使用
+          echo "VERSION=$timestamp" >> $env:GITHUB_ENV
+          echo "ZIP_NAME=$zipName" >> $env:GITHUB_ENV
+
+          Write-Host "打包完成: $zipName"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: EfDEnhanced-${{ env.VERSION }}
+          path: ${{ env.ZIP_NAME }}
+          retention-days: 30
+
+      - name: Create Release
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ env.VERSION }}
+          name: Release ${{ env.VERSION }}
+          body: |
+            ## EfDEnhanced Mod - Release ${{ env.VERSION }}
+
+            ### Installation
+            1. Extract the ZIP file
+            2. Copy the `EfDEnhanced` folder to `Duckov_Data/Mods/`
+            3. Launch the game
+
+            ### Build Information
+            - Build Date: ${{ env.VERSION }}
+            - Commit: ${{ github.sha }}
+            - Branch: ${{ github.ref_name }}
+
+            ---
+            🤖 Auto-generated release by GitHub Actions
+          files: ${{ env.ZIP_NAME }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -9,22 +9,28 @@
         <DefaultItemExcludes>$(DefaultItemExcludes);decompiled/**;tools/**;extracted_assets/**</DefaultItemExcludes>
     </PropertyGroup>
 
+    <!-- CI environment: use Managed directory in project -->
+    <PropertyGroup Condition="'$(CI)' == 'true' OR '$(GITHUB_ACTIONS)' == 'true'">
+        <DuckovDataPath>$(MSBuildProjectDirectory)/</DuckovDataPath>
+        <DuckovModsPath>$(MSBuildProjectDirectory)/output/</DuckovModsPath>
+    </PropertyGroup>
+
     <!-- Windows paths -->
-    <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows')) AND '$(CI)' != 'true' AND '$(GITHUB_ACTIONS)' != 'true'">
         <DuckovPath>C:/Program Files (x86)/Steam/steamapps/common/Escape from Duckov/</DuckovPath>
         <DuckovDataPath>$(DuckovPath)Duckov_Data/</DuckovDataPath>
         <DuckovModsPath>$(DuckovDataPath)Mods/</DuckovModsPath>
     </PropertyGroup>
 
     <!-- macOS paths -->
-    <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+    <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('OSX')) AND '$(CI)' != 'true' AND '$(GITHUB_ACTIONS)' != 'true'">
         <DuckovPath>$(HOME)/Library/Application Support/Steam/steamapps/common/Escape from Duckov/Duckov.app/Contents/</DuckovPath>
         <DuckovDataPath>$(DuckovPath)Resources/Data/</DuckovDataPath>
         <DuckovModsPath>$(DuckovPath)Mods/</DuckovModsPath>
     </PropertyGroup>
 
     <!-- Linux paths (if needed) -->
-    <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
+    <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux')) AND '$(CI)' != 'true' AND '$(GITHUB_ACTIONS)' != 'true'">
         <!-- WSL -->
         <DuckovPath>/mnt/c/Program Files (x86)/Steam/steamapps/common/Escape from Duckov/</DuckovPath>
         <DuckovDataPath>$(DuckovPath)Duckov_Data/</DuckovDataPath>
@@ -94,14 +100,15 @@
         </ItemGroup>
         <Copy SourceFiles="@(AssetsToCopy)" DestinationFolder="$(ModsFolder)/%(RecursiveDir)" />
 
-        <!-- Copy all mod files from output folder to game's Mods folder -->
-        <ItemGroup>
+        <!-- Copy all mod files from output folder to game's Mods folder (skip in CI) -->
+        <ItemGroup Condition="'$(CI)' != 'true' AND '$(GITHUB_ACTIONS)' != 'true'">
             <ModFilesToCopy Include="$(ModsFolder)\**\*.*" />
         </ItemGroup>
-        <Copy SourceFiles="@(ModFilesToCopy)" DestinationFolder="$(DuckovModsPath)EfDEnhanced/%(RecursiveDir)" />
+        <Copy SourceFiles="@(ModFilesToCopy)" DestinationFolder="$(DuckovModsPath)EfDEnhanced/%(RecursiveDir)" Condition="'$(CI)' != 'true' AND '$(GITHUB_ACTIONS)' != 'true'" />
 
         <Message Text="Mod files copied to: $(ModsFolder)" Importance="high" />
-        <Message Text="Mod files deployed to: $(DuckovModsPath)EfDEnhanced" Importance="high" />
+        <Message Text="Mod files deployed to: $(DuckovModsPath)EfDEnhanced" Importance="high" Condition="'$(CI)' != 'true' AND '$(GITHUB_ACTIONS)' != 'true'" />
+        <Message Text="CI build: Skipping deployment to game directory" Importance="high" Condition="'$(CI)' == 'true' OR '$(GITHUB_ACTIONS)' == 'true'" />
         <Message Text="Harmony DLL copied from: $(HarmonyPackagePath)" Importance="high" />
     </Target>
 </Project>
