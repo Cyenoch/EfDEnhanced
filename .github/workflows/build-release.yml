@@ -55,9 +55,9 @@ jobs:
             Copy-Item -Path "preview.png" -Destination $releaseDir/
           }
 
-          # 复制 Assets 文件夹
+          # 复制 Assets 文件夹内容（与 dll 同级）
           if (Test-Path "Assets") {
-            Copy-Item -Path "Assets" -Destination $releaseDir/ -Recurse
+            Copy-Item -Path "Assets/*" -Destination $releaseDir/ -Recurse
           }
 
           # 创建 ZIP 文件
