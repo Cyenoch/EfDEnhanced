@@ -1,6 +1,7 @@
 using System;
 using ItemStatsSystem;
 using EfDEnhanced.Utils;
+using System.Linq;
 
 namespace EfDEnhanced.Utils;
 
@@ -82,7 +83,17 @@ public static class ItemUsageHelper
     /// <returns>True if the item is a container, false otherwise</returns>
     public static bool IsContainer(Item item)
     {
-        return item != null && (item.Tags.Contains("Container") || item.Tags.Contains("Continer") || GetContainerItems(item).Count > 0);
+        if (item != null && (item.Tags.Contains("Container") || item.Tags.Contains("Continer")))
+        {
+            return true;
+        }
+
+        if (item == null) return false;
+
+        if (item.Inventory != null && item.Inventory.GetItemCount() > 0) return true;
+        if (item.Slots != null && item.Slots.list.Where(item => item.Content != null).Count() > 0) return true;
+
+        return false;
     }
 
     /// <summary>
