@@ -34,42 +34,27 @@ jobs:
       - name: Package mod
         shell: pwsh
         run: |
-          # 创建发布目录
-          $releaseDir = "EfDEnhanced"
-          New-Item -ItemType Directory -Force -Path $releaseDir
-
-          # 复制编译的 DLL
-          Copy-Item -Path "bin/Release/netstandard2.1/EfDEnhanced.dll" -Destination $releaseDir/
-
-          # 复制 Harmony DLL (从 NuGet 包)
-          $harmonyPath = Get-ChildItem -Path "$env:USERPROFILE/.nuget/packages/lib.harmony/2.4.1/lib/net48/0Harmony.dll" -ErrorAction SilentlyContinue
-          if ($harmonyPath) {
-            Copy-Item -Path $harmonyPath -Destination $releaseDir/
-          }
-
-          # 复制 info.ini
-          Copy-Item -Path "info.ini" -Destination $releaseDir/
-
-          # 复制 preview.png (如果存在)
-          if (Test-Path "preview.png") {
-            Copy-Item -Path "preview.png" -Destination $releaseDir/
-          }
-
-          # 复制 Assets 文件夹内容（与 dll 同级）
-          if (Test-Path "Assets") {
-            Copy-Item -Path "Assets/*" -Destination $releaseDir/ -Recurse
+          # 构建后，output 目录已包含所有需要的文件
+          # 直接重命名 output 文件夹为 EfDEnhanced
+          if (Test-Path "output") {
+            Rename-Item -Path "output" -NewName "EfDEnhanced"
+          } else {
+            Write-Error "output 目录不存在！构建可能失败。"
+            exit 1
           }
 
           # 创建 ZIP 文件
           $timestamp = Get-Date -Format "yyMMddHHmm"
           $zipName = "EfDEnhanced-$timestamp.zip"
-          Compress-Archive -Path $releaseDir -DestinationPath $zipName
+          Compress-Archive -Path "EfDEnhanced" -DestinationPath $zipName
 
           # 输出版本信息供后续步骤使用
           echo "VERSION=$timestamp" >> $env:GITHUB_ENV
           echo "ZIP_NAME=$zipName" >> $env:GITHUB_ENV
 
           Write-Host "打包完成: $zipName"
+          Write-Host "文件列表:"
+          Get-ChildItem -Path "EfDEnhanced" -Recurse | ForEach-Object { Write-Host "  $_" }
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
