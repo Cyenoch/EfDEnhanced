@@ -93,6 +93,7 @@ namespace EfDEnhanced.Features
                     .AddSetting(ModSettings.FastBuyEnabled)
                     .AddSetting(ModSettings.FastSellEnabled)
                     .AddSetting(ModSettings.ItemWheelScale)
+                    .AddSetting(ModSettings.ItemWheelTimeScale)
                     .AddSetting(ModSettings.ItemWheelMenuHotkey)
                     .AddSetting(ModSettings.ThrowableWheelHotkey)
 

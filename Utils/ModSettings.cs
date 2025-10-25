@@ -272,6 +272,19 @@ namespace EfDEnhanced.Utils
             )
         );
 
+        public static readonly RangedFloatSettingsEntry ItemWheelTimeScale = Register(
+            new RangedFloatSettingsEntry(
+                PREFIX,
+                "ItemWheelTimeScale",
+                "Settings_ItemWheelTimeScale_Name",
+                0.2f, // 行业常用子弹时间 timescale 通常在 0.1~0.25f 之间，这里采用 0.2f 作为默认
+                0f,
+                1f,
+                CATEGORY_UI,
+                "Settings_ItemWheelTimeScale_Desc"
+            )
+        );
+
         public static readonly KeyCodeSettingsEntry ItemWheelMenuHotkey = Register(
             new KeyCodeSettingsEntry(
                 PREFIX,
