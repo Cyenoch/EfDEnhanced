@@ -353,6 +353,22 @@ namespace EfDEnhanced.Utils
             )
         );
 
+        public static readonly IndexedOptionsSettingsEntry ModLanguage = Register(
+            new IndexedOptionsSettingsEntry(
+                PREFIX,
+                "ModLanguage",
+                "Settings_ModLanguage_Name",
+                0, // Default: Follow Game
+                [
+                    "Settings_Language_FollowGame",
+                    "Settings_Language_French",
+                    "Settings_Language_Korean"
+                ],
+                CATEGORY_UI,
+                "Settings_ModLanguage_Desc"
+            )
+        );
+
         #endregion
 
         /// <summary>
@@ -468,11 +484,34 @@ namespace EfDEnhanced.Utils
                     LogSettingInitialization(setting);
                 }
 
+                // Subscribe to language setting changes
+                ModLanguage.ValueChanged += OnModLanguageChanged;
+
+                // Apply language setting after initialization (in case it was loaded from storage)
+                // This ensures the mod uses the correct language even if it's not the default
+                LocalizationHelper.ApplyManualLanguageSelection();
+
                 ModLogger.Log("ModSettings", $"Initialized {_allSettings.Count} settings");
             }
             catch (Exception ex)
             {
                 ModLogger.LogError($"Failed to initialize ModSettings: {ex}");
+            }
+        }
+
+        /// <summary>
+        /// Handle language setting changes
+        /// </summary>
+        private static void OnModLanguageChanged(object? sender, SettingsValueChangedEventArgs<int> e)
+        {
+            try
+            {
+                ModLogger.Log("ModSettings", $"Mod language changed from {e.OldValue} to {e.NewValue}");
+                LocalizationHelper.ApplyManualLanguageSelection();
+            }
+            catch (Exception ex)
+            {
+                ModLogger.LogError($"Failed to handle mod language change: {ex}");
             }
         }
 

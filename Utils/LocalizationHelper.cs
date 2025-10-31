@@ -23,6 +23,40 @@ public static class LocalizationHelper
     public static event Action<SystemLanguage>? OnLanguageChanged;
 
     /// <summary>
+    /// 获取当前应该使用的语言（考虑手动设置）
+    /// </summary>
+    private static SystemLanguage GetCurrentLanguage()
+    {
+        // 如果 ModSettings 已初始化，检查语言选择设置
+        try
+        {
+            // 使用反射或直接访问设置，但需要先检查是否已初始化
+            // 0 = 跟随游戏, 1 = French, 2 = Korean
+            int languageSetting = ModSettings.ModLanguage.Value;
+            
+            if (languageSetting == 0)
+            {
+                // 跟随游戏语言
+                return LocalizationManager.CurrentLanguage;
+            }
+            else if (languageSetting == 1)
+            {
+                return SystemLanguage.French;
+            }
+            else if (languageSetting == 2)
+            {
+                return SystemLanguage.Korean;
+            }
+        }
+        catch
+        {
+            // 如果设置未初始化，使用游戏语言
+        }
+        
+        return LocalizationManager.CurrentLanguage;
+    }
+
+    /// <summary>
     /// 初始化本地化系统
     /// </summary>
     public static void Initialize()
@@ -37,8 +71,8 @@ public static class LocalizationHelper
             // 加载所有语言的翻译
             LoadTranslations();
 
-            // 应用当前语言的翻译
-            ApplyTranslations(LocalizationManager.CurrentLanguage);
+            // 应用当前语言的翻译（使用 GetCurrentLanguage 以支持手动选择）
+            ApplyTranslations(GetCurrentLanguage());
 
             ModLogger.Log("Localization", $"Localization initialized for language: {LocalizationManager.CurrentLanguage}");
         }
@@ -81,15 +115,35 @@ public static class LocalizationHelper
     {
         try
         {
-            ModLogger.Log("Localization", $"Language changed to: {newLanguage}");
-            ApplyTranslations(newLanguage);
+            ModLogger.Log("Localization", $"Game language changed to: {newLanguage}");
+            // 使用 GetCurrentLanguage 来获取实际应该使用的语言（考虑手动设置）
+            SystemLanguage actualLanguage = GetCurrentLanguage();
+            ApplyTranslations(actualLanguage);
 
             // 触发公共事件，通知所有订阅者
-            OnLanguageChanged?.Invoke(newLanguage);
+            OnLanguageChanged?.Invoke(actualLanguage);
         }
         catch (System.Exception ex)
         {
             ModLogger.LogError($"Failed to handle language change: {ex}");
+        }
+    }
+
+    /// <summary>
+    /// 手动应用语言选择（当用户更改设置时调用）
+    /// </summary>
+    public static void ApplyManualLanguageSelection()
+    {
+        try
+        {
+            SystemLanguage language = GetCurrentLanguage();
+            ModLogger.Log("Localization", $"Applying manual language selection: {language}");
+            ApplyTranslations(language);
+            OnLanguageChanged?.Invoke(language);
+        }
+        catch (System.Exception ex)
+        {
+            ModLogger.LogError($"Failed to apply manual language selection: {ex}");
         }
     }
 
@@ -208,6 +262,13 @@ public static class LocalizationHelper
             { "Settings_AutoTrackNewQuests_Desc", "新接受任务时自动将其添加到局内追踪列表" },
             { "Settings_EnableDuckShit_Name", "启用鸭子排便" },
             { "Settings_EnableDuckShit_Desc", "启用鸭子会根据能量和水分消耗自动排便的功能" },
+            
+            // Language Selection
+            { "Settings_ModLanguage_Name", "Mod语言" },
+            { "Settings_ModLanguage_Desc", "选择Mod的显示语言：跟随游戏、法语或韩语" },
+            { "Settings_Language_FollowGame", "跟随游戏" },
+            { "Settings_Language_French", "Français" },
+            { "Settings_Language_Korean", "한국어" },
         };
 
         // 繁体中文
@@ -317,6 +378,13 @@ public static class LocalizationHelper
             { "Settings_AutoTrackNewQuests_Desc", "新接受任務時自動將其添加到局內追蹤列表" },
             { "Settings_EnableDuckShit_Name", "啟用鴨子排便" },
             { "Settings_EnableDuckShit_Desc", "啟用鴨子會根據能量和水分消耗自動排便的功能" },
+            
+            // Language Selection
+            { "Settings_ModLanguage_Name", "Mod語言" },
+            { "Settings_ModLanguage_Desc", "選擇Mod的顯示語言：跟隨遊戲、法語或韓語" },
+            { "Settings_Language_FollowGame", "跟隨遊戲" },
+            { "Settings_Language_French", "Français" },
+            { "Settings_Language_Korean", "한국어" },
         };
 
         // 英语
@@ -426,6 +494,13 @@ public static class LocalizationHelper
             { "Settings_AutoTrackNewQuests_Desc", "Automatically add new accepted quests to the in-raid tracker" },
             { "Settings_EnableDuckShit_Name", "Enable Duck Shit" },
             { "Settings_EnableDuckShit_Desc", "Enable the feature where ducks automatically defecate based on energy and water consumption" },
+            
+            // Language Selection
+            { "Settings_ModLanguage_Name", "Mod Language" },
+            { "Settings_ModLanguage_Desc", "Choose the display language for the mod: Follow Game, French, or Korean" },
+            { "Settings_Language_FollowGame", "Follow Game" },
+            { "Settings_Language_French", "Français" },
+            { "Settings_Language_Korean", "한국어" },
         };
 
         // 日语
@@ -535,6 +610,245 @@ public static class LocalizationHelper
             { "Settings_AutoTrackNewQuests_Desc", "新規クエストを受けた際に自動的に局内追跡リストに追加" },
             { "Settings_EnableDuckShit_Name", "アヒルの排便を有効化" },
             { "Settings_EnableDuckShit_Desc", "アヒルがエネルギーと水分消費に基づいて自動的に排便する機能を有効化" },
+            
+            // Language Selection
+            { "Settings_ModLanguage_Name", "Mod言語" },
+            { "Settings_ModLanguage_Desc", "Modの表示言語を選択：ゲームに従う、フランス語、または韓国語" },
+            { "Settings_Language_FollowGame", "ゲームに従う" },
+            { "Settings_Language_French", "Français" },
+            { "Settings_Language_Korean", "한국어" },
+        };
+
+        // 法语
+        LocalizationData[SystemLanguage.French] = new Dictionary<string, string>
+        {
+            { "RaidCheck_Title", "Vérification avant Raid" },
+            { "RaidCheck_AllClear", "Vérification de l'équipement réussie" },
+            { "RaidCheck_HasIssues", "Les problèmes suivants détectés:\n" },
+            { "RaidCheck_Confirm", "Continuer quand même" },
+            { "RaidCheck_Cancel", "Retour" },
+
+            { "Warning_NoWeapon", "<color=#FF6B6B>⚠ Aucune arme équipée</color>" },
+            { "Warning_NoAmmo", "<color=#FF6B6B>⚠ Pas de munitions</color>" },
+            { "Warning_NoMedicine", "<color=#FF6B6B>⚠ Pas de fournitures médicales</color>" },
+            { "Warning_NoFood", "<color=#FF6B6B>⚠ Pas de nourriture ni de boissons</color>" },
+            { "Warning_StormyWeather", "<color=#FF4444>⚠ Conditions météorologiques orageuses</color>" },
+            { "Warning_StormComing", "<color=#FFA500>⚠ Tempête approchant (dans les 24 heures)</color>" },
+            { "Warning_QuestItem", "<color=#FFD700>⚠ Objet de quête insuffisant: {0} ({1}/{2}) - {3}</color>" },
+            { "Warning_LowAmmo", "<color=#FF8C00>⚠ Munitions faibles pour l'arme: {0} ({1}) - {2}/{3} coups</color>" },
+            { "Warning_QuestWeapon", "<color=#FFD700>⚠ Arme requise pour la quête: {0} - {1} ({2})</color>" },
+
+            { "QuestTracker_Title", "Quêtes actives" },
+            { "QuestTracker_Progress", "Progression: {0}/{1}" },
+            { "QuestTracker_NoQuests", "Aucune quête active" },
+            { "QuestTracker_TaskComplete", "✓" },
+            { "QuestTracker_TaskPending", "○" },
+            { "QuestTracker_CheckboxLabel", "Suivre en Raid" },
+            { "QuestTracker_HelpText", "Appuyez sur . pour masquer/afficher le suivi des quêtes\nLes paramètres du mod dans les paramètres du jeu peuvent ajuster la position du panneau" },
+
+            // Settings UI
+            { "Settings_Title", "Paramètres EfD Enhanced" },
+            { "Settings_ResetButton", "Réinitialiser aux valeurs par défaut" },
+            { "Settings_CloseButton", "Fermer" },
+            { "Settings_ModSettings_Button", "Paramètres EfD Enhanced" },
+
+            // Settings Categories
+            { "Settings_Category_PreRaidCheck", "Vérification avant Raid" },
+            { "Settings_Category_QuestTracker", "Suivi des quêtes" },
+            { "Settings_Category_Movement", "Amélioration du mouvement" },
+            { "Settings_Category_UI", "Amélioration de l'interface" },
+            { "Settings_Category_FunFeatures", "Fonctionnalités amusantes" },
+
+            // Pre-Raid Check Settings
+            { "Settings_EnableRaidCheck_Name", "Activer la vérification avant Raid" },
+            { "Settings_EnableRaidCheck_Desc", "Activer tout le système de vérification avant Raid" },
+            { "Settings_CheckWeapon_Name", "Vérifier l'arme" },
+            { "Settings_CheckWeapon_Desc", "Avertir si aucune arme n'est équipée" },
+            { "Settings_CheckAmmo_Name", "Vérifier les munitions" },
+            { "Settings_CheckAmmo_Desc", "Avertir si aucune munition n'est disponible" },
+            { "Settings_CheckMeds_Name", "Vérifier les fournitures médicales" },
+            { "Settings_CheckMeds_Desc", "Avertir si aucune fourniture médicale n'est disponible" },
+            { "Settings_CheckFood_Name", "Vérifier la nourriture/l'eau" },
+            { "Settings_CheckFood_Desc", "Avertir si aucune nourriture ni eau n'est disponible" },
+            { "Settings_CheckWeather_Name", "Avertir conditions orageuses" },
+            { "Settings_CheckWeather_Desc", "Avertir des conditions météorologiques orageuses" },
+            { "Settings_CheckQuestItems_Name", "Vérifier les objets de quête" },
+            { "Settings_CheckQuestItems_Desc", "Vérifier si les objets de quête requis sont suffisants" },
+            { "Settings_CheckQuestWeapons_Name", "Vérifier les armes de quête" },
+            { "Settings_CheckQuestWeapons_Desc", "Vérifier si les armes requises pour la quête sont équipées" },
+
+            // Quest Tracker Settings
+            { "Settings_EnableQuestTracker_Name", "Activer le HUD de suivi des quêtes" },
+            { "Settings_EnableQuestTracker_Desc", "Afficher le suivi des quêtes actives pendant les raids" },
+            { "Settings_TrackerPositionX_Name", "Position horizontale du suivi" },
+            { "Settings_TrackerPositionX_Desc", "Position horizontale (0=gauche, 1=droite)" },
+            { "Settings_TrackerPositionY_Name", "Position verticale du suivi" },
+            { "Settings_TrackerPositionY_Desc", "Position verticale (0=haut, 1=bas)" },
+            { "Settings_TrackerScale_Name", "Échelle du suivi" },
+            { "Settings_TrackerScale_Desc", "Multiplicateur d'échelle de l'interface" },
+            { "Settings_TrackerShowDescription_Name", "Afficher les descriptions des quêtes" },
+            { "Settings_TrackerShowDescription_Desc", "Afficher les descriptions des quêtes dans le suivi" },
+            { "Settings_TrackerFilterByMap_Name", "Afficher uniquement les quêtes de la carte actuelle" },
+            { "Settings_TrackerFilterByMap_Desc", "Afficher uniquement les quêtes de la carte actuelle et les quêtes sans restriction de carte" },
+            { "Settings_TrackerToggleHotkey_Name", "Raccourci réduction/expansion du suivi des quêtes" },
+            { "Settings_TrackerToggleHotkey_Desc", "Appuyez sur cette touche pour réduire ou développer la liste de suivi des quêtes" },
+            { "Settings_TrackerHotkeyUsed_Name", "Indicateur de raccourci utilisé" },
+            { "Settings_TrackerHotkeyUsed_Desc", "Paramètre interne: Indique si l'utilisateur a utilisé le raccourci afficher/masquer" },
+
+            // Movement Enhancement Settings
+            { "Settings_MovementEnhancement_Name", "Amélioration de la réponse au mouvement" },
+            { "Settings_MovementEnhancement_Desc", "Optimiser la sensation de mouvement du personnage, réduire le mouvement collant. Plusieurs préréglages: Désactivé, Léger, Moyen, Lourd" },
+            { "Settings_Movement_Disabled", "Désactivé" },
+            { "Settings_Movement_Light", "Optimisation légère" },
+            { "Settings_Movement_Medium", "Optimisation moyenne" },
+            { "Settings_Movement_Heavy", "Optimisation lourde" },
+
+            // UI Enhancement Settings
+            { "Settings_EnableWeaponComparison_Name", "Activer la comparaison d'armes" },
+            { "Settings_EnableWeaponComparison_Desc", "Comparer l'arme sélectionnée avec l'arme survolée dans l'inventaire, affichant les différences avec des indicateurs codés par couleur" },
+            { "Settings_FastBuyEnabled_Name", "Activer l'achat rapide" },
+            { "Settings_FastBuyEnabled_Desc", "Acheter rapidement des objets en les survolant dans le menu de la boutique et en appuyant sur F" },
+            { "Settings_FastSellEnabled_Name", "Activer la vente rapide" },
+            { "Settings_FastSellEnabled_Desc", "Vendre rapidement des objets en les survolant dans le menu de la boutique et en appuyant sur F" },
+            { "Settings_ItemWheelScale_Name", "Échelle du menu en roue" },
+            { "Settings_ItemWheelScale_Desc", "Ajuster la taille d'affichage de tous les menus en roue (roue d'objets et roue de projectiles)" },
+            { "Settings_ItemWheelTimeScale_Name", "Échelle de temps du menu en roue" },
+            { "Settings_ItemWheelTimeScale_Desc", "Ajuster l'échelle de temps de tous les menus en roue (roue d'objets et roue de projectiles)" },
+            { "Settings_ItemWheelMenuHotkey_Name", "Raccourci de la roue d'objets" },
+            { "Settings_ItemWheelMenuHotkey_Desc", "Appuyez et relâchez cette touche pour ouvrir le menu de la roue d'objets" },
+            { "Settings_ThrowableWheelEnabled_Name", "Activer la roue de projectiles" },
+            { "Settings_ThrowableWheelEnabled_Desc", "Activer la fonctionnalité du menu de la roue de projectiles" },
+            { "Settings_ThrowableWheelHotkey_Name", "Raccourci de la roue de projectiles" },
+            { "Settings_ThrowableWheelHotkey_Desc", "Appuyez et relâchez cette touche pour ouvrir le menu de la roue de projectiles (touche G par défaut)" },
+            { "Settings_PressAnyKey", "Appuyez sur une touche..." },
+
+            { "Settings_AutoTrackNewQuests_Name", "Suivre automatiquement les nouvelles quêtes acceptées" },
+            { "Settings_AutoTrackNewQuests_Desc", "Ajouter automatiquement les nouvelles quêtes acceptées au suivi en raid" },
+            { "Settings_EnableDuckShit_Name", "Activer la défécation des canards" },
+            { "Settings_EnableDuckShit_Desc", "Activer la fonctionnalité où les canards défèquent automatiquement en fonction de la consommation d'énergie et d'eau" },
+            
+            // Language Selection
+            { "Settings_ModLanguage_Name", "Langue du Mod" },
+            { "Settings_ModLanguage_Desc", "Choisir la langue d'affichage du mod : Suivre le jeu, Français ou Coréen" },
+            { "Settings_Language_FollowGame", "Suivre le jeu" },
+            { "Settings_Language_French", "Français" },
+            { "Settings_Language_Korean", "한국어" },
+        };
+
+        // 韩语
+        LocalizationData[SystemLanguage.Korean] = new Dictionary<string, string>
+        {
+            { "RaidCheck_Title", "레이드 준비 확인" },
+            { "RaidCheck_AllClear", "장비 확인 통과" },
+            { "RaidCheck_HasIssues", "다음 문제가 감지되었습니다:\n" },
+            { "RaidCheck_Confirm", "계속 진행" },
+            { "RaidCheck_Cancel", "돌아가기" },
+
+            { "Warning_NoWeapon", "<color=#FF6B6B>⚠ 무기가 장착되지 않음</color>" },
+            { "Warning_NoAmmo", "<color=#FF6B6B>⚠ 탄약 없음</color>" },
+            { "Warning_NoMedicine", "<color=#FF6B6B>⚠ 의료품 없음</color>" },
+            { "Warning_NoFood", "<color=#FF6B6B>⚠ 음식 또는 음료 없음</color>" },
+            { "Warning_StormyWeather", "<color=#FF4444>⚠ 폭풍 날씨 조건</color>" },
+            { "Warning_StormComing", "<color=#FFA500>⚠ 폭풍 접근 중 (24시간 이내)</color>" },
+            { "Warning_QuestItem", "<color=#FFD700>⚠ 퀘스트 아이템 부족: {0} ({1}/{2}) - {3}</color>" },
+            { "Warning_LowAmmo", "<color=#FF8C00>⚠ 무기 탄약 부족: {0} ({1}) - {2}/{3} 발</color>" },
+            { "Warning_QuestWeapon", "<color=#FFD700>⚠ 퀘스트 필수 무기: {0} - {1} ({2})</color>" },
+
+            { "QuestTracker_Title", "활성 퀘스트" },
+            { "QuestTracker_Progress", "진행도: {0}/{1}" },
+            { "QuestTracker_NoQuests", "활성 퀘스트 없음" },
+            { "QuestTracker_TaskComplete", "✓" },
+            { "QuestTracker_TaskPending", "○" },
+            { "QuestTracker_CheckboxLabel", "레이드에서 추적" },
+            { "QuestTracker_HelpText", ". 키를 눌러 퀘스트 추적기 표시/숨기기\n게임 설정의 모드 설정에서 패널 위치를 조정할 수 있습니다" },
+
+            // Settings UI
+            { "Settings_Title", "EfD Enhanced 설정" },
+            { "Settings_ResetButton", "기본값으로 재설정" },
+            { "Settings_CloseButton", "닫기" },
+            { "Settings_ModSettings_Button", "EfD Enhanced 설정" },
+
+            // Settings Categories
+            { "Settings_Category_PreRaidCheck", "레이드 전 확인" },
+            { "Settings_Category_QuestTracker", "퀘스트 추적기" },
+            { "Settings_Category_Movement", "이동 향상" },
+            { "Settings_Category_UI", "UI 향상" },
+            { "Settings_Category_FunFeatures", "재미있는 기능" },
+
+            // Pre-Raid Check Settings
+            { "Settings_EnableRaidCheck_Name", "레이드 전 확인 활성화" },
+            { "Settings_EnableRaidCheck_Desc", "전체 레이드 전 확인 시스템 활성화" },
+            { "Settings_CheckWeapon_Name", "무기 확인" },
+            { "Settings_CheckWeapon_Desc", "무기가 장착되지 않은 경우 경고" },
+            { "Settings_CheckAmmo_Name", "탄약 확인" },
+            { "Settings_CheckAmmo_Desc", "탄약이 없는 경우 경고" },
+            { "Settings_CheckMeds_Name", "의료품 확인" },
+            { "Settings_CheckMeds_Desc", "의료품이 없는 경우 경고" },
+            { "Settings_CheckFood_Name", "음식/물 확인" },
+            { "Settings_CheckFood_Desc", "음식이나 물이 없는 경우 경고" },
+            { "Settings_CheckWeather_Name", "폭풍 날씨 경고" },
+            { "Settings_CheckWeather_Desc", "폭풍 날씨 조건에 대해 경고" },
+            { "Settings_CheckQuestItems_Name", "퀘스트 아이템 확인" },
+            { "Settings_CheckQuestItems_Desc", "필요한 퀘스트 아이템이 충분한지 확인" },
+            { "Settings_CheckQuestWeapons_Name", "퀘스트 무기 확인" },
+            { "Settings_CheckQuestWeapons_Desc", "퀘스트 필수 무기가 장착되었는지 확인" },
+
+            // Quest Tracker Settings
+            { "Settings_EnableQuestTracker_Name", "퀘스트 추적기 HUD 활성화" },
+            { "Settings_EnableQuestTracker_Desc", "레이드 중 활성 퀘스트 추적기 표시" },
+            { "Settings_TrackerPositionX_Name", "추적기 수평 위치" },
+            { "Settings_TrackerPositionX_Desc", "수평 위치 (0=왼쪽, 1=오른쪽)" },
+            { "Settings_TrackerPositionY_Name", "추적기 수직 위치" },
+            { "Settings_TrackerPositionY_Desc", "수직 위치 (0=위, 1=아래)" },
+            { "Settings_TrackerScale_Name", "추적기 크기" },
+            { "Settings_TrackerScale_Desc", "UI 크기 배율" },
+            { "Settings_TrackerShowDescription_Name", "퀘스트 설명 표시" },
+            { "Settings_TrackerShowDescription_Desc", "추적기에 퀘스트 설명 표시" },
+            { "Settings_TrackerFilterByMap_Name", "현재 지도의 퀘스트만 표시" },
+            { "Settings_TrackerFilterByMap_Desc", "현재 지도와 관련된 퀘스트 및 지도 제한이 없는 퀘스트만 표시" },
+            { "Settings_TrackerToggleHotkey_Name", "퀘스트 추적기 접기/펼치기 단축키" },
+            { "Settings_TrackerToggleHotkey_Desc", "이 키를 눌러 퀘스트 추적기 목록 접기 또는 펼치기" },
+            { "Settings_TrackerHotkeyUsed_Name", "단축키 사용 플래그" },
+            { "Settings_TrackerHotkeyUsed_Desc", "내부 설정: 사용자가 표시/숨기기 단축키를 사용했는지 표시" },
+
+            // Movement Enhancement Settings
+            { "Settings_MovementEnhancement_Name", "이동 반응 향상" },
+            { "Settings_MovementEnhancement_Desc", "캐릭터 이동 느낌 최적화, 끈적한 이동 감소. 여러 사전 설정: 비활성화, 경량, 중간, 무거움" },
+            { "Settings_Movement_Disabled", "비활성화" },
+            { "Settings_Movement_Light", "경량 최적화" },
+            { "Settings_Movement_Medium", "중간 최적화" },
+            { "Settings_Movement_Heavy", "무거운 최적화" },
+
+            // UI Enhancement Settings
+            { "Settings_EnableWeaponComparison_Name", "무기 비교 활성화" },
+            { "Settings_EnableWeaponComparison_Desc", "인벤토리에서 선택한 무기와 마우스 오버한 무기를 비교하여 색상 코딩된 표시기로 차이점 표시" },
+            { "Settings_FastBuyEnabled_Name", "빠른 구매 활성화" },
+            { "Settings_FastBuyEnabled_Desc", "상점 메뉴에서 아이템에 마우스를 올리고 F 키를 눌러 빠르게 아이템 구매" },
+            { "Settings_FastSellEnabled_Name", "빠른 판매 활성화" },
+            { "Settings_FastSellEnabled_Desc", "상점 메뉴에서 아이템에 마우스를 올리고 F 키를 눌러 빠르게 아이템 판매" },
+            { "Settings_ItemWheelScale_Name", "휠 메뉴 크기" },
+            { "Settings_ItemWheelScale_Desc", "모든 휠 메뉴의 표시 크기 조정 (아이템 휠 및 투척물 휠)" },
+            { "Settings_ItemWheelTimeScale_Name", "휠 메뉴 시간 크기" },
+            { "Settings_ItemWheelTimeScale_Desc", "모든 휠 메뉴의 시간 크기 조정 (아이템 휠 및 투척물 휠)" },
+            { "Settings_ItemWheelMenuHotkey_Name", "아이템 휠 단축키" },
+            { "Settings_ItemWheelMenuHotkey_Desc", "이 키를 누르고 놓으면 아이템 휠 메뉴가 열립니다" },
+            { "Settings_ThrowableWheelEnabled_Name", "투척물 휠 활성화" },
+            { "Settings_ThrowableWheelEnabled_Desc", "투척물 휠 메뉴 기능 활성화" },
+            { "Settings_ThrowableWheelHotkey_Name", "투척물 휠 단축키" },
+            { "Settings_ThrowableWheelHotkey_Desc", "이 키를 누르고 놓으면 투척물 휠 메뉴가 열립니다 (기본값 G 키)" },
+            { "Settings_PressAnyKey", "아무 키나 누르세요..." },
+
+            { "Settings_AutoTrackNewQuests_Name", "새로 수락한 퀘스트 자동 추적" },
+            { "Settings_AutoTrackNewQuests_Desc", "새로 수락한 퀘스트를 자동으로 레이드 추적 목록에 추가" },
+            { "Settings_EnableDuckShit_Name", "오리 배변 활성화" },
+            { "Settings_EnableDuckShit_Desc", "오리가 에너지 및 물 소비에 따라 자동으로 배변하는 기능 활성화" },
+            
+            // Language Selection
+            { "Settings_ModLanguage_Name", "모드 언어" },
+            { "Settings_ModLanguage_Desc", "모드의 표시 언어 선택: 게임 따르기, 프랑스어 또는 한국어" },
+            { "Settings_Language_FollowGame", "게임 따르기" },
+            { "Settings_Language_French", "Français" },
+            { "Settings_Language_Korean", "한국어" },
         };
 
         ModLogger.Log("Localization", $"Loaded translations for {LocalizationData.Count} languages");

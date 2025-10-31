@@ -89,6 +89,7 @@ namespace EfDEnhanced.Features
                 _settingsBuilder
                     // UI Enhancement Section
                     .AddSection("Settings_Category_UI")
+                    .AddSetting(ModSettings.ModLanguage)
                     .AddSetting(ModSettings.EnableWeaponComparison)
                     .AddSetting(ModSettings.FastBuyEnabled)
                     .AddSetting(ModSettings.FastSellEnabled)
