@@ -141,7 +141,6 @@ public class DuckShitFeature : MonoBehaviour
             // ModLogger.Log("DuckShit", "Threshold reached, triggering poop/quack event.");
             totalEnergyConsumed = 0;
             totalHydrationConsumed = 0;
-            // DuckQuackFeature.Quack();
             PoopShit().Forget();
         }
     }

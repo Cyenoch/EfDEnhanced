@@ -202,10 +202,6 @@ public static class LocalizationHelper
             { "Settings_ThrowableWheelEnabled_Desc", "启用投掷物轮盘菜单功能" },
             { "Settings_ThrowableWheelHotkey_Name", "投掷物轮盘快捷键" },
             { "Settings_ThrowableWheelHotkey_Desc", "按下并松开此键来打开投掷物轮盘菜单（默认G键）" },
-            { "Settings_EnableDuckQuack_Name", "启用鸭叫按键" },
-            { "Settings_EnableDuckQuack_Desc", "按下热键播放标志性的嘎嘎声" },
-            { "Settings_DuckQuackHotkey_Name", "鸭子叫热键" },
-            { "Settings_DuckQuackHotkey_Desc", "按下此键让角色发出嘎嘎声（默认鼠标中键）" },
             { "Settings_PressAnyKey", "按任意键..." },
 
             { "Settings_AutoTrackNewQuests_Name", "自动追踪新接受的任务" },
@@ -315,10 +311,6 @@ public static class LocalizationHelper
             { "Settings_ThrowableWheelEnabled_Desc", "啟用投擲物輪盤選單功能" },
             { "Settings_ThrowableWheelHotkey_Name", "投擲物輪盤快捷鍵" },
             { "Settings_ThrowableWheelHotkey_Desc", "按下並鬆開此鍵來打開投擲物輪盤選單（預設G鍵）" },
-            { "Settings_EnableDuckQuack_Name", "啟用鴨叫按鍵" },
-            { "Settings_EnableDuckQuack_Desc", "按下熱鍵播放標誌性的嘎嘎聲" },
-            { "Settings_DuckQuackHotkey_Name", "鴨叫熱鍵" },
-            { "Settings_DuckQuackHotkey_Desc", "按下此鍵讓角色發出嘎嘎聲（預設滑鼠中鍵）" },
             { "Settings_PressAnyKey", "按任意鍵..." },
 
             { "Settings_AutoTrackNewQuests_Name", "自動追蹤新接受任務" },
@@ -428,10 +420,6 @@ public static class LocalizationHelper
             { "Settings_ThrowableWheelEnabled_Desc", "Enable the throwable wheel menu feature" },
             { "Settings_ThrowableWheelHotkey_Name", "Throwable Wheel Hotkey" },
             { "Settings_ThrowableWheelHotkey_Desc", "Press and release this key to open the throwable wheel menu (default G key)" },
-            { "Settings_EnableDuckQuack_Name", "Enable Duck Quack Hotkey" },
-            { "Settings_EnableDuckQuack_Desc", "Play a signature quack sound when the hotkey is pressed" },
-            { "Settings_DuckQuackHotkey_Name", "Duck Quack Hotkey" },
-            { "Settings_DuckQuackHotkey_Desc", "Press this key to trigger a quack (default Middle Mouse)" },
             { "Settings_PressAnyKey", "Press any key..." },
 
             { "Settings_AutoTrackNewQuests_Name", "Auto-track new accepted quests" },
@@ -541,10 +529,6 @@ public static class LocalizationHelper
             { "Settings_ThrowableWheelEnabled_Desc", "投擲物ホイールメニュー機能を有効化" },
             { "Settings_ThrowableWheelHotkey_Name", "投擲物ホイールホットキー" },
             { "Settings_ThrowableWheelHotkey_Desc", "このキーを押して離すと投擲物ホイールメニューが開きます（デフォルトGキー）" },
-            { "Settings_EnableDuckQuack_Name", "ガーガーホットキーを有効化" },
-            { "Settings_EnableDuckQuack_Desc", "ホットキーを押すとおなじみのガーガー音を再生" },
-            { "Settings_DuckQuackHotkey_Name", "ガーガーホットキー" },
-            { "Settings_DuckQuackHotkey_Desc", "このキーを押してガーガー鳴かせます（デフォルト中クリック）" },
             { "Settings_PressAnyKey", "任意のキーを押してください..." },
 
             { "Settings_AutoTrackNewQuests_Name", "新規クエストを自動追跡" },

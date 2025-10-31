@@ -58,7 +58,6 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour
         }
 
         transform.AddComponent<ActiveQuestTracker>();
-        transform.AddComponent<DuckQuackFeature>();
         transform.AddComponent<DuckShitFeature>();
     }
 
@@ -83,12 +82,6 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour
             if (questTracker != null)
             {
                 Destroy(questTracker);
-            }
-
-            var duckQuackFeature = transform.GetComponent<DuckQuackFeature>();
-            if (duckQuackFeature != null)
-            {
-                Destroy(duckQuackFeature);
             }
 
             // Clean up localization

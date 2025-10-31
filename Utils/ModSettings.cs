@@ -341,27 +341,6 @@ namespace EfDEnhanced.Utils
             )
         );
 
-        public static readonly BoolSettingsEntry EnableDuckQuack = Register(
-            new BoolSettingsEntry(
-                PREFIX,
-                "EnableDuckQuack",
-                "Settings_EnableDuckQuack_Name",
-                true,
-                CATEGORY_FUN_FEATURE,
-                "Settings_EnableDuckQuack_Desc"
-            )
-        );
-
-        public static readonly KeyCodeSettingsEntry DuckQuackHotkey = Register(
-            new KeyCodeSettingsEntry(
-                PREFIX,
-                "DuckQuackHotkey",
-                "Settings_DuckQuackHotkey_Name",
-                UnityEngine.KeyCode.Mouse2,
-                CATEGORY_FUN_FEATURE,
-                "Settings_DuckQuackHotkey_Desc"
-            )
-        );
 
         public static readonly BoolSettingsEntry EnableDuckShit = Register(
             new BoolSettingsEntry(

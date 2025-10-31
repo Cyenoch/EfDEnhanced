@@ -125,8 +125,6 @@ namespace EfDEnhanced.Features
 
                     // Fun Features Section
                     .AddSection("Settings_Category_FunFeatures")
-                    .AddSetting(ModSettings.EnableDuckQuack)
-                    .AddSetting(ModSettings.DuckQuackHotkey, ModSettings.EnableDuckQuack)
                     .AddSetting(ModSettings.EnableDuckShit)
 
                     // Reset button at the bottom
