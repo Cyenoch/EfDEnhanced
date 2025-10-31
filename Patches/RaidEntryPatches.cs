@@ -28,6 +28,25 @@ public class RaidEntryPatches
     {
         try
         {
+            // 首先检查 mapSelectionEntry 是否为 null（防御性编程）
+            if (mapSelectionEntry == null)
+            {
+                ModLogger.LogWarning("RaidCheck", "MapSelectionEntry is null, allowing entry");
+                return true;
+            }
+
+            // 获取目标场景ID（尽早获取，用于后续判断）
+            string sceneID = mapSelectionEntry.SceneID ?? string.Empty;
+
+            // 优先判断该地图是否需要进行 Raid 检查
+            // 对于非raid场景（如"鸭鸭矿工"），直接放行，完全跳过所有检查逻辑
+            if (string.IsNullOrEmpty(sceneID) || !RaidCheckUtility.ShouldCheckRaidMap(sceneID))
+            {
+                ModLogger.Log("RaidCheck", $"Scene '{sceneID}' does not require raid check, allowing entry immediately");
+                return true;
+            }
+
+            // 只有确认是raid场景后才进行以下检查
             // 检查 loading 标志，防止重复点击
             var loadingField = typeof(MapSelectionView).GetField("loading",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -47,16 +66,6 @@ public class RaidEntryPatches
             {
                 ModLogger.Log("RaidCheck", "Already waiting for confirmation, blocking duplicate call");
                 return false;
-            }
-
-            // 获取目标场景ID
-            string sceneID = mapSelectionEntry.SceneID;
-
-            // 判断该地图是否需要进行 Raid 检查（排除新手引导等）
-            if (!RaidCheckUtility.ShouldCheckRaidMap(sceneID))
-            {
-                ModLogger.Log("RaidCheck", $"Scene '{sceneID}' does not require raid check, allowing entry");
-                return true;
             }
 
             // 执行检查，传入场景ID以便只检查该场景相关的任务
@@ -105,6 +114,14 @@ public class RaidEntryPatches
     {
         try
         {
+            // 防御性检查：确保 mapEntry 不为 null
+            if (mapEntry == null)
+            {
+                ModLogger.LogError("RaidCheck", "HandleCheckFailure called with null mapEntry");
+                ResetLoadingFlag(view);
+                return;
+            }
+
             _isWaitingForConfirmation = true;
 
             // 获取或创建准备界面

@@ -126,6 +126,12 @@ public class DuckShitFeature : MonoBehaviour
             return;
         }
 
+        // 检查 LevelManager 是否存在，避免在非raid场景（如"鸭鸭矿工"）中出错
+        if (LevelManager.Instance == null)
+        {
+            return;
+        }
+
         var player = CharacterMainControl.Main;
         if (LevelManager.Instance.IsRaidMap && !player.Health.Invincible)
         {
