@@ -292,7 +292,7 @@ namespace EfDEnhanced.Utils
                 "Settings_ItemWheelSensitivity_Name",
                 1.0f,
                 0.1f,
-                3.0f,
+                5.0f,
                 CATEGORY_UI,
                 "Settings_ItemWheelSensitivity_Desc"
             )
