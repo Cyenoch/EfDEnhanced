@@ -31,7 +31,9 @@ namespace EfDEnhanced.Features
             public Sprite? Icon { get; set; }
             public string DisplayName { get; set; } = "";
 
-            public int TotalCount => Items.Sum(item => item.StackCount);
+            public int TotalCount => Items
+                .Where(item => item != null) // Filter out destroyed items
+                .Sum(item => Math.Max(1, item.StackCount)); // Ensure at least 1
         }
 
         public static ThrowableWheelMenu? Instance => _instance;
@@ -70,30 +72,87 @@ namespace EfDEnhanced.Features
         {
             try
             {
+                // Validate stack index
                 if (stackIndex < 0 || stackIndex >= _throwableStacks.Count)
                 {
                     ModLogger.LogWarning($"ThrowableWheelMenu: Stack index out of range: {stackIndex}");
                     return;
                 }
 
-                // Get the stack and use the first item
+                // Get the stack
                 ThrowableStack stack = _throwableStacks[stackIndex];
-                if (stack.Items.Count > 0)
+                
+                // Validate stack exists
+                if (stack == null)
                 {
-                    var item = stack.Items[0];
-                    if (item != null)
+                    ModLogger.LogWarning($"ThrowableWheelMenu: Stack at index {stackIndex} is null");
+                    return;
+                }
+
+                // Validate stack has items list
+                if (stack.Items == null)
+                {
+                    ModLogger.LogWarning($"ThrowableWheelMenu: Stack items list is null");
+                    return;
+                }
+
+                // Find first valid (non-destroyed) item with additional safety checks
+                Item? validItem = null;
+                foreach (Item item in stack.Items)
+                {
+                    try
                     {
-                        ItemUsageHelper.UseItem(item);
+                        // Use Unity's proper null check for destroyed objects
+                        if (item == null) continue;
+                        
+                        // Additional validation: try to access a property to ensure object is alive
+                        // If accessing TypeID throws, the object is destroyed or invalid
+                        int _ = item.TypeID;
+                        
+                        // Additional check: verify item is still a throwable
+                        if (IsThrowableItem(item))
+                        {
+                            validItem = item;
+                            break;
+                        }
+                    }
+                    catch (Exception itemEx)
+                    {
+                        // Item is destroyed or invalid, skip it
+                        ModLogger.LogWarning($"ThrowableWheelMenu: Item validation failed (likely destroyed): {itemEx.Message}");
+                        continue;
+                    }
+                }
+                
+                if (validItem != null)
+                {
+                    // Double-check before using
+                    try
+                    {
+                        // Verify item is still valid before using
+                        if (validItem == null || !IsThrowableItem(validItem))
+                        {
+                            ModLogger.LogWarning($"ThrowableWheelMenu: Item became invalid before use");
+                            return;
+                        }
+
+                        ItemUsageHelper.UseItem(validItem);
+                    }
+                    catch (Exception useEx)
+                    {
+                        ModLogger.LogError($"ThrowableWheelMenu: Failed to use item: {useEx}");
+                        // Don't rethrow, just log the error
                     }
                 }
                 else
                 {
-                    ModLogger.LogWarning($"ThrowableWheelMenu: Stack has no items: {stack.DisplayName}");
+                    ModLogger.LogWarning($"ThrowableWheelMenu: Stack has no valid items: {stack.DisplayName ?? "Unknown"}");
                 }
             }
             catch (Exception ex)
             {
                 ModLogger.LogError($"ThrowableWheelMenu: Failed to invoke item: {ex}");
+                // Don't rethrow to prevent crash
             }
         }
 
@@ -104,6 +163,21 @@ namespace EfDEnhanced.Features
         {
             try
             {
+                // Check if item is null or destroyed
+                if (item == null) return false;
+
+                // Additional safety: try to access a property to verify object is alive
+                // This will throw if the object has been destroyed
+                try
+                {
+                    int _ = item.TypeID;
+                }
+                catch
+                {
+                    // Object is destroyed, return false
+                    return false;
+                }
+
                 // Check if item is a skill
                 if (!item.GetBool("IsSkill"))
                 {
@@ -120,9 +194,14 @@ namespace EfDEnhanced.Features
                 // Check if skill is Skill_Grenade type
                 return skillSetting.Skill is Skill_Grenade;
             }
+            catch (NullReferenceException)
+            {
+                // Item was destroyed during check
+                return false;
+            }
             catch (Exception ex)
             {
-                ModLogger.LogError($"ThrowableWheelMenu: Error checking if item is throwable: {ex}");
+                ModLogger.LogWarning($"ThrowableWheelMenu: Error checking if item is throwable: {ex.Message}");
                 return false;
             }
         }
@@ -146,37 +225,83 @@ namespace EfDEnhanced.Features
 
                 // Dictionary to group items by TypeID
                 Dictionary<int, ThrowableStack> stacksByTypeID = [];
+                // Use HashSet to track added items and prevent duplicate counting
+                HashSet<Item> processedItems = [];
 
                 // Filter throwable items
                 foreach (Item item in allItems)
                 {
-                    if (item == null) continue;
-
-                    // Check if item is a throwable
-                    if (IsThrowableItem(item))
+                    try
                     {
-                        _throwableItems.Add(item);
+                        // Check if item is null or destroyed (Unity's == null check works for destroyed objects)
+                        if (item == null) continue;
 
-                        int typeID = item.TypeID;
+                        // Skip if already processed (prevent duplicate counting)
+                        if (processedItems.Contains(item)) continue;
 
-                        // Add to existing stack or create new one
-                        if (!stacksByTypeID.ContainsKey(typeID))
+                        // Check if item is a throwable
+                        if (IsThrowableItem(item))
                         {
-                            stacksByTypeID[typeID] = new ThrowableStack
+                            // Additional safety: verify item is still valid before accessing properties
+                            int typeID;
+                            Sprite? icon;
+                            string displayName;
+                            
+                            try
                             {
-                                TypeID = typeID.ToString(),
-                                Icon = item.Icon,
-                                DisplayName = item.DisplayName
-                            };
-                        }
+                                typeID = item.TypeID;
+                                icon = item.Icon;
+                                displayName = item.DisplayName ?? "Unknown";
+                            }
+                            catch (Exception propEx)
+                            {
+                                // Item was destroyed during processing, skip it
+                                ModLogger.LogWarning($"ThrowableWheelMenu: Item destroyed during refresh: {propEx.Message}");
+                                continue;
+                            }
 
-                        stacksByTypeID[typeID].Items.Add(item);
+                            // Mark as processed
+                            processedItems.Add(item);
+                            _throwableItems.Add(item);
+
+                            // Add to existing stack or create new one
+                            if (!stacksByTypeID.ContainsKey(typeID))
+                            {
+                                stacksByTypeID[typeID] = new ThrowableStack
+                                {
+                                    TypeID = typeID.ToString(),
+                                    Icon = icon,
+                                    DisplayName = displayName
+                                };
+                            }
+
+                            stacksByTypeID[typeID].Items.Add(item);
+                        }
+                    }
+                    catch (Exception itemEx)
+                    {
+                        // Skip this item if any error occurs
+                        ModLogger.LogWarning($"ThrowableWheelMenu: Error processing item: {itemEx.Message}");
+                        continue;
                     }
                 }
 
                 // Convert stacks to list and create menu items
-                foreach (var stack in stacksByTypeID.Values)
+                // Filter out stacks with no valid items
+                foreach (var kvp in stacksByTypeID)
                 {
+                    var stack = kvp.Value;
+                    
+                    // Filter out destroyed items from the stack
+                    stack.Items = stack.Items.Where(item => item != null).ToList();
+                    
+                    // Skip stacks with no valid items
+                    if (stack.Items.Count == 0) continue;
+                    
+                    // Skip stacks with zero total count
+                    int totalCount = stack.TotalCount;
+                    if (totalCount <= 0) continue;
+
                     _throwableStacks.Add(stack);
 
                     // Create menu item with icon and count
@@ -184,12 +309,12 @@ namespace EfDEnhanced.Features
                         // Use the current stack index as the menu item ID
                         (_throwableStacks.Count - 1).ToString(),
                         stack.Icon,
-                        stack.TotalCount,
+                        totalCount,
                         stack.DisplayName
                     ));
 
                     ModLogger.Log("ThrowableWheelMenu",
-                        $"Added throwable stack: {stack.DisplayName} x{stack.TotalCount} ({stack.Items.Count} items)");
+                        $"Added throwable stack: {stack.DisplayName} x{totalCount} ({stack.Items.Count} items)");
                 }
 
                 ModLogger.Log("ThrowableWheelMenu",
