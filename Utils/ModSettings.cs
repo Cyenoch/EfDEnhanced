@@ -285,6 +285,19 @@ namespace EfDEnhanced.Utils
             )
         );
 
+        public static readonly RangedFloatSettingsEntry ItemWheelSensitivity = Register(
+            new RangedFloatSettingsEntry(
+                PREFIX,
+                "ItemWheelSensitivity",
+                "Settings_ItemWheelSensitivity_Name",
+                1.0f,
+                0.1f,
+                3.0f,
+                CATEGORY_UI,
+                "Settings_ItemWheelSensitivity_Desc"
+            )
+        );
+
         public static readonly KeyCodeSettingsEntry ItemWheelMenuHotkey = Register(
             new KeyCodeSettingsEntry(
                 PREFIX,

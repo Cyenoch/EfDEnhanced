@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.InputSystem;
 using EfDEnhanced.Utils.UI.Constants;
+using EfDEnhanced.Utils;
 
 namespace EfDEnhanced.Utils.UI.Components
 {
@@ -302,7 +303,9 @@ namespace EfDEnhanced.Utils.UI.Components
                 _inputMode = PieMenuInputMode.Mouse;
             }
 
-            _virtualCursorPosition += mouseDelta;
+            // Apply sensitivity setting to mouse delta
+            float sensitivity = ModSettings.ItemWheelSensitivity.Value;
+            _virtualCursorPosition += mouseDelta * sensitivity;
             ClampVirtualCursorToWheelRadius();
         }
 

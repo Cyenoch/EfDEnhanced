@@ -96,6 +96,7 @@ namespace EfDEnhanced.Features
                     .AddSetting(ModSettings.ItemWheelScale)
                     .AddSetting(ModSettings.ItemWheelTimeScale)
                     .AddSetting(ModSettings.ItemWheelMenuHotkey)
+                    .AddSetting(ModSettings.ItemWheelSensitivity)
                     .AddSetting(ModSettings.ThrowableWheelHotkey)
 
                     // Pre-Raid Check Section
