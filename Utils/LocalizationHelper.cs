@@ -23,36 +23,11 @@ public static class LocalizationHelper
     public static event Action<SystemLanguage>? OnLanguageChanged;
 
     /// <summary>
-    /// 获取当前应该使用的语言（考虑手动设置）
+    /// 获取当前应该使用的语言（直接跟随游戏设置）
     /// </summary>
     private static SystemLanguage GetCurrentLanguage()
     {
-        // 如果 ModSettings 已初始化，检查语言选择设置
-        try
-        {
-            // 使用反射或直接访问设置，但需要先检查是否已初始化
-            // 0 = 跟随游戏, 1 = French, 2 = Korean
-            int languageSetting = ModSettings.ModLanguage.Value;
-            
-            if (languageSetting == 0)
-            {
-                // 跟随游戏语言
-                return LocalizationManager.CurrentLanguage;
-            }
-            else if (languageSetting == 1)
-            {
-                return SystemLanguage.French;
-            }
-            else if (languageSetting == 2)
-            {
-                return SystemLanguage.Korean;
-            }
-        }
-        catch
-        {
-            // 如果设置未初始化，使用游戏语言
-        }
-        
+        // 直接使用游戏的语言设置
         return LocalizationManager.CurrentLanguage;
     }
 
@@ -71,7 +46,7 @@ public static class LocalizationHelper
             // 加载所有语言的翻译
             LoadTranslations();
 
-            // 应用当前语言的翻译（使用 GetCurrentLanguage 以支持手动选择）
+            // 应用当前语言的翻译（直接跟随游戏语言）
             ApplyTranslations(GetCurrentLanguage());
 
             ModLogger.Log("Localization", $"Localization initialized for language: {LocalizationManager.CurrentLanguage}");
@@ -116,34 +91,15 @@ public static class LocalizationHelper
         try
         {
             ModLogger.Log("Localization", $"Game language changed to: {newLanguage}");
-            // 使用 GetCurrentLanguage 来获取实际应该使用的语言（考虑手动设置）
-            SystemLanguage actualLanguage = GetCurrentLanguage();
-            ApplyTranslations(actualLanguage);
+            // 直接使用游戏语言设置
+            ApplyTranslations(newLanguage);
 
             // 触发公共事件，通知所有订阅者
-            OnLanguageChanged?.Invoke(actualLanguage);
+            OnLanguageChanged?.Invoke(newLanguage);
         }
         catch (System.Exception ex)
         {
             ModLogger.LogError($"Failed to handle language change: {ex}");
-        }
-    }
-
-    /// <summary>
-    /// 手动应用语言选择（当用户更改设置时调用）
-    /// </summary>
-    public static void ApplyManualLanguageSelection()
-    {
-        try
-        {
-            SystemLanguage language = GetCurrentLanguage();
-            ModLogger.Log("Localization", $"Applying manual language selection: {language}");
-            ApplyTranslations(language);
-            OnLanguageChanged?.Invoke(language);
-        }
-        catch (System.Exception ex)
-        {
-            ModLogger.LogError($"Failed to apply manual language selection: {ex}");
         }
     }
 
@@ -264,13 +220,6 @@ public static class LocalizationHelper
             { "Settings_AutoTrackNewQuests_Desc", "新接受任务时自动将其添加到局内追踪列表" },
             { "Settings_EnableDuckShit_Name", "启用鸭子排便" },
             { "Settings_EnableDuckShit_Desc", "启用鸭子会根据能量和水分消耗自动排便的功能" },
-            
-            // Language Selection
-            { "Settings_ModLanguage_Name", "Mod语言" },
-            { "Settings_ModLanguage_Desc", "选择Mod的显示语言：跟随游戏、法语或韩语" },
-            { "Settings_Language_FollowGame", "跟随游戏" },
-            { "Settings_Language_French", "Français" },
-            { "Settings_Language_Korean", "한국어" },
         };
 
         // 繁体中文
@@ -382,13 +331,6 @@ public static class LocalizationHelper
             { "Settings_AutoTrackNewQuests_Desc", "新接受任務時自動將其添加到局內追蹤列表" },
             { "Settings_EnableDuckShit_Name", "啟用鴨子排便" },
             { "Settings_EnableDuckShit_Desc", "啟用鴨子會根據能量和水分消耗自動排便的功能" },
-            
-            // Language Selection
-            { "Settings_ModLanguage_Name", "Mod語言" },
-            { "Settings_ModLanguage_Desc", "選擇Mod的顯示語言：跟隨遊戲、法語或韓語" },
-            { "Settings_Language_FollowGame", "跟隨遊戲" },
-            { "Settings_Language_French", "Français" },
-            { "Settings_Language_Korean", "한국어" },
         };
 
         // 英语
@@ -500,13 +442,6 @@ public static class LocalizationHelper
             { "Settings_AutoTrackNewQuests_Desc", "Automatically add new accepted quests to the in-raid tracker" },
             { "Settings_EnableDuckShit_Name", "Enable Duck Shit" },
             { "Settings_EnableDuckShit_Desc", "Enable the feature where ducks automatically defecate based on energy and water consumption" },
-            
-            // Language Selection
-            { "Settings_ModLanguage_Name", "Mod Language" },
-            { "Settings_ModLanguage_Desc", "Choose the display language for the mod: Follow Game, French, or Korean" },
-            { "Settings_Language_FollowGame", "Follow Game" },
-            { "Settings_Language_French", "Français" },
-            { "Settings_Language_Korean", "한국어" },
         };
 
         // 日语
@@ -618,13 +553,6 @@ public static class LocalizationHelper
             { "Settings_AutoTrackNewQuests_Desc", "新規クエストを受けた際に自動的に局内追跡リストに追加" },
             { "Settings_EnableDuckShit_Name", "アヒルの排便を有効化" },
             { "Settings_EnableDuckShit_Desc", "アヒルがエネルギーと水分消費に基づいて自動的に排便する機能を有効化" },
-            
-            // Language Selection
-            { "Settings_ModLanguage_Name", "Mod言語" },
-            { "Settings_ModLanguage_Desc", "Modの表示言語を選択：ゲームに従う、フランス語、または韓国語" },
-            { "Settings_Language_FollowGame", "ゲームに従う" },
-            { "Settings_Language_French", "Français" },
-            { "Settings_Language_Korean", "한국어" },
         };
 
         // 法语
@@ -736,13 +664,6 @@ public static class LocalizationHelper
             { "Settings_AutoTrackNewQuests_Desc", "Ajouter automatiquement les nouvelles quêtes acceptées au suivi en raid" },
             { "Settings_EnableDuckShit_Name", "Activer la défécation des canards" },
             { "Settings_EnableDuckShit_Desc", "Activer la fonctionnalité où les canards défèquent automatiquement en fonction de la consommation d'énergie et d'eau" },
-            
-            // Language Selection
-            { "Settings_ModLanguage_Name", "Langue du Mod" },
-            { "Settings_ModLanguage_Desc", "Choisir la langue d'affichage du mod : Suivre le jeu, Français ou Coréen" },
-            { "Settings_Language_FollowGame", "Suivre le jeu" },
-            { "Settings_Language_French", "Français" },
-            { "Settings_Language_Korean", "한국어" },
         };
 
         // 韩语
@@ -854,13 +775,450 @@ public static class LocalizationHelper
             { "Settings_AutoTrackNewQuests_Desc", "새로 수락한 퀘스트를 자동으로 레이드 추적 목록에 추가" },
             { "Settings_EnableDuckShit_Name", "오리 배변 활성화" },
             { "Settings_EnableDuckShit_Desc", "오리가 에너지 및 물 소비에 따라 자동으로 배변하는 기능 활성화" },
-            
-            // Language Selection
-            { "Settings_ModLanguage_Name", "모드 언어" },
-            { "Settings_ModLanguage_Desc", "모드의 표시 언어 선택: 게임 따르기, 프랑스어 또는 한국어" },
-            { "Settings_Language_FollowGame", "게임 따르기" },
-            { "Settings_Language_French", "Français" },
-            { "Settings_Language_Korean", "한국어" },
+        };
+
+        // 德语
+        LocalizationData[SystemLanguage.German] = new Dictionary<string, string>
+        {
+            { "RaidCheck_Title", "Raid-Vorbereitungsprüfung" },
+            { "RaidCheck_AllClear", "Ausrüstungsprüfung bestanden" },
+            { "RaidCheck_HasIssues", "Folgende Probleme erkannt:\n" },
+            { "RaidCheck_Confirm", "Trotzdem fortfahren" },
+            { "RaidCheck_Cancel", "Zurück" },
+
+            { "Warning_NoWeapon", "<color=#FF6B6B>⚠ Keine Waffe ausgerüstet</color>" },
+            { "Warning_NoAmmo", "<color=#FF6B6B>⚠ Keine Munition</color>" },
+            { "Warning_NoMedicine", "<color=#FF6B6B>⚠ Keine medizinischen Vorräte</color>" },
+            { "Warning_NoFood", "<color=#FF6B6B>⚠ Kein Essen oder Getränke</color>" },
+            { "Warning_StormyWeather", "<color=#FF4444>⚠ Stürmische Wetterbedingungen</color>" },
+            { "Warning_StormComing", "<color=#FFA500>⚠ Sturm naht (innerhalb von 24 Stunden)</color>" },
+            { "Warning_QuestItem", "<color=#FFD700>⚠ Quest-Gegenstand unzureichend: {0} ({1}/{2}) - {3}</color>" },
+            { "Warning_LowAmmo", "<color=#FF8C00>⚠ Niedrige Munition für Waffe: {0} ({1}) - {2}/{3} Schuss</color>" },
+            { "Warning_QuestWeapon", "<color=#FFD700>⚠ Quest-erforderliche Waffe: {0} - {1} ({2})</color>" },
+
+            { "QuestTracker_Title", "Aktive Quests" },
+            { "QuestTracker_Progress", "Fortschritt: {0}/{1}" },
+            { "QuestTracker_NoQuests", "Keine aktiven Quests" },
+            { "QuestTracker_TaskComplete", "✓" },
+            { "QuestTracker_TaskPending", "○" },
+            { "QuestTracker_CheckboxLabel", "Im Raid verfolgen" },
+            { "QuestTracker_HelpText", "Drücke . zum Ein-/Ausblenden des Quest-Trackers\nMod-Einstellungen in den Spiel-Einstellungen können die Panel-Position anpassen" },
+
+            // Settings UI
+            { "Settings_Title", "EfD Enhanced Einstellungen" },
+            { "Settings_ResetButton", "Auf Standard zurücksetzen" },
+            { "Settings_CloseButton", "Schließen" },
+            { "Settings_ModSettings_Button", "EfD Enhanced Einstellungen" },
+
+            // Settings Categories
+            { "Settings_Category_PreRaidCheck", "Vor-Raid-Prüfung" },
+            { "Settings_Category_QuestTracker", "Quest-Tracker" },
+            { "Settings_Category_Movement", "Bewegungsverbesserung" },
+            { "Settings_Category_UI", "UI-Verbesserung" },
+            { "Settings_Category_FunFeatures", "Spaß-Funktionen" },
+
+            // Pre-Raid Check Settings
+            { "Settings_EnableRaidCheck_Name", "Vor-Raid-Prüfung aktivieren" },
+            { "Settings_EnableRaidCheck_Desc", "Das gesamte Vor-Raid-Prüfungssystem aktivieren" },
+            { "Settings_CheckWeapon_Name", "Waffe prüfen" },
+            { "Settings_CheckWeapon_Desc", "Warnen, wenn keine Waffe ausgerüstet ist" },
+            { "Settings_CheckAmmo_Name", "Munition prüfen" },
+            { "Settings_CheckAmmo_Desc", "Warnen, wenn keine Munition verfügbar ist" },
+            { "Settings_CheckMeds_Name", "Medizinische Vorräte prüfen" },
+            { "Settings_CheckMeds_Desc", "Warnen, wenn keine medizinischen Vorräte verfügbar sind" },
+            { "Settings_CheckFood_Name", "Essen/Wasser prüfen" },
+            { "Settings_CheckFood_Desc", "Warnen, wenn kein Essen oder Wasser verfügbar ist" },
+            { "Settings_CheckWeather_Name", "Vor stürmischem Wetter warnen" },
+            { "Settings_CheckWeather_Desc", "Vor stürmischen Wetterbedingungen warnen" },
+            { "Settings_CheckQuestItems_Name", "Quest-Gegenstände prüfen" },
+            { "Settings_CheckQuestItems_Desc", "Prüfen, ob erforderliche Quest-Gegenstände ausreichend sind" },
+            { "Settings_CheckQuestWeapons_Name", "Quest-Waffen prüfen" },
+            { "Settings_CheckQuestWeapons_Desc", "Prüfen, ob Quest-erforderliche Waffen ausgerüstet sind" },
+
+            // Quest Tracker Settings
+            { "Settings_EnableQuestTracker_Name", "Quest-Tracker HUD aktivieren" },
+            { "Settings_EnableQuestTracker_Desc", "Aktiven Quest-Tracker während Raids anzeigen" },
+            { "Settings_TrackerPositionX_Name", "Tracker horizontale Position" },
+            { "Settings_TrackerPositionX_Desc", "Horizontale Position (0=links, 1=rechts)" },
+            { "Settings_TrackerPositionY_Name", "Tracker vertikale Position" },
+            { "Settings_TrackerPositionY_Desc", "Vertikale Position (0=oben, 1=unten)" },
+            { "Settings_TrackerScale_Name", "Tracker-Skalierung" },
+            { "Settings_TrackerScale_Desc", "UI-Skalierungsmultiplikator" },
+            { "Settings_TrackerShowDescription_Name", "Quest-Beschreibungen anzeigen" },
+            { "Settings_TrackerShowDescription_Desc", "Quest-Beschreibungen im Tracker anzeigen" },
+            { "Settings_TrackerFilterByMap_Name", "Nur Quests der aktuellen Karte anzeigen" },
+            { "Settings_TrackerFilterByMap_Desc", "Nur Quests für die aktuelle Karte und Quests ohne Kartenanforderungen anzeigen" },
+            { "Settings_TrackerToggleHotkey_Name", "Quest-Tracker Ein-/Ausklappen Tastenkürzel" },
+            { "Settings_TrackerToggleHotkey_Desc", "Diese Taste drücken, um die Quest-Tracker-Liste ein- oder auszuklappen" },
+            { "Settings_TrackerHotkeyUsed_Name", "Tastenkürzel verwendet Flagge" },
+            { "Settings_TrackerHotkeyUsed_Desc", "Interne Einstellung: Markiert, ob der Benutzer das Ein-/Ausblenden-Tastenkürzel verwendet hat" },
+
+            // Movement Enhancement Settings
+            { "Settings_MovementEnhancement_Name", "Bewegungsreaktionsverbesserung" },
+            { "Settings_MovementEnhancement_Desc", "Charakterbewegungsgefühl optimieren, klebrige Bewegung reduzieren. Mehrere Voreinstellungen: Deaktiviert, Leicht, Mittel, Schwer" },
+            { "Settings_Movement_Disabled", "Deaktiviert" },
+            { "Settings_Movement_Light", "Leichte Optimierung" },
+            { "Settings_Movement_Medium", "Mittlere Optimierung" },
+            { "Settings_Movement_Heavy", "Schwere Optimierung" },
+
+            // UI Enhancement Settings
+            { "Settings_EnableWeaponComparison_Name", "Waffenvergleich aktivieren" },
+            { "Settings_EnableWeaponComparison_Desc", "Ausgewählte Waffe mit überfahrener Waffe im Inventar vergleichen, Unterschiede mit farbcodierten Indikatoren anzeigen" },
+            { "Settings_FastBuyEnabled_Name", "Schnellkauf aktivieren" },
+            { "Settings_FastBuyEnabled_Desc", "Gegenstände schnell kaufen, indem man sie im Ladenmenü überfährt und F drückt" },
+            { "Settings_FastSellEnabled_Name", "Schnellverkauf aktivieren" },
+            { "Settings_FastSellEnabled_Desc", "Gegenstände schnell verkaufen, indem man sie im Ladenmenü überfährt und F drückt" },
+            { "Settings_ItemWheelScale_Name", "Radmenü-Skalierung" },
+            { "Settings_ItemWheelScale_Desc", "Anzeigegröße aller Radmenüs anpassen (Gegenstandsrad und Wurfobjektrad)" },
+            { "Settings_ItemWheelTimeScale_Name", "Radmenü-Zeitskalierung" },
+            { "Settings_ItemWheelTimeScale_Desc", "Zeitskalierung aller Radmenüs anpassen (Gegenstandsrad und Wurfobjektrad)" },
+            { "Settings_ItemWheelSensitivity_Name", "Radmenü-Empfindlichkeit" },
+            { "Settings_ItemWheelSensitivity_Desc", "Mausempfindlichkeit aller Radmenüs anpassen (Gegenstandsrad und Wurfobjektrad)" },
+            { "Settings_ItemWheelMenuHotkey_Name", "Gegenstandsrad Tastenkürzel" },
+            { "Settings_ItemWheelMenuHotkey_Desc", "Diese Taste drücken und loslassen, um das Gegenstandsradmenü zu öffnen" },
+            { "Settings_ThrowableWheelEnabled_Name", "Wurfobjektrad aktivieren" },
+            { "Settings_ThrowableWheelEnabled_Desc", "Wurfobjektradmenü-Funktion aktivieren" },
+            { "Settings_ThrowableWheelHotkey_Name", "Wurfobjektrad Tastenkürzel" },
+            { "Settings_ThrowableWheelHotkey_Desc", "Diese Taste drücken und loslassen, um das Wurfobjektradmenü zu öffnen (Standard: G-Taste)" },
+            { "Settings_PressAnyKey", "Beliebige Taste drücken..." },
+
+            { "Settings_AutoTrackNewQuests_Name", "Neu akzeptierte Quests automatisch verfolgen" },
+            { "Settings_AutoTrackNewQuests_Desc", "Neu akzeptierte Quests automatisch zur Raid-Tracker-Liste hinzufügen" },
+            { "Settings_EnableDuckShit_Name", "Enten-Kot aktivieren" },
+            { "Settings_EnableDuckShit_Desc", "Funktion aktivieren, bei der Enten automatisch koten, basierend auf Energie- und Wasserverbrauch" },
+        };
+
+        // 西班牙语
+        LocalizationData[SystemLanguage.Spanish] = new Dictionary<string, string>
+        {
+            { "RaidCheck_Title", "Verificación de Preparación para Raid" },
+            { "RaidCheck_AllClear", "Verificación de equipo aprobada" },
+            { "RaidCheck_HasIssues", "Se detectaron los siguientes problemas:\n" },
+            { "RaidCheck_Confirm", "Continuar de todos modos" },
+            { "RaidCheck_Cancel", "Volver" },
+
+            { "Warning_NoWeapon", "<color=#FF6B6B>⚠ No hay arma equipada</color>" },
+            { "Warning_NoAmmo", "<color=#FF6B6B>⚠ No hay munición</color>" },
+            { "Warning_NoMedicine", "<color=#FF6B6B>⚠ No hay suministros médicos</color>" },
+            { "Warning_NoFood", "<color=#FF6B6B>⚠ No hay comida ni bebidas</color>" },
+            { "Warning_StormyWeather", "<color=#FF4444>⚠ Condiciones climáticas tormentosas</color>" },
+            { "Warning_StormComing", "<color=#FFA500>⚠ Tormenta aproximándose (dentro de 24 horas)</color>" },
+            { "Warning_QuestItem", "<color=#FFD700>⚠ Objeto de misión insuficiente: {0} ({1}/{2}) - {3}</color>" },
+            { "Warning_LowAmmo", "<color=#FF8C00>⚠ Munición baja para arma: {0} ({1}) - {2}/{3} rondas</color>" },
+            { "Warning_QuestWeapon", "<color=#FFD700>⚠ Arma requerida para misión: {0} - {1} ({2})</color>" },
+
+            { "QuestTracker_Title", "Misiones Activas" },
+            { "QuestTracker_Progress", "Progreso: {0}/{1}" },
+            { "QuestTracker_NoQuests", "No hay misiones activas" },
+            { "QuestTracker_TaskComplete", "✓" },
+            { "QuestTracker_TaskPending", "○" },
+            { "QuestTracker_CheckboxLabel", "Rastrear en Raid" },
+            { "QuestTracker_HelpText", "Presiona . para ocultar/mostrar el rastreador de misiones\nLa configuración del mod en la configuración del juego puede ajustar la posición del panel" },
+
+            // Settings UI
+            { "Settings_Title", "Configuración EfD Enhanced" },
+            { "Settings_ResetButton", "Restablecer a valores predeterminados" },
+            { "Settings_CloseButton", "Cerrar" },
+            { "Settings_ModSettings_Button", "Configuración EfD Enhanced" },
+
+            // Settings Categories
+            { "Settings_Category_PreRaidCheck", "Verificación Pre-Raid" },
+            { "Settings_Category_QuestTracker", "Rastreador de Misiones" },
+            { "Settings_Category_Movement", "Mejora de Movimiento" },
+            { "Settings_Category_UI", "Mejora de Interfaz" },
+            { "Settings_Category_FunFeatures", "Características Divertidas" },
+
+            // Pre-Raid Check Settings
+            { "Settings_EnableRaidCheck_Name", "Activar Verificación Pre-Raid" },
+            { "Settings_EnableRaidCheck_Desc", "Activar todo el sistema de verificación pre-raid" },
+            { "Settings_CheckWeapon_Name", "Verificar Arma" },
+            { "Settings_CheckWeapon_Desc", "Advertir si no hay arma equipada" },
+            { "Settings_CheckAmmo_Name", "Verificar Munición" },
+            { "Settings_CheckAmmo_Desc", "Advertir si no hay munición disponible" },
+            { "Settings_CheckMeds_Name", "Verificar Suministros Médicos" },
+            { "Settings_CheckMeds_Desc", "Advertir si no hay suministros médicos disponibles" },
+            { "Settings_CheckFood_Name", "Verificar Comida/Agua" },
+            { "Settings_CheckFood_Desc", "Advertir si no hay comida o agua disponible" },
+            { "Settings_CheckWeather_Name", "Advertir Clima Tormentoso" },
+            { "Settings_CheckWeather_Desc", "Advertir sobre condiciones climáticas tormentosas" },
+            { "Settings_CheckQuestItems_Name", "Verificar Objetos de Misión" },
+            { "Settings_CheckQuestItems_Desc", "Verificar si los objetos de misión requeridos son suficientes" },
+            { "Settings_CheckQuestWeapons_Name", "Verificar Armas de Misión" },
+            { "Settings_CheckQuestWeapons_Desc", "Verificar si las armas requeridas para la misión están equipadas" },
+
+            // Quest Tracker Settings
+            { "Settings_EnableQuestTracker_Name", "Activar HUD de Rastreador de Misiones" },
+            { "Settings_EnableQuestTracker_Desc", "Mostrar rastreador de misiones activas durante los raids" },
+            { "Settings_TrackerPositionX_Name", "Posición Horizontal del Rastreador" },
+            { "Settings_TrackerPositionX_Desc", "Posición horizontal (0=izquierda, 1=derecha)" },
+            { "Settings_TrackerPositionY_Name", "Posición Vertical del Rastreador" },
+            { "Settings_TrackerPositionY_Desc", "Posición vertical (0=arriba, 1=abajo)" },
+            { "Settings_TrackerScale_Name", "Escala del Rastreador" },
+            { "Settings_TrackerScale_Desc", "Multiplicador de escala de interfaz" },
+            { "Settings_TrackerShowDescription_Name", "Mostrar Descripciones de Misiones" },
+            { "Settings_TrackerShowDescription_Desc", "Mostrar descripciones de misiones en el rastreador" },
+            { "Settings_TrackerFilterByMap_Name", "Mostrar Solo Misiones del Mapa Actual" },
+            { "Settings_TrackerFilterByMap_Desc", "Mostrar solo misiones del mapa actual y misiones sin requisitos de mapa" },
+            { "Settings_TrackerToggleHotkey_Name", "Atajo de Colapsar/Expandir Rastreador de Misiones" },
+            { "Settings_TrackerToggleHotkey_Desc", "Presiona esta tecla para colapsar o expandir la lista del rastreador de misiones" },
+            { "Settings_TrackerHotkeyUsed_Name", "Marcador de Atajo Usado" },
+            { "Settings_TrackerHotkeyUsed_Desc", "Configuración interna: Marca si el usuario ha usado el atajo de mostrar/ocultar" },
+
+            // Movement Enhancement Settings
+            { "Settings_MovementEnhancement_Name", "Mejora de Respuesta de Movimiento" },
+            { "Settings_MovementEnhancement_Desc", "Optimizar la sensación de movimiento del personaje, reducir el movimiento pegajoso. Múltiples ajustes preestablecidos: Desactivado, Ligero, Medio, Pesado" },
+            { "Settings_Movement_Disabled", "Desactivado" },
+            { "Settings_Movement_Light", "Optimización Ligera" },
+            { "Settings_Movement_Medium", "Optimización Media" },
+            { "Settings_Movement_Heavy", "Optimización Pesada" },
+
+            // UI Enhancement Settings
+            { "Settings_EnableWeaponComparison_Name", "Activar Comparación de Armas" },
+            { "Settings_EnableWeaponComparison_Desc", "Comparar arma seleccionada con arma sobre la que se pasa el cursor en el inventario, mostrando diferencias con indicadores codificados por color" },
+            { "Settings_FastBuyEnabled_Name", "Activar Compra Rápida" },
+            { "Settings_FastBuyEnabled_Desc", "Comprar objetos rápidamente pasando el cursor sobre ellos en el menú de la tienda y presionando F" },
+            { "Settings_FastSellEnabled_Name", "Activar Venta Rápida" },
+            { "Settings_FastSellEnabled_Desc", "Vender objetos rápidamente pasando el cursor sobre ellos en el menú de la tienda y presionando F" },
+            { "Settings_ItemWheelScale_Name", "Escala del Menú de Rueda" },
+            { "Settings_ItemWheelScale_Desc", "Ajustar el tamaño de visualización de todos los menús de rueda (rueda de objetos y rueda de lanzables)" },
+            { "Settings_ItemWheelTimeScale_Name", "Escala de Tiempo del Menú de Rueda" },
+            { "Settings_ItemWheelTimeScale_Desc", "Ajustar la escala de tiempo de todos los menús de rueda (rueda de objetos y rueda de lanzables)" },
+            { "Settings_ItemWheelSensitivity_Name", "Sensibilidad del Menú de Rueda" },
+            { "Settings_ItemWheelSensitivity_Desc", "Ajustar la sensibilidad del mouse de todos los menús de rueda (rueda de objetos y rueda de lanzables)" },
+            { "Settings_ItemWheelMenuHotkey_Name", "Atajo de Rueda de Objetos" },
+            { "Settings_ItemWheelMenuHotkey_Desc", "Presiona y suelta esta tecla para abrir el menú de la rueda de objetos" },
+            { "Settings_ThrowableWheelEnabled_Name", "Activar Rueda de Lanzables" },
+            { "Settings_ThrowableWheelEnabled_Desc", "Activar la función del menú de rueda de lanzables" },
+            { "Settings_ThrowableWheelHotkey_Name", "Atajo de Rueda de Lanzables" },
+            { "Settings_ThrowableWheelHotkey_Desc", "Presiona y suelta esta tecla para abrir el menú de la rueda de lanzables (tecla G por defecto)" },
+            { "Settings_PressAnyKey", "Presiona cualquier tecla..." },
+
+            { "Settings_AutoTrackNewQuests_Name", "Rastrear automáticamente misiones aceptadas nuevas" },
+            { "Settings_AutoTrackNewQuests_Desc", "Agregar automáticamente misiones aceptadas nuevas a la lista de rastreo en raid" },
+            { "Settings_EnableDuckShit_Name", "Activar Caca de Pato" },
+            { "Settings_EnableDuckShit_Desc", "Activar la función donde los patos defecan automáticamente basándose en el consumo de energía y agua" },
+        };
+
+        // 俄语
+        LocalizationData[SystemLanguage.Russian] = new Dictionary<string, string>
+        {
+            { "RaidCheck_Title", "Проверка готовности к рейду" },
+            { "RaidCheck_AllClear", "Проверка снаряжения пройдена" },
+            { "RaidCheck_HasIssues", "Обнаружены следующие проблемы:\n" },
+            { "RaidCheck_Confirm", "Продолжить" },
+            { "RaidCheck_Cancel", "Назад" },
+
+            { "Warning_NoWeapon", "<color=#FF6B6B>⚠ Оружие не экипировано</color>" },
+            { "Warning_NoAmmo", "<color=#FF6B6B>⚠ Нет боеприпасов</color>" },
+            { "Warning_NoMedicine", "<color=#FF6B6B>⚠ Нет медицинских принадлежностей</color>" },
+            { "Warning_NoFood", "<color=#FF6B6B>⚠ Нет еды или напитков</color>" },
+            { "Warning_StormyWeather", "<color=#FF4444>⚠ Штормовые погодные условия</color>" },
+            { "Warning_StormComing", "<color=#FFA500>⚠ Приближается шторм (в течение 24 часов)</color>" },
+            { "Warning_QuestItem", "<color=#FFD700>⚠ Недостаточно предмета квеста: {0} ({1}/{2}) - {3}</color>" },
+            { "Warning_LowAmmo", "<color=#FF8C00>⚠ Мало боеприпасов для оружия: {0} ({1}) - {2}/{3} патронов</color>" },
+            { "Warning_QuestWeapon", "<color=#FFD700>⚠ Требуемое для квеста оружие: {0} - {1} ({2})</color>" },
+
+            { "QuestTracker_Title", "Активные квесты" },
+            { "QuestTracker_Progress", "Прогресс: {0}/{1}" },
+            { "QuestTracker_NoQuests", "Нет активных квестов" },
+            { "QuestTracker_TaskComplete", "✓" },
+            { "QuestTracker_TaskPending", "○" },
+            { "QuestTracker_CheckboxLabel", "Отслеживать в рейде" },
+            { "QuestTracker_HelpText", "Нажмите . чтобы скрыть/показать трекер квестов\nНастройки мода в настройках игры могут изменять позицию панели" },
+
+            // Settings UI
+            { "Settings_Title", "Настройки EfD Enhanced" },
+            { "Settings_ResetButton", "Сбросить на значения по умолчанию" },
+            { "Settings_CloseButton", "Закрыть" },
+            { "Settings_ModSettings_Button", "Настройки EfD Enhanced" },
+
+            // Settings Categories
+            { "Settings_Category_PreRaidCheck", "Проверка перед рейдом" },
+            { "Settings_Category_QuestTracker", "Трекер квестов" },
+            { "Settings_Category_Movement", "Улучшение движения" },
+            { "Settings_Category_UI", "Улучшение интерфейса" },
+            { "Settings_Category_FunFeatures", "Забавные функции" },
+
+            // Pre-Raid Check Settings
+            { "Settings_EnableRaidCheck_Name", "Включить проверку перед рейдом" },
+            { "Settings_EnableRaidCheck_Desc", "Включить всю систему проверки перед рейдом" },
+            { "Settings_CheckWeapon_Name", "Проверять оружие" },
+            { "Settings_CheckWeapon_Desc", "Предупреждать, если оружие не экипировано" },
+            { "Settings_CheckAmmo_Name", "Проверять боеприпасы" },
+            { "Settings_CheckAmmo_Desc", "Предупреждать, если нет боеприпасов" },
+            { "Settings_CheckMeds_Name", "Проверять медицинские принадлежности" },
+            { "Settings_CheckMeds_Desc", "Предупреждать, если нет медицинских принадлежностей" },
+            { "Settings_CheckFood_Name", "Проверять еду/воду" },
+            { "Settings_CheckFood_Desc", "Предупреждать, если нет еды или воды" },
+            { "Settings_CheckWeather_Name", "Предупреждать о штормовой погоде" },
+            { "Settings_CheckWeather_Desc", "Предупреждать о штормовых погодных условиях" },
+            { "Settings_CheckQuestItems_Name", "Проверять предметы квестов" },
+            { "Settings_CheckQuestItems_Desc", "Проверять, достаточно ли требуемых предметов квестов" },
+            { "Settings_CheckQuestWeapons_Name", "Проверять оружие квестов" },
+            { "Settings_CheckQuestWeapons_Desc", "Проверять, экипировано ли требуемое для квеста оружие" },
+
+            // Quest Tracker Settings
+            { "Settings_EnableQuestTracker_Name", "Включить HUD трекера квестов" },
+            { "Settings_EnableQuestTracker_Desc", "Показывать трекер активных квестов во время рейдов" },
+            { "Settings_TrackerPositionX_Name", "Горизонтальная позиция трекера" },
+            { "Settings_TrackerPositionX_Desc", "Горизонтальная позиция (0=слева, 1=справа)" },
+            { "Settings_TrackerPositionY_Name", "Вертикальная позиция трекера" },
+            { "Settings_TrackerPositionY_Desc", "Вертикальная позиция (0=сверху, 1=снизу)" },
+            { "Settings_TrackerScale_Name", "Масштаб трекера" },
+            { "Settings_TrackerScale_Desc", "Множитель масштаба интерфейса" },
+            { "Settings_TrackerShowDescription_Name", "Показывать описания квестов" },
+            { "Settings_TrackerShowDescription_Desc", "Отображать описания квестов в трекере" },
+            { "Settings_TrackerFilterByMap_Name", "Показывать только квесты текущей карты" },
+            { "Settings_TrackerFilterByMap_Desc", "Показывать только квесты текущей карты и квесты без требований к карте" },
+            { "Settings_TrackerToggleHotkey_Name", "Горячая клавиша сворачивания/разворачивания трекера квестов" },
+            { "Settings_TrackerToggleHotkey_Desc", "Нажмите эту клавишу, чтобы свернуть или развернуть список трекера квестов" },
+            { "Settings_TrackerHotkeyUsed_Name", "Флаг использования горячей клавиши" },
+            { "Settings_TrackerHotkeyUsed_Desc", "Внутренняя настройка: Отмечает, использовал ли пользователь горячую клавишу показа/скрытия" },
+
+            // Movement Enhancement Settings
+            { "Settings_MovementEnhancement_Name", "Улучшение отклика движения" },
+            { "Settings_MovementEnhancement_Desc", "Оптимизировать ощущение движения персонажа, уменьшить липкое движение. Несколько предустановок: Отключено, Легкая, Средняя, Тяжелая" },
+            { "Settings_Movement_Disabled", "Отключено" },
+            { "Settings_Movement_Light", "Легкая оптимизация" },
+            { "Settings_Movement_Medium", "Средняя оптимизация" },
+            { "Settings_Movement_Heavy", "Тяжелая оптимизация" },
+
+            // UI Enhancement Settings
+            { "Settings_EnableWeaponComparison_Name", "Включить сравнение оружия" },
+            { "Settings_EnableWeaponComparison_Desc", "Сравнивать выбранное оружие с оружием при наведении в инвентаре, показывая различия с цветовыми индикаторами" },
+            { "Settings_FastBuyEnabled_Name", "Включить быструю покупку" },
+            { "Settings_FastBuyEnabled_Desc", "Быстро покупать предметы, наводя на них в меню магазина и нажимая F" },
+            { "Settings_FastSellEnabled_Name", "Включить быструю продажу" },
+            { "Settings_FastSellEnabled_Desc", "Быстро продавать предметы, наводя на них в меню магазина и нажимая F" },
+            { "Settings_ItemWheelScale_Name", "Масштаб колесного меню" },
+            { "Settings_ItemWheelScale_Desc", "Настроить размер отображения всех колесных меню (колесо предметов и колесо метательных)" },
+            { "Settings_ItemWheelTimeScale_Name", "Временной масштаб колесного меню" },
+            { "Settings_ItemWheelTimeScale_Desc", "Настроить временной масштаб всех колесных меню (колесо предметов и колесо метательных)" },
+            { "Settings_ItemWheelSensitivity_Name", "Чувствительность колесного меню" },
+            { "Settings_ItemWheelSensitivity_Desc", "Настроить чувствительность мыши всех колесных меню (колесо предметов и колесо метательных)" },
+            { "Settings_ItemWheelMenuHotkey_Name", "Горячая клавиша колеса предметов" },
+            { "Settings_ItemWheelMenuHotkey_Desc", "Нажмите и отпустите эту клавишу, чтобы открыть меню колеса предметов" },
+            { "Settings_ThrowableWheelEnabled_Name", "Включить колесо метательных" },
+            { "Settings_ThrowableWheelEnabled_Desc", "Включить функцию меню колеса метательных" },
+            { "Settings_ThrowableWheelHotkey_Name", "Горячая клавиша колеса метательных" },
+            { "Settings_ThrowableWheelHotkey_Desc", "Нажмите и отпустите эту клавишу, чтобы открыть меню колеса метательных (по умолчанию клавиша G)" },
+            { "Settings_PressAnyKey", "Нажмите любую клавишу..." },
+
+            { "Settings_AutoTrackNewQuests_Name", "Автоматически отслеживать новые принятые квесты" },
+            { "Settings_AutoTrackNewQuests_Desc", "Автоматически добавлять новые принятые квесты в список отслеживания рейда" },
+            { "Settings_EnableDuckShit_Name", "Включить утиный помет" },
+            { "Settings_EnableDuckShit_Desc", "Включить функцию, при которой утки автоматически испражняются на основе потребления энергии и воды" },
+        };
+
+        // 葡萄牙语
+        LocalizationData[SystemLanguage.Portuguese] = new Dictionary<string, string>
+        {
+            { "RaidCheck_Title", "Verificação de Preparação para Raid" },
+            { "RaidCheck_AllClear", "Verificação de equipamento aprovada" },
+            { "RaidCheck_HasIssues", "Os seguintes problemas foram detectados:\n" },
+            { "RaidCheck_Confirm", "Continuar mesmo assim" },
+            { "RaidCheck_Cancel", "Voltar" },
+
+            { "Warning_NoWeapon", "<color=#FF6B6B>⚠ Nenhuma arma equipada</color>" },
+            { "Warning_NoAmmo", "<color=#FF6B6B>⚠ Sem munição</color>" },
+            { "Warning_NoMedicine", "<color=#FF6B6B>⚠ Sem suprimentos médicos</color>" },
+            { "Warning_NoFood", "<color=#FF6B6B>⚠ Sem comida ou bebidas</color>" },
+            { "Warning_StormyWeather", "<color=#FF4444>⚠ Condições climáticas tempestuosas</color>" },
+            { "Warning_StormComing", "<color=#FFA500>⚠ Tempestade se aproximando (dentro de 24 horas)</color>" },
+            { "Warning_QuestItem", "<color=#FFD700>⚠ Item de missão insuficiente: {0} ({1}/{2}) - {3}</color>" },
+            { "Warning_LowAmmo", "<color=#FF8C00>⚠ Munição baixa para arma: {0} ({1}) - {2}/{3} tiros</color>" },
+            { "Warning_QuestWeapon", "<color=#FFD700>⚠ Arma necessária para missão: {0} - {1} ({2})</color>" },
+
+            { "QuestTracker_Title", "Missões Ativas" },
+            { "QuestTracker_Progress", "Progresso: {0}/{1}" },
+            { "QuestTracker_NoQuests", "Nenhuma missão ativa" },
+            { "QuestTracker_TaskComplete", "✓" },
+            { "QuestTracker_TaskPending", "○" },
+            { "QuestTracker_CheckboxLabel", "Rastrear no Raid" },
+            { "QuestTracker_HelpText", "Pressione . para ocultar/mostrar o rastreador de missões\nAs configurações do mod nas configurações do jogo podem ajustar a posição do painel" },
+
+            // Settings UI
+            { "Settings_Title", "Configurações EfD Enhanced" },
+            { "Settings_ResetButton", "Redefinir para padrões" },
+            { "Settings_CloseButton", "Fechar" },
+            { "Settings_ModSettings_Button", "Configurações EfD Enhanced" },
+
+            // Settings Categories
+            { "Settings_Category_PreRaidCheck", "Verificação Pré-Raid" },
+            { "Settings_Category_QuestTracker", "Rastreador de Missões" },
+            { "Settings_Category_Movement", "Melhoria de Movimento" },
+            { "Settings_Category_UI", "Melhoria de Interface" },
+            { "Settings_Category_FunFeatures", "Recursos Divertidos" },
+
+            // Pre-Raid Check Settings
+            { "Settings_EnableRaidCheck_Name", "Ativar Verificação Pré-Raid" },
+            { "Settings_EnableRaidCheck_Desc", "Ativar todo o sistema de verificação pré-raid" },
+            { "Settings_CheckWeapon_Name", "Verificar Arma" },
+            { "Settings_CheckWeapon_Desc", "Avisar se nenhuma arma estiver equipada" },
+            { "Settings_CheckAmmo_Name", "Verificar Munição" },
+            { "Settings_CheckAmmo_Desc", "Avisar se não houver munição disponível" },
+            { "Settings_CheckMeds_Name", "Verificar Suprimentos Médicos" },
+            { "Settings_CheckMeds_Desc", "Avisar se não houver suprimentos médicos disponíveis" },
+            { "Settings_CheckFood_Name", "Verificar Comida/Água" },
+            { "Settings_CheckFood_Desc", "Avisar se não houver comida ou água disponível" },
+            { "Settings_CheckWeather_Name", "Avisar Clima Tempestuoso" },
+            { "Settings_CheckWeather_Desc", "Avisar sobre condições climáticas tempestuosas" },
+            { "Settings_CheckQuestItems_Name", "Verificar Itens de Missão" },
+            { "Settings_CheckQuestItems_Desc", "Verificar se os itens de missão necessários são suficientes" },
+            { "Settings_CheckQuestWeapons_Name", "Verificar Armas de Missão" },
+            { "Settings_CheckQuestWeapons_Desc", "Verificar se as armas necessárias para a missão estão equipadas" },
+
+            // Quest Tracker Settings
+            { "Settings_EnableQuestTracker_Name", "Ativar HUD do Rastreador de Missões" },
+            { "Settings_EnableQuestTracker_Desc", "Mostrar rastreador de missões ativas durante raids" },
+            { "Settings_TrackerPositionX_Name", "Posição Horizontal do Rastreador" },
+            { "Settings_TrackerPositionX_Desc", "Posição horizontal (0=esquerda, 1=direita)" },
+            { "Settings_TrackerPositionY_Name", "Posição Vertical do Rastreador" },
+            { "Settings_TrackerPositionY_Desc", "Posição vertical (0=topo, 1=base)" },
+            { "Settings_TrackerScale_Name", "Escala do Rastreador" },
+            { "Settings_TrackerScale_Desc", "Multiplicador de escala da interface" },
+            { "Settings_TrackerShowDescription_Name", "Mostrar Descrições de Missões" },
+            { "Settings_TrackerShowDescription_Desc", "Exibir descrições de missões no rastreador" },
+            { "Settings_TrackerFilterByMap_Name", "Mostrar Apenas Missões do Mapa Atual" },
+            { "Settings_TrackerFilterByMap_Desc", "Mostrar apenas missões do mapa atual e missões sem requisitos de mapa" },
+            { "Settings_TrackerToggleHotkey_Name", "Atalho de Recolher/Expandir Rastreador de Missões" },
+            { "Settings_TrackerToggleHotkey_Desc", "Pressione esta tecla para recolher ou expandir a lista do rastreador de missões" },
+            { "Settings_TrackerHotkeyUsed_Name", "Marcador de Atalho Usado" },
+            { "Settings_TrackerHotkeyUsed_Desc", "Configuração interna: Marca se o usuário usou o atalho de mostrar/ocultar" },
+
+            // Movement Enhancement Settings
+            { "Settings_MovementEnhancement_Name", "Melhoria de Resposta de Movimento" },
+            { "Settings_MovementEnhancement_Desc", "Otimizar a sensação de movimento do personagem, reduzir movimento grudento. Múltiplas predefinições: Desativado, Leve, Médio, Pesado" },
+            { "Settings_Movement_Disabled", "Desativado" },
+            { "Settings_Movement_Light", "Otimização Leve" },
+            { "Settings_Movement_Medium", "Otimização Média" },
+            { "Settings_Movement_Heavy", "Otimização Pesada" },
+
+            // UI Enhancement Settings
+            { "Settings_EnableWeaponComparison_Name", "Ativar Comparação de Armas" },
+            { "Settings_EnableWeaponComparison_Desc", "Comparar arma selecionada com arma sobre a qual o cursor está no inventário, mostrando diferenças com indicadores codificados por cor" },
+            { "Settings_FastBuyEnabled_Name", "Ativar Compra Rápida" },
+            { "Settings_FastBuyEnabled_Desc", "Comprar itens rapidamente passando o cursor sobre eles no menu da loja e pressionando F" },
+            { "Settings_FastSellEnabled_Name", "Ativar Venda Rápida" },
+            { "Settings_FastSellEnabled_Desc", "Vender itens rapidamente passando o cursor sobre eles no menu da loja e pressionando F" },
+            { "Settings_ItemWheelScale_Name", "Escala do Menu de Roda" },
+            { "Settings_ItemWheelScale_Desc", "Ajustar o tamanho de exibição de todos os menus de roda (roda de itens e roda de arremessáveis)" },
+            { "Settings_ItemWheelTimeScale_Name", "Escala de Tempo do Menu de Roda" },
+            { "Settings_ItemWheelTimeScale_Desc", "Ajustar a escala de tempo de todos os menus de roda (roda de itens e roda de arremessáveis)" },
+            { "Settings_ItemWheelSensitivity_Name", "Sensibilidade do Menu de Roda" },
+            { "Settings_ItemWheelSensitivity_Desc", "Ajustar a sensibilidade do mouse de todos os menus de roda (roda de itens e roda de arremessáveis)" },
+            { "Settings_ItemWheelMenuHotkey_Name", "Atalho da Roda de Itens" },
+            { "Settings_ItemWheelMenuHotkey_Desc", "Pressione e solte esta tecla para abrir o menu da roda de itens" },
+            { "Settings_ThrowableWheelEnabled_Name", "Ativar Roda de Arremessáveis" },
+            { "Settings_ThrowableWheelEnabled_Desc", "Ativar a função do menu da roda de arremessáveis" },
+            { "Settings_ThrowableWheelHotkey_Name", "Atalho da Roda de Arremessáveis" },
+            { "Settings_ThrowableWheelHotkey_Desc", "Pressione e solte esta tecla para abrir o menu da roda de arremessáveis (tecla G padrão)" },
+            { "Settings_PressAnyKey", "Pressione qualquer tecla..." },
+
+            { "Settings_AutoTrackNewQuests_Name", "Rastrear automaticamente novas missões aceitas" },
+            { "Settings_AutoTrackNewQuests_Desc", "Adicionar automaticamente novas missões aceitas à lista de rastreamento do raid" },
+            { "Settings_EnableDuckShit_Name", "Ativar Cocô de Pato" },
+            { "Settings_EnableDuckShit_Desc", "Ativar a função onde os patos defecam automaticamente com base no consumo de energia e água" },
         };
 
         ModLogger.Log("Localization", $"Loaded translations for {LocalizationData.Count} languages");
